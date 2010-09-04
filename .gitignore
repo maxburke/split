@@ -1,0 +1,9 @@
+*.suo
+*.dll
+*.exe
+*.user
+*.pdb
+TempPE
+*.txt
+*.cachefile
+*.swp
