@@ -31,23 +31,25 @@ namespace Split
             Vector3 displacement = new Vector3();
 
             if (KS.IsKeyDown(Keys.W))
-                displacement = new Vector3(0, 0, -1);
+                displacement += new Vector3(0, 0, -1);
 
             if (KS.IsKeyDown(Keys.S))
-                displacement = new Vector3(0, 0, 1);
+                displacement += new Vector3(0, 0, 1);
 
             if (KS.IsKeyDown(Keys.D))
-                displacement = new Vector3(1, 0, 0);
+                displacement += new Vector3(1, 0, 0);
 
             if (KS.IsKeyDown(Keys.A))
-                displacement = new Vector3(-1, 0, 0);
+                displacement += new Vector3(-1, 0, 0);
 
             if (displacement == new Vector3(0, 0, 0))
                 return;
 
+            displacement.Normalize();
+
             const float scaleFactor = 4;
             Matrix rotationMatrix = Matrix.CreateFromQuaternion(mCameraQuaternion);
-            Vector3 transformedDisplacement = Vector3.Transform(displacement, rotationMatrix);
+            Vector3 transformedDisplacement = Vector3.Transform(displacement * scaleFactor, rotationMatrix);
             mPosition += transformedDisplacement;
         }
 
@@ -72,20 +74,18 @@ namespace Split
         void GenerateViewMatrix()
         {
             // TODO: are these angles right?
-            Quaternion xRotationQuaternion = Quaternion.CreateFromAxisAngle(new Vector3(0, 1, 0), mRotation.X);
-            Quaternion yRotationQuaternion = Quaternion.CreateFromAxisAngle(new Vector3(1, 0, 0), mRotation.Y);
-            mCameraQuaternion = Quaternion.Concatenate(xRotationQuaternion, yRotationQuaternion);
-//            View = Matrix.CreateFromQuaternion(CameraQuaternion) * Matrix.CreateTranslation(Vector3.Negate(Position));
-
-
-
-            mView = // Matrix.CreateTranslation(mPosition) * Matrix.CreateFromQuaternion(mCameraQuaternion);
-                Matrix.Invert(Matrix.CreateFromQuaternion(mCameraQuaternion) * Matrix.CreateTranslation(mPosition));
+            Quaternion xRotationQuaternion = Quaternion.CreateFromAxisAngle(new Vector3(0, -1, 0), mRotation.X);
+            Quaternion yRotationQuaternion = Quaternion.CreateFromAxisAngle(new Vector3(-1, 0, 0), mRotation.Y);
+            mCameraQuaternion = xRotationQuaternion * yRotationQuaternion;
         }
 
         public Matrix View
         {
-            get { return mView; }
+            get 
+            { 
+                mView = Matrix.Invert(Matrix.CreateFromQuaternion(mCameraQuaternion) * Matrix.CreateTranslation(mPosition)); 
+                return mView; 
+            }
         }
 
         public void Update()
