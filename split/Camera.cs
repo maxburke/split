@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+
 namespace Split
 {
     class FreeCam
@@ -73,7 +74,6 @@ namespace Split
 
         void GenerateViewMatrix()
         {
-            // TODO: are these angles right?
             Quaternion xRotationQuaternion = Quaternion.CreateFromAxisAngle(new Vector3(0, -1, 0), mRotation.X);
             Quaternion yRotationQuaternion = Quaternion.CreateFromAxisAngle(new Vector3(-1, 0, 0), mRotation.Y);
             mCameraQuaternion = xRotationQuaternion * yRotationQuaternion;
