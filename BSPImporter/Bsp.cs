@@ -252,8 +252,10 @@ namespace Split.Pipeline
         public readonly int FirstMeshVert;
         public readonly int NumMeshVerts;
         public readonly int LightMapIndex;
-        public readonly Pair<int, int> LightMapStart;
-        public readonly Pair<int, int> LightMapSize;
+        public readonly Vector2 LightMapStart;
+        public readonly Vector2 LightMapSize;
+//        public readonly Pair<int, int> LightMapStart;
+//        public readonly Pair<int, int> LightMapSize;
         public readonly Vector3 LightMapOrigin;
         public readonly Pair<Vector3, Vector3> LightMapST;
         public readonly Vector3 Normal;
@@ -269,8 +271,14 @@ namespace Split.Pipeline
             FirstMeshVert = ER.ReadI4();
             NumMeshVerts = ER.ReadI4();
             LightMapIndex = ER.ReadI4();
-            LightMapStart = ER.ReadIntPair();
-            LightMapSize = ER.ReadIntPair();
+
+            Pair<int, int> x = ER.ReadIntPair();
+            LightMapStart = new Vector2(x.first, x.second);
+            x = ER.ReadIntPair();
+            LightMapSize = new Vector2(x.first, x.second);
+//            LightMapStart = ER.ReadIntPair();
+//            LightMapSize = ER.ReadIntPair();
+
             LightMapOrigin = ER.ReadV3();
 
             Vector3 lmS = ER.ReadV3();
