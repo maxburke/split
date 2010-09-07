@@ -15,8 +15,10 @@ struct VS_OUTPUT {
     float4 color    : COLOR;
 };
 
-
+float2 LightMapSize;
+float2 LightMapStart;
 float4x4 WorldViewProjection;
+
 sampler SurfaceTexture : register(s0) = sampler_state
 {
     MinFilter = Anisotropic;
@@ -51,8 +53,7 @@ struct PS_INPUT {
 
 float4 ps_main(in PS_INPUT input) : COLOR {
 	float4 albedo = tex2D(SurfaceTexture, input.surfaceUV);
-	float4 light = float4(1, 1, 1, 1);
-//	float4 light = tex2D(LightMap, input.lightmapUV) * 4;
+	float4 light = tex2D(LightMap, input.lightmapUV) * 4;
 	float4 color = albedo * light;
 	
 	if (albedo.w <= 0.1f)
