@@ -50,7 +50,7 @@ namespace Split
             int width = GraphicsDevice.DisplayMode.Width;
             int height = GraphicsDevice.DisplayMode.Height;
             Projection = Matrix.CreatePerspectiveFieldOfView(
-                (float)(Math.PI / 4), (float)width / (float)height, 1.0f, 1000.0f);
+                (float)(Math.PI / 4), (float)width / (float)height, 1.0f, 5000.0f);
             Camera = new FreeCam(width, height);
 
             base.Initialize();
