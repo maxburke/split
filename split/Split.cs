@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
+using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -27,6 +28,9 @@ namespace Split
         FreeCam Camera;
         Matrix World = Matrix.CreateWorld(new Vector3(), new Vector3(0, -1, 0), new Vector3(-1, 0, 0));
         Matrix Projection;
+        int mBackBufferWidth;
+        int mBackBufferHeight;
+        SurfaceFormat mBackBufferFormat;
 
         public Split()
         {
@@ -47,11 +51,13 @@ namespace Split
         /// </summary>
         protected override void Initialize()
         {
-            int width = GraphicsDevice.DisplayMode.Width;
-            int height = GraphicsDevice.DisplayMode.Height;
+            mBackBufferWidth = GraphicsDevice.PresentationParameters.BackBufferWidth;
+            mBackBufferHeight = GraphicsDevice.PresentationParameters.BackBufferHeight;
+            mBackBufferFormat = GraphicsDevice.PresentationParameters.BackBufferFormat;
+
             Projection = Matrix.CreatePerspectiveFieldOfView(
-                (float)(Math.PI / 4), (float)width / (float)height, 1.0f, 5000.0f);
-            Camera = new FreeCam(width, height);
+                (float)(Math.PI / 4), (float)mBackBufferWidth / (float)mBackBufferHeight, 1.0f, 5000.0f);
+            Camera = new FreeCam(mBackBufferWidth, mBackBufferHeight);
 
             base.Initialize();
         }
@@ -81,6 +87,9 @@ namespace Split
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
 
+        static bool mSpecial;
+        public static bool Special { get { return mSpecial; } }
+
         protected override void Update(GameTime gameTime)
         {
             Camera.Update();
@@ -91,7 +100,31 @@ namespace Split
                 || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 this.Exit();
 
+            if (KS.IsKeyDown(Keys.F11))
+                mSpecial = !mSpecial;
+
+            if (KS.IsKeyDown(Keys.PrintScreen))
+                TakeScreenshot();
+
             base.Update(gameTime);
+        }
+
+
+        void TakeScreenshot()
+        {
+            int i = 0;
+            string fileName = null;
+
+            for (; ; ++i)
+            {
+                fileName = string.Format("screenshot_{0}.png", i);
+                if (!File.Exists(fileName))
+                    break;
+            }
+
+            ResolveTexture2D backBuffer = new ResolveTexture2D(GraphicsDevice, mBackBufferWidth, mBackBufferHeight, 1, mBackBufferFormat);
+            GraphicsDevice.ResolveBackBuffer(backBuffer);
+            backBuffer.Save(fileName, ImageFileFormat.Png);
         }
 
         /// <summary>
