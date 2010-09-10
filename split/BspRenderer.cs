@@ -71,74 +71,68 @@ namespace Split
 
             void TesselatePatches()
             {
-/*                
-                for (int i = 0; i < 9; ++i)
-                    mVertices.Add(mBsp.Vertices[mControlPointIndices[i]]);
-
-                mIndices.AddRange(new int[] { 1, 0, 3});
-                mIndices.AddRange(new int[] { 1, 3, 4});
-                mIndices.AddRange(new int[] { 2, 1, 5});
-                mIndices.AddRange(new int[] { 5, 1, 4});
-
-                mIndices.AddRange(new int[] { 4, 3, 6});
-                mIndices.AddRange(new int[] { 7, 4, 6});
-                mIndices.AddRange(new int[] { 5, 4, 8});
-                mIndices.AddRange(new int[] { 8, 4, 7});
- */
-                //List<Vertex> V = new List<Vertex>();
-
-                mIdxBase = mVertices.Count;
-
                 for (int y = 0; y <= TESSELATION_DEGREE; ++y)
-                {
                     for (int x = 0; x <= TESSELATION_DEGREE; ++x)
-                    {
-                        mVertices.Add(new Vertex(P(x, y), new Vector2(), new Vector2(), new Vector3(), new Color(1.0f, 1.0f, 1.0f)));
-                    }
-                }
+                        mVertices.Add(InterpolateVertex(x, y));
 
                 for (int y = 0; y < TESSELATION_DEGREE; ++y)
                 {
                     for (int x = 0; x < TESSELATION_DEGREE; ++x)
                     {
-                        mIndices.AddRange(new int[] { ToIndex(y, x), ToIndex(y, x + 1), ToIndex(y + 1, x) });
-                        mIndices.AddRange(new int[] { ToIndex(y, x + 1), ToIndex(y + 1, x + 1), ToIndex(y + 1, x) });
+                        mIndices.AddRange(new int[] { I(x + 1, y), I(x, y), I(x, y + 1) });
+                        mIndices.AddRange(new int[] { I(x + 1, y + 1), I(x + 1, y), I(x, y + 1) });
+
+                        // TODO: remove these:
+                        mIndices.AddRange(new int[] { I(x, y), I(x + 1, y), I(x, y + 1) });
+                        mIndices.AddRange(new int[] { I(x + 1, y), I(x + 1, y + 1), I(x, y + 1) });
                     }
                 }
-
-                //Debugger.Break();
             }
 
-
-            int mIdxBase = 0;
-            int ToIndex(int y, int x)
+            static int I(int x, int y)
             {
-                return (y * TESSELATION_DEGREE + 1) + x + mIdxBase;
+                return y * (TESSELATION_DEGREE + 1) + x;
             }
 
-            Vector4 P(int u, int v)
+            static float InterpolationFactor(int u, int v, int i, int j)
             {
-                double[] binaryCoefficients = new double[] { 1, 2, 1 };
+                double[] binomialCoefficients = new double[] { 1, 2, 1 };
                 double frac = 1.0 / (double)TESSELATION_DEGREE;
 
                 double fracU = (double)u * frac;
                 double fracV = (double)v * frac;
 
-                Vector4 P = new Vector4();
+                double jFactor = binomialCoefficients[j] * Math.Pow(fracV, (double)j) * Math.Pow(1.0 - fracV, (double)(2 - j));
+                double iFactor = binomialCoefficients[i] * Math.Pow(fracU, (double)i) * Math.Pow(1.0 - fracU, (double)(2 - i));
+                float totalFactor = (float)(iFactor * jFactor);
+
+                return totalFactor;
+            }
+
+            Vertex InterpolateVertex(int u, int v)
+            {
+                Vector4 position = new Vector4();
+                Vector2 surfaceTexCoord = new Vector2();
+                Vector2 lightmapTexcoord = new Vector2();
+                Vector3 normal = new Vector3();
+                Vector3 color = new Vector3();
+
                 for (int j = 0; j < 3; ++j)
                 {
-                    double jFactor = binaryCoefficients[j] * Math.Pow(fracU, (double)j) * Math.Pow(1.0 - fracU, (double)(2 - j));
-
                     for (int i = 0; i < 3; ++i)
                     {
-                        double iFactor = binaryCoefficients[i] * Math.Pow(fracU, (double)i) * Math.Pow(1.0 - fracU, (double)(2 - i));
-                        float totalFactor = (float)(iFactor * jFactor);
-
-                        P += mBsp.Vertices[mControlPointIndices[3 * j + i]].Position * totalFactor;
+                        float factor = InterpolationFactor(u, v, i, j);
+                        int idx = mControlPointIndices[3 * j + i];
+                        position += mBsp.Vertices[idx].Position * factor;
+                        surfaceTexCoord += mBsp.Vertices[idx].SurfaceTexCoord * factor;
+                        lightmapTexcoord += mBsp.Vertices[idx].LightMapTexCoord * factor;
+                        normal += mBsp.Vertices[idx].Normal * factor;
+                        color += mBsp.Vertices[idx].VertexColor.ToVector3() * factor;
                     }
                 }
 
-                return new Vector4(P.X, P.Y, P.Z, 1.0f);
+                position.W = 1.0f;
+                return new Vertex(position, surfaceTexCoord, lightmapTexcoord, normal, new Color(color));
             }
 
             void TesselateFace(int i)
@@ -153,11 +147,9 @@ namespace Split
                 {
                     for (int x = 0; x < F.Size.first - 1; x += 2)
                     {
-//                        if (i == 56)
-//                            Debugger.Break();
                         LoadControlPoints(mBsp.Faces[i], x, y);
                         TesselatePatches();
-                        PD.NumIndices += 6;
+                        PD.NumIndices = mIndices.Count - PD.StartIndex;
                     }
                 }
 
