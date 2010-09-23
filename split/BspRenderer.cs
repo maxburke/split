@@ -123,6 +123,7 @@ namespace Split
                     {
                         float factor = InterpolationFactor(u, v, i, j);
                         int idx = mControlPointIndices[3 * j + i];
+
                         position += mBsp.Vertices[idx].Position * factor;
                         surfaceTexCoord += mBsp.Vertices[idx].SurfaceTexCoord * factor;
                         lightmapTexcoord += mBsp.Vertices[idx].LightMapTexCoord * factor;
@@ -328,6 +329,11 @@ namespace Split
             mSurfaces = mBsp.Textures;
             mBsp.Textures = null;
 
+            Texture2D def = new Texture2D(mDevice, 1, 1, 1, TextureUsage.Linear, SurfaceFormat.Color);
+            Color[] defColor = new Color[1];
+            defColor[0] = new Color(1.0f, 0.0f, 0.0f);
+            def.SetData<Color>(defColor);
+
             for (int i = 0; i < mSurfaces.Length; ++i)
             {
                 try
@@ -337,6 +343,7 @@ namespace Split
 //                    mSurfaces[i].Texture.GenerateMipMaps(TextureFilter.Anisotropic);
 
 #if DEBUG
+                    Debug.WriteLine(string.Format("{0}", mSurfaces[i].Name));
                     Debug.WriteLine(string.Format("{0,3}: {1,8:X} {2,8:X} {3}", 
                         i, 
                         mSurfaces[i].Contents, 
@@ -348,11 +355,13 @@ namespace Split
                 }
                 catch (ContentLoadException)
                 {
+                    mSurfaces[i].Texture = def;
                     Debug.WriteLine(string.Format("{0,3}: {1,8:X} {2,8:X} {3} ** NOT LOADED **",
                         i,
                         mSurfaces[i].Contents,
                         mSurfaces[i].Flags,
-                        mSurfaces[i].Name)); mSurfaces[i].Texture = null;
+                        mSurfaces[i].Name)); 
+                    //mSurfaces[i].Texture = null;
                 }
             }
         }
