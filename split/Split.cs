@@ -37,7 +37,7 @@ namespace Split
             Graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             Graphics.PreferMultiSampling = true;
-            Graphics.PreferredBackBufferFormat = SurfaceFormat.Bgra1010102;
+//            Graphics.PreferredBackBufferFormat = SurfaceFormat.Bgra1010102;
 
 //            Graphics.PreferredBackBufferWidth = 1920;
 //            Graphics.PreferredBackBufferHeight = 1200;
@@ -112,6 +112,7 @@ namespace Split
 
         void TakeScreenshot()
         {
+#if !XBOX
             int i = 0;
             string fileName = null;
 
@@ -125,6 +126,7 @@ namespace Split
             ResolveTexture2D backBuffer = new ResolveTexture2D(GraphicsDevice, mBackBufferWidth, mBackBufferHeight, 1, mBackBufferFormat);
             GraphicsDevice.ResolveBackBuffer(backBuffer);
             backBuffer.Save(fileName, ImageFileFormat.Png);
+#endif
         }
 
         /// <summary>

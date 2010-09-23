@@ -38,7 +38,7 @@ namespace Split
         public void Render()
         {
 #if DEBUG
-            Device.Clear(Color.CornflowerBlue);
+            Device.Clear(Color.Black);
 #endif
 
             int numRenderables = Renderables.Count;

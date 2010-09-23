@@ -8045,137 +8045,137 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="base.shader">
+    <Compile Include="shaders\base.shader">
       <Name>base</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="base_button.shader">
+    <Compile Include="shaders\base_button.shader">
       <Name>base_button</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="base_floor.shader">
+    <Compile Include="shaders\base_floor.shader">
       <Name>base_floor</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="base_light.shader">
+    <Compile Include="shaders\base_light.shader">
       <Name>base_light</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="base_object.shader">
+    <Compile Include="shaders\base_object.shader">
       <Name>base_object</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="base_support.shader">
+    <Compile Include="shaders\base_support.shader">
       <Name>base_support</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="base_trim.shader">
+    <Compile Include="shaders\base_trim.shader">
       <Name>base_trim</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="base_wall.shader">
+    <Compile Include="shaders\base_wall.shader">
       <Name>base_wall</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="common.shader">
+    <Compile Include="shaders\common.shader">
       <Name>common</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="ctf.shader">
+    <Compile Include="shaders\ctf.shader">
       <Name>ctf</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="eerie.shader">
+    <Compile Include="shaders\eerie.shader">
       <Name>eerie</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="gfx.shader">
+    <Compile Include="shaders\gfx.shader">
       <Name>gfx</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="gothic_block.shader">
+    <Compile Include="shaders\gothic_block.shader">
       <Name>gothic_block</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="gothic_floor.shader">
+    <Compile Include="shaders\gothic_floor.shader">
       <Name>gothic_floor</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="gothic_light.shader">
+    <Compile Include="shaders\gothic_light.shader">
       <Name>gothic_light</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="gothic_trim.shader">
+    <Compile Include="shaders\gothic_trim.shader">
       <Name>gothic_trim</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="gothic_wall.shader">
+    <Compile Include="shaders\gothic_wall.shader">
       <Name>gothic_wall</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="hell.shader">
+    <Compile Include="shaders\hell.shader">
       <Name>hell</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="liquid.shader">
+    <Compile Include="shaders\liquid.shader">
       <Name>liquid</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="menu.shader">
+    <Compile Include="shaders\menu.shader">
       <Name>menu</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="models.shader">
+    <Compile Include="shaders\models.shader">
       <Name>models</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="organics.shader">
+    <Compile Include="shaders\organics.shader">
       <Name>organics</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="sfx.shader">
+    <Compile Include="shaders\sfx.shader">
       <Name>sfx</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="shrine.shader">
+    <Compile Include="shaders\shrine.shader">
       <Name>shrine</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="skin.shader">
+    <Compile Include="shaders\skin.shader">
       <Name>skin</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="sky.shader">
+    <Compile Include="shaders\sky.shader">
       <Name>sky</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
     </Compile>
-    <Compile Include="test.shader">
+    <Compile Include="shaders\test.shader">
       <Name>test</Name>
       <Importer>ShaderBuilder</Importer>
       <Processor>ShaderProcessor</Processor>
