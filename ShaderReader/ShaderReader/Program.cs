@@ -60,38 +60,73 @@ namespace ShaderReader
             string nearbox = NextToken();
         }
 
-        void Cull() { }
-        void DeformVertexes() { }
-        void FogParms() { }
-        void Nopicmip() { }
-        void Nomipmap() { }
-        void PolygonOffset() { }
-        void Portal() { }
-        void Sort() { }
-        void TessSize() { }
-        void Q3mapBackshader() { }
-        void Q3mapGlobalTexture() { }
-        void Q3mapSun() { }
-        void Q3mapSurfaceLight() { }
-        void Q3mapLightImage() { }
-        void Q3mapLightSubdivide() { }
-        void SurfaceParm() { }
-        void QerEditorImage() { }
-        void QerNoCarve() { }
-        void QerTrans() { }
+        #region General parsers
+        void Cull() { Debugger.Break(); }
+        void DeformVertexes() { Debugger.Break(); }
+        void FogParms() { Debugger.Break(); }
+        void Nopicmip() { Debugger.Break(); }
+        void Nomipmap() { Debugger.Break(); }
+        void PolygonOffset() { Debugger.Break(); }
+        void Portal() { Debugger.Break(); }
+        void Sort() { Debugger.Break(); }
+        void TessSize() { Debugger.Break(); }
+        void Q3mapBackshader() { Debugger.Break(); }
+        void Q3mapGlobalTexture() { Debugger.Break(); }
+        void Q3mapSun() { Debugger.Break(); }
+        void Q3mapSurfaceLight() 
+        {
+            string lightValue = NextToken();
+        }
 
+        void Q3mapLightImage() { Debugger.Break(); }
+        void Q3mapLightSubdivide() { Debugger.Break(); }
+        void SurfaceParm() { Debugger.Break(); }
+        void QerEditorImage() { Debugger.Break(); }
+        void QerNoCarve() { Debugger.Break(); }
+        void QerTrans() { Debugger.Break(); }
+        #endregion
 
-        void Map() { }
-        void ClampMap() { }
-        void AnimMap() { }
-        void BlendFunc() { }
-        void RgbGen() { }
-        void AlphaGen() { }
-        void TcGen() { }
-        void TcMod() { }
-        void DepthFunc() { }
-        void DepthWrite() { }
-        void AlphaFunc() { }
+        #region Shader stage parsers
+        void Map() 
+        {
+            string textureMap = NextToken();
+        }
+
+        void ClampMap() { Debugger.Break(); }
+        void AnimMap() { Debugger.Break(); }
+        void BlendFunc() { Debugger.Break(); }
+        void RgbGen() 
+        {
+            string function = NextTokenLowerCase();
+            switch (function)
+            {
+                case "identitylighting":
+                case "identity":
+                case "entity":
+                case "oneminusentity":
+                case "vertex":
+                case "oneminusvertex":
+                case "lightingdiffuse":
+                    break;
+                case "wave":
+                    {
+                        string func = NextTokenLowerCase();
+                        string baseVal = NextToken();
+                        string ampVal = NextToken();
+                        string phaseVal = NextToken();
+                        string freq = NextToken();
+                    }
+                    break;
+            }
+        }
+
+        void AlphaGen() { Debugger.Break(); }
+        void TcGen() { Debugger.Break(); }
+        void TcMod() { Debugger.Break(); }
+        void DepthFunc() { Debugger.Break(); }
+        void DepthWrite() { Debugger.Break(); }
+        void AlphaFunc() { Debugger.Break(); }
+        #endregion
 
         void InitializeTokenParsers()
         {
@@ -235,9 +270,14 @@ namespace ShaderReader
             return token;
         }
 
-        TokenParser FindParser(TokenParser[] parsers, string token)
+        void InvokeParser(TokenParser[] parsers, string token)
         {
-            return Array.Find<TokenParser>(parsers, x => x.Token == token);
+            TokenParser t = Array.Find<TokenParser>(parsers, x => x.Token == token);
+
+            if (t == null)
+                throw new Exception(string.Format("shit's broken. failing on token '{0}'", token));
+
+            t.Function();
         }
 
         void ParseGeneralShaderCode()
@@ -245,26 +285,33 @@ namespace ShaderReader
             for (; ; )
             {
                 string token = NextTokenLowerCase();
-                TokenParser tokenParser = FindParser(mGeneralTokenParsers, token);
-
-                if (tokenParser == null)
-                    throw new Exception(string.Format("shit's broken. failing on token '{0}'", token));
-
-                tokenParser.Function();
-
                 if (token == "{")
                 {
                     PushToken(token);
                     return;
                 }
+
+                InvokeParser(mGeneralTokenParsers, token);
             }
         }
 
         void ParseShaderStages()
         {
-            string t = NextToken();
-            if (t != "{")
-                return;
+            for (; ; )
+            {
+                string t = NextToken();
+                if (t != "{")
+                    return;
+              
+                for (; ; )
+                {
+                    string token = NextTokenLowerCase();
+                    if (token == "}")
+                        break;
+
+                    InvokeParser(mShaderStageTokenParsers, token);
+                }
+            }
         }
 
         bool ParseShader()
