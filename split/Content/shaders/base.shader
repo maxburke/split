@@ -137,7 +137,7 @@ textures/base/electricwall
 	}
 	{
 		map textures/base/electric.blend.tga
-		tcMod scroll 1 1 10 20
+		tcMod scroll 1 1 // 10 20
 		rgbGen wave sin 1 2 0 1
 		blendfunc GL_ONE GL_ONE
 	}

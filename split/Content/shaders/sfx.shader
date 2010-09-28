@@ -849,7 +849,7 @@ textures/sfx/beam_waterlight1
 		tcMod scale 0.35 0.35
 		tcMod turb 0 0.015 0.5 0.07
 		tcMod Scroll .15 0
-                blendFunc GL_add
+                blendFunc add
         }
      	{
 		map textures/sfx/beam_cyan5.tga
