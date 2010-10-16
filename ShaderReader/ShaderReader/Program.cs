@@ -7,6 +7,180 @@ using System.Text;
 
 namespace ShaderReader
 {
+    class ShaderBuilder
+    {
+        StringBuilder mShaderBuilder = new StringBuilder();
+        StringBuilder mVSBuilder = new StringBuilder();
+        StringBuilder mPSBuilder = new StringBuilder();
+        int mNumSamplers = 0;
+        public string mLastVSValue = "input.position";
+        public string mLastPSValue;
+
+        public ShaderBuilder()
+        {
+            EmitShaderPrologue();
+        }
+
+        public string AddSampler()
+        {
+            return AddSampler("Anisotropic");
+        }
+
+        public string AddSampler(string filter)
+        {
+            string samplerName = string.Format("Sampler{0}", mNumSamplers);
+            const string samplerFormat =
+@"sampler {0} : register(s{0}) = sampler_state {
+    MinFilter = {1};
+    MagFilter = {1};
+    MipFilter = {1};
+};
+
+";
+            mShaderBuilder.AppendFormat(samplerFormat, mNumSamplers, filter);
+            ++mNumSamplers;
+
+            return samplerName;
+        }
+
+        public void AddVSLine(string code, string value)
+        {
+            mVSBuilder.Append("    ");
+            mVSBuilder.AppendLine(code);
+            mLastVSValue = value;
+        }
+
+        public void AddPSLine(string code, string value)
+        {
+            mPSBuilder.Append("    ");
+            mPSBuilder.AppendLine(code);
+            mLastPSValue = value;
+        }
+
+        void EmitShaderPrologue()
+        {
+            const string prologue =
+@"struct VS_INPUT {
+    float4 position : POSITION;
+    float2 surfaceUV  : TEXCOORD0;
+    float2 lightmapUV : TEXCOORD1;
+    float3 normal   : NORMAL;
+    float4 color    : COLOR;
+};
+
+
+struct VS_OUTPUT {
+    float4 position : POSITION;
+    float2 surfaceUV  : TEXCOORD0;
+    float2 lightmapUV : TEXCOORD1;
+    float3 normal   : NORMAL;
+    float4 color    : COLOR;
+};
+
+
+struct PS_INPUT {
+    float2 surfaceUV  : TEXCOORD0;
+    float2 lightmapUV : TEXCOORD1;
+    float3 normal   : NORMAL;
+    float4 color    : COLOR;
+};
+
+float4x4 View;
+float4x4 Projection;
+float Time;
+
+#define PI 3.1415926535
+
+float SinWave(float t, float base, float amp, float phase, float freq) {
+    const float t1 = t * 2 * PI;
+    return sin(freq * t1 + phase) * amp + base;
+}
+
+float SquareWave(float t, float base, float amp, float phase, float freq) {
+    const float t1 = t * 2 * PI;
+    const float sign = sign(sin(freq * t1 + phase));
+    return sign * amp + base;
+}
+
+float TriangleWave(float t, float base, float amp, float phase, float freq) {
+    // this is kind of broken for now.
+    const float t1 = t * PI;
+    return abs((2.0 / PI) * asin(sin(t1)));
+}
+
+float SawtoothWave(float t, float base, float amp, float phase, float freq) {
+    const float t1 = t * freq + phase;
+    return (t1 - floor(t1)) * amp + base;
+}
+
+float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
+    return amp - sawtooth(t, base, amp, phase, freq);
+}
+
+";
+            mShaderBuilder.Append(prologue);
+        }
+
+        void FinalizeVertexShader()
+        {
+            const string vertexShader =
+@"VS_OUTPUT vs_main(in VS_INPUT input) {{
+{0}
+
+    VS_OUTPUT output;
+    output.position = mul(mul({1}, View), Projection);
+    output.surfaceUV = input.surfaceUV;
+    output.lightmapUV = input.lightmapUV;
+    output.normal = input.normal;
+    output.color = input.color;
+
+    return output;
+}}
+
+";
+            mShaderBuilder.AppendFormat(vertexShader, mVSBuilder.ToString(), mLastVSValue);
+        }
+
+        void FinalizePixelShader()
+        {
+            const string pixelShader = 
+@"float4 ps_main(in PS_INPUT input) : COLOR {{
+{0}
+    return {1};
+}}
+";
+            mShaderBuilder.AppendFormat(pixelShader, mPSBuilder.ToString(), mLastPSValue);
+        }
+
+        void EmitShaderEpilogue()
+        {
+            const string epilogue =
+@"technique defaultTechnique {
+    pass P0 {
+        VertexShader = compile vs_3_0 vs_main();
+        PixelShader = compile ps_3_0 ps_main();
+    }
+}
+";
+            mShaderBuilder.Append(epilogue);
+        }
+
+        string mFinalShader;
+
+        public string ToString()
+        {
+            if (mFinalShader == null)
+            {
+                FinalizeVertexShader();
+                FinalizePixelShader();
+                EmitShaderEpilogue();
+                mFinalShader = mShaderBuilder.ToString();
+            }
+
+            return mFinalShader;
+        }
+    }
+
     class Shader
     {
         public enum CullMode
@@ -31,8 +205,22 @@ namespace ShaderReader
             GL_ONE_MINUS_SRC_ALPHA,
         }
 
+        public enum Flag
+        {
+            NOPICMIP = 1 << 0,
+            NOMIPMAP = 1 << 1
+        }
+
         string mName;
         public CullMode mCullMode = CullMode.Front;
+        public List<string> mTextures = new List<string>();
+        public ShaderBuilder mShaderBuilder = new ShaderBuilder();
+        public uint mFlags;
+
+        public void SetFlag(Flag f)
+        {
+            mFlags = mFlags | (uint)f;
+        }
 
         public Shader(string name)
         {
@@ -48,6 +236,15 @@ namespace ShaderReader
 
     class ShaderParser
     {
+        TokenParser[] mGeneralTokenParsers;
+        TokenParser[] mShaderStageTokenParsers;
+        string mStashedToken;
+        Shader mShader;
+        string mContent;
+        string mCurrentEffect;
+        int I;
+        int E;
+
         class TokenParser
         {
             public readonly string Token;
@@ -65,22 +262,8 @@ namespace ShaderReader
         {
         }
 
-        TokenParser[] mGeneralTokenParsers;
-        TokenParser[] mShaderStageTokenParsers;
-#if DEBUG
-        string mLastKeyword;
-#endif
-
-        void SkyParms()
-        {
-            string farBox = NextToken();
-            string cloudHeight = NextToken();
-            string nearbox = NextToken();
-
-            // TODO: wtf?
-        }
-
         #region General parsers
+
         void Cull() 
         {
             string cullMode = NextTokenLowerCase();
@@ -101,6 +284,15 @@ namespace ShaderReader
             }
         }
 
+        void SkyParms()
+        {
+            string farBox = NextToken();
+            string cloudHeight = NextToken();
+            string nearbox = NextToken();
+
+            // TODO: wtf?
+        }
+
         void DeformVertexes()
         {
             string method = NextTokenLowerCase();
@@ -115,6 +307,11 @@ namespace ShaderReader
                         string ampVal = NextToken();
                         string phaseVal = NextToken();
                         string freqVal = NextToken();
+
+                        mShader.mShaderBuilder.AddVSLine(
+                            string.Format("float4 deformVertexesWavePosition = {0}({1}, {2}, {3}, {4}) * {5} * float4(input.normal, 1) + {6};",
+                                func, baseVal, ampVal, phaseVal, freqVal, div, mShader.mShaderBuilder.mLastVSValue),
+                            "deformVertexesWavePosition");
                     }
                     break;
                 case "normal":
@@ -140,6 +337,11 @@ namespace ShaderReader
                         string ampVal = NextToken();
                         string phaseVal = NextToken();
                         string freqVal = NextToken();
+
+                        mShader.mShaderBuilder.AddVSLine(
+                            string.Format("float4 deformVertexesMovePosition = float4({0}, {1}, {2}, 1) * {3}({4}, {5}, {6}, {7}) + {8};",
+                            x, y, z, func, baseVal, ampVal, phaseVal, freqVal, mShader.mShaderBuilder.mLastVSValue),
+                            "deformVertexesMovePosition");
                     }
                     break;
                 case "autosprite":
@@ -176,12 +378,12 @@ namespace ShaderReader
 
         void Nopicmip() 
         {
-            // TODO: figure out wth to do here.
+            mShader.SetFlag(Shader.Flag.NOPICMIP);
         }
 
         void Nomipmap() 
         {
-            // TODO: add no mipmap handling code here. 
+            mShader.SetFlag(Shader.Flag.NOMIPMAP);
         }
 
         void PolygonOffset()
@@ -319,10 +521,11 @@ namespace ShaderReader
         void Map() 
         {
             string textureMap = NextToken();
-
-            // TODO: add texture setup code here. Probably need to 
-            // generate a list of texture names that we store in
-            // the shader structure.
+            if (textureMap.ToLower() != "$lightmap")
+            {
+                // TODO: Validate that the texture map exists
+                mShader.mTextures.Add(textureMap);
+            }
         }
 
         void ClampMap() 
@@ -348,7 +551,7 @@ namespace ShaderReader
                     break;
                 }
 
-                frames.Add(token);
+                mShader.mTextures.Add(token);
             }
 
             // Todo: Implement this.
@@ -561,6 +764,8 @@ namespace ShaderReader
         }
         #endregion
 
+        #region Initialization code
+
         void InitializeTokenParsers()
         {
             mGeneralTokenParsers = new TokenParser[]
@@ -616,6 +821,10 @@ namespace ShaderReader
             Array.Sort(mShaderStageTokenParsers, (a, b) => { return a.Token.CompareTo(b.Token); });
         }
 
+        #endregion
+
+        #region Parser code
+
         bool IsKeyword(TokenParser[] parsers, string token)
         {
             string lowerCaseToken = token.ToLower();
@@ -626,13 +835,6 @@ namespace ShaderReader
 
             return false;
         }
-
-        Stack<string> mPushedTokens = new Stack<string>();
-        Shader mShader;
-        string mContent;
-        string mCurrentEffect;
-        int I;
-        int E;
 
         public ShaderParser(string content)
         {   
@@ -671,8 +873,12 @@ namespace ShaderReader
 
         string NextTokenImpl()
         {
-            if (mPushedTokens.Count != 0)
-                return mPushedTokens.Pop();
+            if (mStashedToken != null)
+            {
+                string t = mStashedToken;
+                mStashedToken = null;
+                return t;
+            }
 
             if (I == E)
                 return null;
@@ -701,7 +907,7 @@ namespace ShaderReader
 
         void SkipToEndOfLine()
         {
-            if (mPushedTokens.Count != 0)
+            if (mStashedToken != null)
                 return;
 
             if (I == E)
@@ -732,7 +938,10 @@ namespace ShaderReader
 
         void PushToken(string s)
         {
-            mPushedTokens.Push(s);
+            if (mStashedToken != null)
+                throw new Exception("Didn't expect there to be a token alredy here.");
+
+            mStashedToken = s;
         }
 
         void ParseAllShaders()
@@ -824,6 +1033,8 @@ namespace ShaderReader
 
             return true;
         }
+
+        #endregion
     }
 
     class ShaderReader
