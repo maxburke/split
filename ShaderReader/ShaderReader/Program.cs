@@ -167,7 +167,7 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
 
         string mFinalShader;
 
-        public string ToString()
+        public override string ToString()
         {
             if (mFinalShader == null)
             {
@@ -258,8 +258,23 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
             }
         }
 
-        public void DefaultParseFunction()
+        public void PassAndContinue()
         {
+        }
+
+        public void DiscardOneTokenAndContinue()
+        {
+            // This method is a placeholder for shader functionality 
+            // that is handled by the q3map pipeline
+            NextToken();
+        }
+
+        public void DiscardTwoTokensAndContinue()
+        {
+            // This method is a placeholder for shader functionality 
+            // that is handled by the q3map pipeline
+            NextToken();
+            NextToken();
         }
 
         #region General parsers
@@ -403,28 +418,6 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
             // object sort key that we generate, perhaps?
         }
 
-        void TessSize() 
-        {
-            // Handled by the pipeline, discard.
-            string tessSize = NextToken();
-        }
-
-        void Q3mapBackshader() 
-        {
-            // Handled by the pipeline, discard.
-            NextToken();
-        }
-
-        void Q3mapFlare()
-        {
-            // Handled by the pipeline, discard.
-        }
-
-        void Q3mapGlobalTexture() 
-        { 
-            // Handled by the pipeline, discard.
-        }
-
         void Q3mapSun() 
         {
             string r = NextToken();
@@ -437,57 +430,14 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
             // TODO: Add sun code here.
         }
 
-        void Q3mapBacksplash()
-        {
-            // Handled by the pipeline, discard.
-            NextToken();
-            NextToken();
-        }
-
         void Q3mapSurfaceLight() 
         {
             string lightValue = NextToken();
         }
 
-        void Q3mapLight()
-        {
-            // Handled by the pipeline, discard.
-            NextToken();
-        }
-
-        void Q3mapLightImage() 
-        {
-            // Handled by the pipeline, discard.
-            NextToken();
-        }
-
-        void Q3mapLightSubdivide() 
-        {
-            // Handled by the pipeline, discard.
-            NextToken();
-        }
-
-        void SurfaceParm()
-        {
-            // Handled by the pipeline and will appear in surface flags, discard.
-            NextToken();
-        }
-
-        void QerEditorImage() 
-        { 
-            // Editor only, discard.
-            NextToken();
-        }
-
         void QerNoCarve()
         {
             // Editor only, discard.
-        }
-
-        void QerTrans()
-        {
-            // Editor only, discard.
-            NextToken();
         }
 
         void FogOnly()
@@ -779,21 +729,21 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
                 new TokenParser("polygonoffset", PolygonOffset),
                 new TokenParser("portal", Portal),
                 new TokenParser("sort", Sort),
-                new TokenParser("tesssize", TessSize),
-                new TokenParser("q3map_backshader", Q3mapBackshader),
-                new TokenParser("q3map_globaltexture", Q3mapGlobalTexture),
+                new TokenParser("tesssize", DiscardOneTokenAndContinue),
+                new TokenParser("q3map_backshader", DiscardOneTokenAndContinue),
+                new TokenParser("q3map_globaltexture", PassAndContinue),
                 new TokenParser("q3map_sun", Q3mapSun),
                 new TokenParser("q3map_surfacelight", Q3mapSurfaceLight),
-                new TokenParser("q3map_lightimage", Q3mapLightImage),
-                new TokenParser("q3map_lightsubdivide", Q3mapLightSubdivide),
-                new TokenParser("q3map_backsplash", Q3mapBacksplash),
-                new TokenParser("q3map_flare", Q3mapFlare),
-                new TokenParser("light", Q3mapLight),
-                new TokenParser("light1", DefaultParseFunction),
-                new TokenParser("surfaceparm", SurfaceParm),
-                new TokenParser("qer_editorimage", QerEditorImage),
+                new TokenParser("q3map_lightimage", DiscardOneTokenAndContinue),
+                new TokenParser("q3map_lightsubdivide", DiscardOneTokenAndContinue),
+                new TokenParser("q3map_backsplash", DiscardTwoTokensAndContinue),
+                new TokenParser("q3map_flare", PassAndContinue),
+                new TokenParser("light", DiscardOneTokenAndContinue),
+                new TokenParser("light1", PassAndContinue),
+                new TokenParser("surfaceparm", DiscardOneTokenAndContinue),
+                new TokenParser("qer_editorimage", DiscardOneTokenAndContinue),
                 new TokenParser("qer_nocarve", QerNoCarve),
-                new TokenParser("qer_trans", QerTrans),
+                new TokenParser("qer_trans", DiscardOneTokenAndContinue),
                 new TokenParser("fogonly", FogOnly),
                 new TokenParser("entitymergable", EntityMergable),
                 new TokenParser("cloudparms", CloudParms),
