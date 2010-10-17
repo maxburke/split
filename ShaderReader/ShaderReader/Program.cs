@@ -30,14 +30,14 @@ namespace ShaderReader
         {
             string samplerName = string.Format("Sampler{0}", mNumSamplers);
             const string samplerFormat =
-@"sampler {0} : register(s{0}) = sampler_state {
-    MinFilter = {1};
-    MagFilter = {1};
-    MipFilter = {1};
-};
+@"sampler {0} : register(s{1}) = sampler_state {{
+    MinFilter = {2};
+    MagFilter = {2};
+    MipFilter = {2};
+}};
 
 ";
-            mShaderBuilder.AppendFormat(samplerFormat, mNumSamplers, filter);
+            mShaderBuilder.AppendFormat(samplerFormat, samplerName, mNumSamplers, filter);
             ++mNumSamplers;
 
             return samplerName;
@@ -148,6 +148,7 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
 {0}
     return {1};
 }}
+
 ";
             mShaderBuilder.AppendFormat(pixelShader, mPSBuilder.ToString(), mLastPSValue);
         }
@@ -245,6 +246,11 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
         int I;
         int E;
 
+        public string GetHlsl()
+        {
+            return mShader.mShaderBuilder.ToString();
+        }
+
         class TokenParser
         {
             public readonly string Token;
@@ -258,18 +264,18 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
             }
         }
 
-        public void PassAndContinue()
+        void PassAndContinue()
         {
         }
 
-        public void DiscardOneTokenAndContinue()
+        void DiscardOneTokenAndContinue()
         {
             // This method is a placeholder for shader functionality 
             // that is handled by the q3map pipeline
             NextToken();
         }
 
-        public void DiscardTwoTokensAndContinue()
+        void DiscardTwoTokensAndContinue()
         {
             // This method is a placeholder for shader functionality 
             // that is handled by the q3map pipeline
@@ -471,16 +477,15 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
         void Map() 
         {
             string textureMap = NextToken();
-            if (textureMap.ToLower() != "$lightmap")
-            {
-                // TODO: Validate that the texture map exists
-                mShader.mTextures.Add(textureMap);
-            }
+            mShader.mTextures.Add(textureMap);
+            string sampler = mShader.mShaderBuilder.AddSampler();
         }
 
         void ClampMap() 
         {
             string textureMap = NextToken();
+            mShader.mTextures.Add(textureMap);
+            string sampler = mShader.mShaderBuilder.AddSampler();
 
             // TODO: add more texture setup code here.
         }
@@ -979,7 +984,8 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
 
             Expect("}");
 
-            Console.WriteLine(mShader);
+//            Console.WriteLine(mShader);
+            Console.WriteLine(mShader.mShaderBuilder);
 
             return true;
         }
