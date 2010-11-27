@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ShaderReader
 {
@@ -13,21 +16,32 @@ namespace ShaderReader
         StringBuilder mVSBuilder = new StringBuilder();
         StringBuilder mPSBuilder = new StringBuilder();
         int mNumSamplers = 0;
-        public string mLastVSValue = "input.position";
-        public string mLastPSValue;
+        string mLastVSValue = "input.position";
+        string mLastPSValue;
+        string mSampler;
+//        bool mSamplerIsLightmap;
+
+        int mPSValueCounter = 0;
 
         public ShaderBuilder()
         {
             EmitShaderPrologue();
         }
 
-        public string AddSampler()
+        public string LastVSValue
         {
-            return AddSampler("Anisotropic");
+            get { return mLastVSValue; }
         }
 
-        public string AddSampler(string filter)
+        public string AddSampler(bool samplerIsLightmap)
         {
+            return AddSampler("Anisotropic", samplerIsLightmap);
+        }
+
+        public string AddSampler(string filter, bool samplerIsLightmap)
+        {
+            mSamplerIsLightmap = samplerIsLightmap;
+
             string samplerName = string.Format("Sampler{0}", mNumSamplers);
             const string samplerFormat =
 @"sampler {0} : register(s{1}) = sampler_state {{
@@ -40,6 +54,7 @@ namespace ShaderReader
             mShaderBuilder.AppendFormat(samplerFormat, samplerName, mNumSamplers, filter);
             ++mNumSamplers;
 
+            mSampler = samplerName;
             return samplerName;
         }
 
@@ -114,7 +129,7 @@ float SawtoothWave(float t, float base, float amp, float phase, float freq) {
 }
 
 float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
-    return amp - sawtooth(t, base, amp, phase, freq);
+    return amp - SawtoothWave(t, base, amp, phase, freq);
 }
 
 ";
@@ -331,7 +346,7 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
 
                         mShader.mShaderBuilder.AddVSLine(
                             string.Format("float4 deformVertexesWavePosition = {0}({1}, {2}, {3}, {4}) * {5} * float4(input.normal, 1) + {6};",
-                                func, baseVal, ampVal, phaseVal, freqVal, div, mShader.mShaderBuilder.mLastVSValue),
+                                func, baseVal, ampVal, phaseVal, freqVal, div, mShader.mShaderBuilder.LastVSValue),
                             "deformVertexesWavePosition");
                     }
                     break;
@@ -361,7 +376,7 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
 
                         mShader.mShaderBuilder.AddVSLine(
                             string.Format("float4 deformVertexesMovePosition = float4({0}, {1}, {2}, 1) * {3}({4}, {5}, {6}, {7}) + {8};",
-                            x, y, z, func, baseVal, ampVal, phaseVal, freqVal, mShader.mShaderBuilder.mLastVSValue),
+                            x, y, z, func, baseVal, ampVal, phaseVal, freqVal, mShader.mShaderBuilder.LastVSValue),
                             "deformVertexesMovePosition");
                     }
                     break;
@@ -478,14 +493,17 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
         {
             string textureMap = NextToken();
             mShader.mTextures.Add(textureMap);
-            string sampler = mShader.mShaderBuilder.AddSampler();
+
+            bool isLightmap = textureMap.ToLower() == "$lightmap";
+            string sampler = mShader.mShaderBuilder.AddSampler(isLightmap);
         }
 
         void ClampMap() 
         {
             string textureMap = NextToken();
             mShader.mTextures.Add(textureMap);
-            string sampler = mShader.mShaderBuilder.AddSampler();
+            bool isLightmap = textureMap.ToLower() == "$lightmap";
+            string sampler = mShader.mShaderBuilder.AddSampler(isLightmap);
 
             // TODO: add more texture setup code here.
         }
@@ -984,8 +1002,12 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
 
             Expect("}");
 
-//            Console.WriteLine(mShader);
-            Console.WriteLine(mShader.mShaderBuilder);
+            string shader = mShader.mShaderBuilder.ToString();
+
+            CompiledShader VS = ShaderCompiler.CompileFromSource(shader,
+                null, null, CompilerOptions.None, "vs_main", ShaderProfile.VS_3_0, TargetPlatform.Windows);
+            CompiledShader PS = ShaderCompiler.CompileFromSource(shader,
+                null, null, CompilerOptions.None, "ps_main", ShaderProfile.PS_3_0, TargetPlatform.Windows);
 
             return true;
         }
