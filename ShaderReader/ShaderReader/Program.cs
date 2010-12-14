@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace ShaderReader
 {
-    class ShaderBuilder
+    class ShaderBuilder__refactor_this_crud
     {
         StringBuilder mShaderBuilder = new StringBuilder();
         StringBuilder mVSBuilder = new StringBuilder();
@@ -23,7 +23,7 @@ namespace ShaderReader
 
         int mPSValueCounter = 0;
 
-        public ShaderBuilder()
+        public ShaderBuilder__refactor_this_crud()
         {
             EmitShaderPrologue();
         }
@@ -40,7 +40,7 @@ namespace ShaderReader
 
         public string AddSampler(string filter, bool samplerIsLightmap)
         {
-            mSamplerIsLightmap = samplerIsLightmap;
+//            mSamplerIsLightmap = samplerIsLightmap;
 
             string samplerName = string.Format("Sampler{0}", mNumSamplers);
             const string samplerFormat =
@@ -230,7 +230,7 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
         string mName;
         public CullMode mCullMode = CullMode.Front;
         public List<string> mTextures = new List<string>();
-        public ShaderBuilder mShaderBuilder = new ShaderBuilder();
+        public ShaderBuilder__refactor_this_crud mShaderBuilder = new ShaderBuilder__refactor_this_crud();
         public uint mFlags;
 
         public void SetFlag(Flag f)
@@ -1024,6 +1024,9 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
 
         static void Main(string[] args)
         {
+            if (!Hlsl.Test.RunTests())
+                return;
+
             if (args.Length == 0)
                 return;
 
