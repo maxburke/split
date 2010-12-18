@@ -26,7 +26,7 @@ namespace Hlsl
 
             DeclExpr output = new DeclExpr(vsData, argValue);
             udf.AddExpr(output);
-            udf.AddExpr(new ReturnExpr(output.Value));
+            udf.AddExpr(new ReturnExpr(output));
 
             HlslProgram program = new HlslProgram();
             program.SetShader(ShaderType.VertexShader, udf, ShaderProfile.vs_3_0);

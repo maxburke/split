@@ -86,5 +86,10 @@ namespace Hlsl
             Name = name;
             Semantic = semantic;
         }
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

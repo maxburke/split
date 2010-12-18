@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HlslExpr.cs" />
     <Compile Include="HlslProgram.cs" />
     <Compile Include="HlslType.cs" />
     <Compile Include="HlslValue.cs" />
