@@ -66,6 +66,16 @@ namespace Hlsl
         {
             return !(A == B);
         }
+
+        public override bool Equals(object obj)
+        {
+            return this == (Semantic)obj;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 
     class Value

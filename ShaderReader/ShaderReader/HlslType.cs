@@ -52,187 +52,194 @@ namespace Hlsl
 
     abstract class Type
     {
-        int TypeTag;
-        public int Tag { get { return TypeTag; } }
-
         public abstract string TypeName();
 
-        Type(int typeTag)
+        protected Type() { }
+
+        public static bool operator ==(Type A, Type B)
         {
-            TypeTag = typeTag;
+            object a = (object)A;
+            object b = (object)B;
+
+            if (a == null && b == null)
+                return true;
+
+            if (a == null || b == null)
+                return false;
+
+            return A.GetType() == B.GetType();
         }
 
-        public abstract class ScalarType : Type
+        public static bool operator !=(Type A, Type B)
         {
-            protected ScalarType(int typeTag)
-                : base(typeTag)
-            { }
+            return !(A == B);
         }
 
-        public class BoolType : ScalarType
+        public override bool Equals(object obj)
         {
-            public BoolType()
-                : base(++sTypeCounter)
-            { }
-
-            public override string TypeName()
-            {
-                return "bool";
-            }
+            return this == (Type)obj;
         }
 
-        public class IntType : ScalarType
+        public override int GetHashCode()
         {
-            public IntType()
-                : base(++sTypeCounter)
-            { }
+            return base.GetHashCode();
+        }
+    }
 
-            public override string TypeName()
-            {
-                return "int";
-            }
+    abstract class ScalarType : Type
+    {
+        protected ScalarType() { }
+    }
+
+    class BoolType : ScalarType
+    {
+        public BoolType() { }
+
+        public override string TypeName()
+        {
+            return "bool";
+        }
+    }
+
+    class IntType : ScalarType
+    {
+        public IntType() { }
+
+        public override string TypeName()
+        {
+            return "int";
+        }
+    }
+
+    class UIntType : ScalarType
+    {
+        public UIntType() { }
+
+        public override string TypeName()
+        {
+            return "uint";
+        }
+    }
+
+    class FloatType : ScalarType
+    {
+        public FloatType() { }
+
+        public override string TypeName()
+        {
+            return "float";
+        }
+    }
+
+    class SamplerType : Type
+    {
+        public SamplerType() { }
+
+        public override string TypeName()
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    abstract class DerivedType : Type
+    {
+        protected DerivedType() { }
+    }
+
+    class VectorType : DerivedType
+    {
+        public readonly Type BaseType;
+        public readonly int Dimension;
+
+        public VectorType(Type baseType, int dimension)
+        {
+            if (!(baseType is ScalarType))
+                throw new ShaderDomException("Vector base type must be a scalar!");
+
+            BaseType = baseType;
+            Dimension = dimension;
         }
 
-        public class UIntType : ScalarType
+        public override string TypeName()
         {
-            public UIntType()
-                : base(++sTypeCounter)
-            { }
+            return BaseType.TypeName() + Dimension.ToString();
+        }
+    }
 
-            public override string TypeName()
-            {
-                return "uint";
-            }
+    class MatrixType : DerivedType
+    {
+        public readonly Type BaseType;
+        public readonly int Dimension;
+
+        public MatrixType(Type baseType, int dimension)
+        {
+            if (!(baseType is VectorType))
+                throw new ShaderDomException("Matrix base type must be a vector!");
+
+            BaseType = baseType;
+            Dimension = dimension;
         }
 
-        public class FloatType : ScalarType
+        public override string TypeName()
         {
-            public FloatType()
-                : base(++sTypeCounter)
-            { }
+            return BaseType.TypeName() + "x" + Dimension.ToString();
+        }
+    }
 
-            public override string TypeName()
-            {
-                return "float";
-            }
+    class StructType : DerivedType
+    {
+        public readonly string Name;
+        public readonly StructField[] Fields;
+
+        public StructType(string name, StructField[] fields)
+        {
+            Name = name;
+            Fields = fields;
         }
 
-        public class SamplerType : Type
+        public override string TypeName()
         {
-            public SamplerType()
-                : base(++sTypeCounter)
-            { }
-
-            public override string TypeName()
-            {
-                throw new NotImplementedException();
-            }
+            return Name;
         }
 
-        public abstract class DerivedType : Type
+        public override string ToString()
         {
-            protected DerivedType(int typeTag)
-                : base(typeTag)
-            { }
+            StringBuilder SB = new StringBuilder();
+
+            SB.AppendFormat("struct {0} {{{1}", Name, System.Environment.NewLine);
+
+            foreach (StructField SF in Fields)
+                SB.AppendFormat("    {0} {1} : {2};{3}",
+                    SF.FieldType.TypeName(),
+                    SF.FieldName,
+                    SF.FieldSemantic,
+                    System.Environment.NewLine);
+
+            SB.AppendLine("};");
+
+            return SB.ToString();
         }
+    }
 
-        public class VectorType : DerivedType
-        {
-            public readonly Type BaseType;
-            public readonly int Dimension;
+    class TypeRegistry
+    {
+        BoolType sBoolType = new BoolType();
+        IntType sIntType = new IntType();
+        UIntType sUIntType = new UIntType();
+        FloatType sFloatType = new FloatType();
+        SamplerType sSamplerType = new SamplerType();
 
-            public VectorType(Type baseType, int dimension)
-                : base(++sTypeCounter)
-            {
-                if (!(baseType is ScalarType))
-                    throw new ShaderDomException("Vector base type must be a scalar!");
-                    
-                BaseType = baseType;
-                Dimension = dimension;
-            }
+        List<VectorType> sVectorTypes = new List<VectorType>();
+        List<MatrixType> sMatrixTypes = new List<MatrixType>();
+        List<StructType> sStructTypes = new List<StructType>();
 
-            public override string TypeName()
-            {
-                return BaseType.TypeName() + Dimension.ToString();
-            }
-        }
+        public BoolType GetBoolType() { return sBoolType; }
+        public IntType GetIntType() { return sIntType; }
+        public UIntType GetUIntType() { return sUIntType; }
+        public FloatType GetFloatType() { return sFloatType; }
+        public SamplerType GetSamplerType() { return sSamplerType; }
 
-        public class MatrixType : DerivedType
-        {
-            public readonly Type BaseType;
-            public readonly int Dimension;
-
-            public MatrixType(Type baseType, int dimension)
-                : base(++sTypeCounter)
-            {
-                if (!(baseType is VectorType))
-                    throw new ShaderDomException("Matrix base type must be a vector!");
-
-                BaseType = baseType;
-                Dimension = dimension;
-            }
-
-            public override string TypeName()
-            {
-                return BaseType.TypeName() + "x" + Dimension.ToString();
-            }
-        }
-
-        public class StructType : DerivedType
-        {
-            public readonly string Name;
-            public readonly StructField[] Fields;
-
-            public StructType(string name, StructField[] fields)
-                : base(++sTypeCounter)
-            {
-                Name = name;
-                Fields = fields;
-            }
-
-            public override string TypeName()
-            {
-                return Name;
-            }
-
-            public override string ToString()
-            {
-                StringBuilder SB = new StringBuilder();
-
-                SB.AppendFormat("struct {0} {{{1}", Name, System.Environment.NewLine);
-
-                foreach (StructField SF in Fields)
-                    SB.AppendFormat("    {0} {1} : {2};{3}", 
-                        SF.FieldType.TypeName(),
-                        SF.FieldName,
-                        SF.FieldSemantic,
-                        System.Environment.NewLine);
-
-                SB.AppendLine("};");
-
-                return SB.ToString();
-            }
-        }
-
-        static int sTypeCounter = 0;
-
-        static BoolType sBoolType = new BoolType();
-        static IntType sIntType = new IntType();
-        static UIntType sUIntType = new UIntType();
-        static FloatType sFloatType = new FloatType();
-        static SamplerType sSamplerType = new SamplerType();
-
-        static List<VectorType> sVectorTypes = new List<VectorType>();
-        static List<MatrixType> sMatrixTypes = new List<MatrixType>();
-        static List<StructType> sStructTypes = new List<StructType>();
-
-        public static BoolType GetBoolType() { return sBoolType; }
-        public static IntType GetIntType() { return sIntType; }
-        public static UIntType GetUIntType() { return sUIntType; }
-        public static FloatType GetFloatType() { return sFloatType; }
-        public static SamplerType GetSamplerType() { return sSamplerType; }
-
-        public static VectorType GetVectorType(Type baseType, int dimension)
+        public VectorType GetVectorType(Type baseType, int dimension)
         {
             foreach (VectorType VT in sVectorTypes)
             {
@@ -246,7 +253,7 @@ namespace Hlsl
             return newVT;
         }
 
-        public static MatrixType GetMatrixType(Type baseType, int dimension)
+        public MatrixType GetMatrixType(Type baseType, int dimension)
         {
             foreach (MatrixType MT in sMatrixTypes)
             {
@@ -260,7 +267,7 @@ namespace Hlsl
             return newVT;
         }
 
-        public static StructType GetStructType(string name)
+        public StructType GetStructType(string name)
         {
             foreach (StructType ST in sStructTypes)
             {
@@ -271,7 +278,7 @@ namespace Hlsl
             return null;
         }
 
-        public static StructType GetStructType(string name, StructField[] fields)
+        public StructType GetStructType(string name, StructField[] fields)
         {
             StructType ST = GetStructType(name);
 
@@ -303,7 +310,7 @@ namespace Hlsl
             return newST;
         }
 
-        public static ReadOnlyCollection<StructType> GetAllStructTypes()
+        public ReadOnlyCollection<StructType> GetAllStructTypes()
         {
             return new ReadOnlyCollection<StructType>(sStructTypes);
         }

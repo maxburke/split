@@ -72,7 +72,7 @@ namespace Hlsl
 
         public Value AddArgument(Type structType)
         {
-            if (!(structType is Type.StructType))
+            if (!(structType is StructType))
                 throw new ShaderDomException("Argument must be a struct type or have a semantic!");
 
             Value v = new Value(structType, string.Format("arg{0}", Arguments.Count));
@@ -170,11 +170,12 @@ namespace Hlsl
         }
     }
 
-    class HlslProgram
+    class HlslProgram : IDisposable
     {
         List<GlobalVariableExpr> Globals = new List<GlobalVariableExpr>();
         Dictionary<Function, bool> Functions = new Dictionary<Function, bool>();
         Pair<ShaderProfile, Function>[] Shaders = new Pair<ShaderProfile, Function>[(int)ShaderType.NUM_SHADER_TYPES];
+        public TypeRegistry Types = new TypeRegistry();
 
         public HlslProgram()
         {
@@ -208,9 +209,9 @@ namespace Hlsl
         {
             StringBuilder SB = new StringBuilder();
 
-            ReadOnlyCollection<Type.StructType> structTypes = Type.GetAllStructTypes();
+            ReadOnlyCollection<StructType> structTypes = Types.GetAllStructTypes();
 
-            foreach (Type.StructType ST in structTypes)
+            foreach (StructType ST in structTypes)
                 SB.AppendLine(ST.ToString());
 
             foreach (GlobalVariableExpr GVE in Globals)
@@ -223,16 +224,29 @@ namespace Hlsl
             SB.AppendLine("    pass P0 {");
 
             for (int i = 0; i < (int)ShaderType.NUM_SHADER_TYPES; ++i)
+            {
+                if (Shaders[i].second == null)
+                    throw new ShaderDomException(string.Format("HlslProgram has null {0}", Enum.GetName(typeof(ShaderType), (object)i)));
+
                 SB.AppendFormat("        {0} = compile {1} {2}();{3}",
                     Enum.GetName(typeof(ShaderType), (object)i),
                     Shaders[i].first,
                     Shaders[i].second.Name,
                     System.Environment.NewLine);
+            }
 
             SB.AppendLine("    }");
             SB.AppendLine("}");
 
             return SB.ToString();
+        }
+
+        public void Dispose()
+        {
+            Globals = null;
+            Functions = null;
+            Shaders = null;
+            Types = null;
         }
     }
 }

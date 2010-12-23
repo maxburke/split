@@ -299,7 +299,7 @@ namespace Hlsl
             if (!test.HasValue())
                 throw new ShaderDomException("Test expression doesn't return a value!");
 
-            if (!(test.Value.ValueType is Type.BoolType))
+            if (!(test.Value.ValueType is BoolType))
                 throw new ShaderDomException("Test expression does not return a boolean value!");
 
             Initializer = initializer;
@@ -342,11 +342,12 @@ namespace Hlsl
     class AssignmentExpr : Expr
     {
         Operator Modifier;
-        Value AssignmentValue;
+        Value LhsValue;
+        Value RhsValue;
 
         public override Value Value
         {
-            get { throw new ShaderDomException("SelfModifyingExprs have no value!"); }
+            get { throw new ShaderDomException("AssignmentExprs have no value!"); }
         }
 
         public override bool HasValue()
@@ -354,23 +355,24 @@ namespace Hlsl
             throw new NotImplementedException();
         }
 
-        public AssignmentExpr(Value v)
-            : this(v, Operator.IDENTITY)
+        public AssignmentExpr(Value lhsValue, Value rhsValue)
+            : this(lhsValue, rhsValue, Operator.IDENTITY)
         {
         }
 
-        public AssignmentExpr(Value value, Operator modifier)
+        public AssignmentExpr(Value lhsValue, Value rhsValue, Operator modifier)
         {
             if (modifier <= Operator.FIRST_MODIFIER_OPERATOR || modifier >= Operator.LAST_MODIFIER_OPERATOR)
                 throw new ShaderDomException(string.Format("Operator {0} cannot be used to modify an assignment!", modifier));
 
-            AssignmentValue = value;
+            LhsValue = lhsValue;
+            RhsValue = rhsValue;
             Modifier = modifier;
         }
 
         public override string ToString()
         {
-            throw new NotImplementedException();
+            return string.Format("{0} = {1};", LhsValue.Name, RhsValue.Name);
         }
     }
 
@@ -399,6 +401,53 @@ namespace Hlsl
             SB.AppendFormat("return {0};", ReturnValue.Value);
 
             return SB.ToString();
+        }
+    }
+
+    class StructMemberExpr : Expr
+    {
+        Value FieldValue;
+
+        public override bool HasValue()
+        {
+            return true;
+        }
+
+        public override Value Value
+        {
+            get { return FieldValue; }
+        }
+
+        public StructMemberExpr(Value value, StructField field)
+        {
+            if (!(value.ValueType is StructType))
+                throw new ShaderDomException("StructMemberExpr only valid on structs!");
+
+            FieldValue = new Value(field.FieldType, value.Name + "." + field.FieldName);
+        }
+
+        public StructMemberExpr(Value value, string fieldName)
+        {
+            StructType structType = value.ValueType as StructType;
+            if (structType == null)
+                throw new ShaderDomException("StructMemberExpr only valid on structs!");
+
+            for (int i = 0; i < structType.Fields.Length; ++i)
+            {
+                StructField field = structType.Fields[i];
+                if (field.FieldName == fieldName)
+                {
+                    FieldValue = new Value(field.FieldType, value.Name + "." + field.FieldName);
+                    return;
+                }
+            }
+
+            throw new ShaderDomException(string.Format("Field {0} does not exist in type {1}!", fieldName, structType.Name));
+        }
+
+        public override string ToString()
+        {
+            return FieldValue.Name;
         }
     }
 }
