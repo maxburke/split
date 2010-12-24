@@ -24,7 +24,7 @@ namespace Hlsl
             return vsData;
         }
 
-        public static string Test1()
+        public static string EmptyProgramTest()
         {
             try
             {
@@ -41,7 +41,7 @@ namespace Hlsl
         }
 
 
-        public static string Test2()
+        public static string ArgAssignedToOutputTest()
         {
             using (HlslProgram program = new HlslProgram())
             {
@@ -60,7 +60,7 @@ namespace Hlsl
             }
         }
 
-        public static string Test3()
+        public static string SimpleStructMemberTest()
         {
             using (HlslProgram program = new HlslProgram())
             {
@@ -83,11 +83,40 @@ namespace Hlsl
             }
         }
 
+        public static string SimpleFunctionCallTest()
+        {
+            using (HlslProgram program = new HlslProgram())
+            {
+                Type vsData = CreateVSType(program);
+                Type f1 = program.Types.GetFloatType();
+                Type f4 = program.Types.GetVectorType(f1, 4);
+
+                DeclExpr wvpMatrixDecl = new DeclExpr(program.Types.GetMatrixType(f4, 4));
+                program.AddGlobal(wvpMatrixDecl);
+
+                UserDefinedFunction udf = new UserDefinedFunction("vs_main");
+                Value argValue = udf.AddArgument(vsData);
+
+                DeclExpr output = new DeclExpr(vsData);
+                udf.AddExpr(output);
+                udf.AddExpr(new AssignmentExpr(
+                    new StructMemberExpr(output.Value, "position").Value,
+                    new StructMemberExpr(argValue, "position").Value));
+
+                udf.AddExpr(new ReturnExpr(output));
+                program.SetShader(ShaderType.VertexShader, udf, ShaderProfile.vs_3_0);
+                program.SetShader(ShaderType.PixelShader, udf, ShaderProfile.ps_3_0);
+
+                return program.ToString();
+            }
+        }
+
         public static bool RunTests()
         {
-            string test1 = Test1();
-            string test2 = Test2();
-            string test3 = Test3();
+            string test1 = EmptyProgramTest();
+            string test2 = ArgAssignedToOutputTest();
+            string test3 = SimpleStructMemberTest();
+            string test4 = SimpleFunctionCallTest();
 
             return false;
         }

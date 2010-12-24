@@ -112,19 +112,6 @@ namespace Hlsl
         }
     }
 
-    class GlobalVariableExpr : Expr
-    {
-        public override Value Value
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public override bool HasValue()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
     class CommaExpr : Expr
     {
         public readonly Expr LHS;

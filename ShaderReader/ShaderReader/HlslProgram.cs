@@ -172,7 +172,7 @@ namespace Hlsl
 
     class HlslProgram : IDisposable
     {
-        List<GlobalVariableExpr> Globals = new List<GlobalVariableExpr>();
+        List<DeclExpr> Globals = new List<DeclExpr>();
         Dictionary<Function, bool> Functions = new Dictionary<Function, bool>();
         Pair<ShaderProfile, Function>[] Shaders = new Pair<ShaderProfile, Function>[(int)ShaderType.NUM_SHADER_TYPES];
         public TypeRegistry Types = new TypeRegistry();
@@ -199,6 +199,11 @@ namespace Hlsl
                 Functions.Add(function, true);
         }
 
+        public void AddGlobal(DeclExpr globalVariableDecl)
+        {
+            Globals.Add(globalVariableDecl);
+        }
+
         public void SetShader(ShaderType type, UserDefinedFunction function, ShaderProfile profile)
         {
             AddFunction(function);
@@ -214,8 +219,10 @@ namespace Hlsl
             foreach (StructType ST in structTypes)
                 SB.AppendLine(ST.ToString());
 
-            foreach (GlobalVariableExpr GVE in Globals)
+            foreach (DeclExpr GVE in Globals)
                 SB.AppendLine(GVE.ToString());
+
+            SB.AppendLine();
 
             foreach (KeyValuePair<Function, bool> kvp in Functions)
                 SB.AppendLine(kvp.Key.ToString());
