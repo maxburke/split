@@ -52,7 +52,7 @@ namespace Hlsl
             Name = name;
         }
 
-        public abstract int Arity { get; }
+        public abstract bool IsValidCall(Value[] args);
     }
 
     class UserDefinedFunction : Function
@@ -68,6 +68,17 @@ namespace Hlsl
         public UserDefinedFunction(string name)
             : base(name)
         {
+        }
+
+        public override bool IsValidCall(Value[] args)
+        {
+            for (int i = 0; i < args.Length; ++i)
+            {
+                if (args[i].ValueType != Arguments[i].first.ValueType)
+                    return false;
+            }
+
+            return true;
         }
 
         public Value AddArgument(Type structType)

@@ -97,6 +97,8 @@ namespace Hlsl
                 UserDefinedFunction udf = new UserDefinedFunction("vs_main");
                 Value argValue = udf.AddArgument(vsData);
 
+                udf.AddExpr(new CallExpr(...));
+
                 DeclExpr output = new DeclExpr(vsData);
                 udf.AddExpr(output);
                 udf.AddExpr(new AssignmentExpr(

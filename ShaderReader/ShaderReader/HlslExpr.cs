@@ -316,7 +316,12 @@ namespace Hlsl
 
         public CallExpr(Function fn, Expr[] parameters)
         {
-            if (fn.Arity != parameters.Length)
+            Value[] fnValues = new Value[parameters.Length];
+
+            for (int i = 0; i < parameters.Length; ++i)
+                fnValues[i] = parameters[i].Value;
+
+            if (!fn.IsValidCall(fnValues))
                 throw new ShaderDomException("Number of parameters doesn't match function arity!");
         }
 
