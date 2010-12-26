@@ -47,6 +47,11 @@ namespace Hlsl
     {
         public readonly string Name;
 
+        public Function()
+        {
+            throw new NotImplementedException();
+        }
+
         public Function(string name)
         {
             Name = name;
@@ -163,28 +168,10 @@ namespace Hlsl
         }
     }
 
-    class BuiltInFunction : Function
-    {
-        Type[] ArgTypes;
-        Type ReturnType;
-
-        public BuiltInFunction(string name, Type returnType, Type[] argTypes)
-            : base(name)
-        {
-            ArgTypes = argTypes;
-            ReturnType = returnType;
-        }
-
-        public override int Arity
-        {
-            get { return ArgTypes.Length; }
-        }
-    }
-
     class HlslProgram : IDisposable
     {
         List<DeclExpr> Globals = new List<DeclExpr>();
-        Dictionary<Function, bool> Functions = new Dictionary<Function, bool>();
+        List<Function> Functions = new List<Function>();
         Pair<ShaderProfile, Function>[] Shaders = new Pair<ShaderProfile, Function>[(int)ShaderType.NUM_SHADER_TYPES];
         public TypeRegistry Types = new TypeRegistry();
 
@@ -193,21 +180,19 @@ namespace Hlsl
             // Populate built-in-functions here
         }
 
-        public List<Function> GetFunctionsByName(string name)
+        public Function GetFunctionByName(string name)
         {
-            List<Function> fns = new List<Function>();
+            foreach (Function fn in Functions)
+                if (fn.Name == name)
+                    return fn;
 
-            foreach (KeyValuePair<Function, bool> kvp in Functions)
-                if (kvp.Key.Name == name)
-                    fns.Add(kvp.Key);
-
-            return fns;
+            throw new ShaderDomException("Function does not exist!");
         }
 
         public void AddFunction(UserDefinedFunction function)
         {
-            if (!Functions.ContainsKey(function))
-                Functions.Add(function, true);
+            if (!Functions.Contains(function))
+                Functions.Add(function);
         }
 
         public void AddGlobal(DeclExpr globalVariableDecl)
