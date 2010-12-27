@@ -9,10 +9,10 @@ namespace Hlsl
     {
         public static Type CreateVSType(HlslProgram program)
         {
-            Type f = program.Types.GetFloatType();
-            Type float4 = program.Types.GetVectorType(f, 4);
-            Type float3 = program.Types.GetVectorType(f, 3);
-            Type float2 = program.Types.GetVectorType(f, 2);
+            Type f = TypeRegistry.GetFloatType();
+            Type float4 = TypeRegistry.GetVectorType(f, 4);
+            Type float3 = TypeRegistry.GetVectorType(f, 3);
+            Type float2 = TypeRegistry.GetVectorType(f, 2);
             Type vsData = program.Types.GetStructType("vs_input", new StructField[] {
                     new StructField(float4, "position", new Semantic(Semantic.SemanticType.POSITION)),
                     new StructField(float2, "surfaceUV", new Semantic(Semantic.SemanticType.TEXCOORD, 0)),
@@ -88,10 +88,10 @@ namespace Hlsl
             using (HlslProgram program = new HlslProgram())
             {
                 Type vsData = CreateVSType(program);
-                Type f1 = program.Types.GetFloatType();
-                Type f4 = program.Types.GetVectorType(f1, 4);
+                Type f1 = TypeRegistry.GetFloatType();
+                Type f4 = TypeRegistry.GetVectorType(f1, 4);
 
-                DeclExpr wvpMatrixDecl = new DeclExpr(program.Types.GetMatrixType(f4, 4));
+                DeclExpr wvpMatrixDecl = new DeclExpr(TypeRegistry.GetMatrixType(f4, 4));
                 program.AddGlobal(wvpMatrixDecl);
 
                 UserDefinedFunction udf = new UserDefinedFunction("vs_main");

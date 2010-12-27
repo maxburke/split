@@ -58,17 +58,14 @@ namespace Hlsl
         }
 
         public abstract bool IsValidCall(Value[] args);
+        public abstract Type GetReturnType(Value[] args);
     }
 
     class UserDefinedFunction : Function
     {
         List<Expr> Expressions = new List<Expr>();
         List<Pair<Value, Semantic>> Arguments = new List<Pair<Value, Semantic>>();
-
-        public override int Arity
-        {
-            get { return Arguments.Count; }
-        }
+        Type FnReturnType;
 
         public UserDefinedFunction(string name)
             : base(name)
@@ -84,6 +81,11 @@ namespace Hlsl
             }
 
             return true;
+        }
+
+        public override Type GetReturnType(Value[] args)
+        {
+            return DetermineReturnType();
         }
 
         public Value AddArgument(Type structType)
@@ -117,6 +119,9 @@ namespace Hlsl
 
         Type DetermineReturnType()
         {
+            if (FnReturnType != null)
+                return FnReturnType;
+
             Type returnType = null;
 
             foreach (Expr E in Expressions)
@@ -134,15 +139,16 @@ namespace Hlsl
             if (returnType == null)
                 throw new ShaderDomException("Function has no return type!");
 
+            FnReturnType = returnType;
             return returnType;
         }
 
         public override string ToString()
         {
             StringBuilder SB = new StringBuilder();
-            
-            Type returnType = DetermineReturnType();
 
+            Type returnType = DetermineReturnType();
+            
             /// TODO: Add support for return value sematics.
             SB.AppendFormat("{0} {1}(", returnType.TypeName(), Name);
 
@@ -220,8 +226,8 @@ namespace Hlsl
 
             SB.AppendLine();
 
-            foreach (KeyValuePair<Function, bool> kvp in Functions)
-                SB.AppendLine(kvp.Key.ToString());
+            foreach (Function fn in Functions)
+                SB.AppendLine(fn.ToString());
 
             SB.AppendLine("technique defaultTechnique {");
             SB.AppendLine("    pass P0 {");

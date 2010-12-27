@@ -84,11 +84,18 @@ namespace Hlsl
         {
             return base.GetHashCode();
         }
+
+        public abstract Type GetScalarBaseType();
     }
 
     abstract class ScalarType : Type
     {
         protected ScalarType() { }
+
+        public override Type GetScalarBaseType()
+        {
+            return this;
+        }
     }
 
     class BoolType : ScalarType
@@ -139,6 +146,11 @@ namespace Hlsl
         {
             throw new NotImplementedException();
         }
+
+        public override Type GetScalarBaseType()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     abstract class DerivedType : Type
@@ -164,6 +176,11 @@ namespace Hlsl
         {
             return BaseType.TypeName() + Dimension.ToString();
         }
+
+        public override Type GetScalarBaseType()
+        {
+            return BaseType;
+        }
     }
 
     class MatrixType : DerivedType
@@ -183,6 +200,11 @@ namespace Hlsl
         public override string TypeName()
         {
             return BaseType.TypeName() + "x" + Dimension.ToString();
+        }
+
+        public override Type GetScalarBaseType()
+        {
+            return ((DerivedType)BaseType).GetScalarBaseType();
         }
     }
 
@@ -219,27 +241,32 @@ namespace Hlsl
 
             return SB.ToString();
         }
+
+        public override Type GetScalarBaseType()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     class TypeRegistry
     {
-        BoolType sBoolType = new BoolType();
-        IntType sIntType = new IntType();
-        UIntType sUIntType = new UIntType();
-        FloatType sFloatType = new FloatType();
-        SamplerType sSamplerType = new SamplerType();
+        static BoolType sBoolType = new BoolType();
+        static IntType sIntType = new IntType();
+        static UIntType sUIntType = new UIntType();
+        static FloatType sFloatType = new FloatType();
+        static SamplerType sSamplerType = new SamplerType();
 
-        List<VectorType> sVectorTypes = new List<VectorType>();
-        List<MatrixType> sMatrixTypes = new List<MatrixType>();
+        static List<VectorType> sVectorTypes = new List<VectorType>();
+        static List<MatrixType> sMatrixTypes = new List<MatrixType>();
         List<StructType> sStructTypes = new List<StructType>();
 
-        public BoolType GetBoolType() { return sBoolType; }
-        public IntType GetIntType() { return sIntType; }
-        public UIntType GetUIntType() { return sUIntType; }
-        public FloatType GetFloatType() { return sFloatType; }
-        public SamplerType GetSamplerType() { return sSamplerType; }
+        public static BoolType GetBoolType() { return sBoolType; }
+        public static IntType GetIntType() { return sIntType; }
+        public static UIntType GetUIntType() { return sUIntType; }
+        public static FloatType GetFloatType() { return sFloatType; }
+        public static SamplerType GetSamplerType() { return sSamplerType; }
 
-        public VectorType GetVectorType(Type baseType, int dimension)
+        public static VectorType GetVectorType(Type baseType, int dimension)
         {
             foreach (VectorType VT in sVectorTypes)
             {
@@ -253,7 +280,7 @@ namespace Hlsl
             return newVT;
         }
 
-        public MatrixType GetMatrixType(Type baseType, int dimension)
+        public static MatrixType GetMatrixType(Type baseType, int dimension)
         {
             foreach (MatrixType MT in sMatrixTypes)
             {
@@ -267,6 +294,8 @@ namespace Hlsl
             return newVT;
         }
 
+        // StructTypes are bound to an instance of an HlslProgram as they
+        // are not defined within the scope of the language.
         public StructType GetStructType(string name)
         {
             foreach (StructType ST in sStructTypes)
