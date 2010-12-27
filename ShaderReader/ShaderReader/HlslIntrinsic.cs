@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
 namespace Hlsl
 {
-    #region OutputTypeMatchesInput Functions
+    #region Data Transformation Functions
 
     class DataTransformFunction : Function
     {
@@ -913,5 +914,111 @@ namespace Hlsl
     #endregion
 
     #region Sampler functions
+
+    #region TexBase
+    abstract class TexBase : Function
+    {
+        int TextureDimension;
+        bool HasDdxDdy;
+        bool HasMandatoryDdxDdy;
+
+        public TexBase(string name, int dimension, bool hasDdxDdy, bool hasMandatoryDdxDdy)
+            : base(name)
+        {
+            TextureDimension = dimension;
+            HasMandatoryDdxDdy = hasMandatoryDdxDdy;
+            HasDdxDdy = hasMandatoryDdxDdy || hasDdxDdy;
+        }
+
+        bool VerifyDimensions(Value arg)
+        {
+            VectorType VT = arg.ValueType as VectorType;
+
+            // Permit scalar floats as well as 1-dimensional float vectors
+            // if this is a 1d texture sample function.
+            if (TextureDimension == 1)
+            {
+                if (arg.ValueType is FloatType)
+                    return true;
+
+                if (VT != null)
+                    return VT.Dimension == 1;
+            }
+
+            if (VT != null)
+                return VT.Dimension == TextureDimension;
+
+            return false;
+        }
+
+        bool VerifyArgs(Value[] args)
+        {
+            if (HasMandatoryDdxDdy)
+                return args.Length == 4;
+
+            if (HasDdxDdy)
+                return args.Length == 4 || args.Length == 2;
+
+            return args.Length == 2;
+        }
+
+        public override bool IsValidCall(Value[] args)
+        {
+            if (!VerifyArgs(args))
+                return false;
+
+            if (!(args[0].ValueType is SamplerType))
+                return false;
+
+            if (!VerifyDimensions(args[1]))
+                return false;
+
+            if (HasDdxDdy)
+                if (!VerifyDimensions(args[2]) || !VerifyDimensions(args[3]))
+                    return false;
+
+            return true;
+        }
+
+        public override Type GetReturnType(Value[] args)
+        {
+            return TypeRegistry.GetVectorType(TypeRegistry.GetFloatType(), 4);
+        }
+
+    }
+    #endregion
+
+    #region 1D samplers
+    class Tex1D : TexBase { public Tex1D() : base("tex1D", 1, true, false) { } }
+    class Tex1DBias : TexBase { public Tex1DBias() : base("tex1Dbias", 1, false, false) { } }
+    class Tex1DGrad : TexBase { public Tex1DGrad() : base("tex1Dgrad", 1, true, true) { } }
+    class Tex1DLod : TexBase { public Tex1DLod() : base("tex1Dlod", 1, false, false) { } }
+    class Tex1DProj : TexBase { public Tex1DProj() : base("tex1Dproj", 1, false, false) { } }
+    #endregion
+
+    #region 2D samplers
+    class Tex2D : TexBase { public Tex2D() : base("tex2D", 2, true, false) { } }
+    class Tex2DBias : TexBase { public Tex2DBias() : base("tex2Dbias", 2, false, false) { } }
+    class Tex2DGrad : TexBase { public Tex2DGrad() : base("tex2Dgrad", 2, true, true) { } }
+    class Tex2DLod : TexBase { public Tex2DLod() : base("tex2Dlod", 2, false, false) { } }
+    class Tex2DProj : TexBase { public Tex2DProj() : base("tex2Dproj", 2, false, false) { } }
+    #endregion
+
+    #region 3D samplers
+    class Tex3D : TexBase { public Tex3D() : base("tex3D", 3, true, false) { } }
+    class Tex3DBias : TexBase { public Tex3DBias() : base("tex3Dbias", 3, false, false) { } }
+    class Tex3DGrad : TexBase { public Tex3DGrad() : base("tex3Dgrad", 3, true, true) { } }
+    class Tex3DLod : TexBase { public Tex3DLod() : base("tex3Dlod", 3, false, false) { } }
+    class Tex3DProj : TexBase { public Tex3DProj() : base("tex3Dproj", 3, false, false) { } }
+    #endregion
+
+    #region Cube samplers
+    class TexCUBE : TexBase { public TexCUBE() : base("texCUBE", 3, true, false) { } }
+    class TexCUBEBias : TexBase { public TexCUBEBias() : base("texCUBEbias", 3, false, false) { } }
+    class TexCUBEGrad : TexBase { public TexCUBEGrad() : base("texCUBEgrad", 3, true, true) { } }
+    class TexCUBELod : TexBase { public TexCUBELod() : base("texCUBElod", 3, false, false) { } }
+    class TexCUBEProj : TexBase { public TexCUBEProj() : base("texCUBEproj", 3, false, false) { } }
+    #endregion
+
     #endregion
 }
