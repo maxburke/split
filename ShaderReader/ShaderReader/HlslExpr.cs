@@ -304,6 +304,11 @@ namespace Hlsl
 
     class CallExpr : Expr
     {
+        Function Fn;
+        Value[] Parameters;
+        Value FnValue;
+        static int Counter;
+
         public override bool HasValue()
         {
             return true;
@@ -311,23 +316,38 @@ namespace Hlsl
 
         public override Value Value
         {
-            get { throw new NotImplementedException(); }
+            get 
+            {
+                if (FnValue == null)
+                    FnValue = new Value(Fn.GetReturnType(Parameters), string.Format("fnResult{0}", Counter++));
+
+                return FnValue;
+            }
         }
 
         public CallExpr(Function fn, Expr[] parameters)
         {
-            Value[] fnValues = new Value[parameters.Length];
+            Fn = fn;
+            Parameters = new Value[parameters.Length];
 
             for (int i = 0; i < parameters.Length; ++i)
-                fnValues[i] = parameters[i].Value;
+                Parameters[i] = parameters[i].Value;
 
-            if (!fn.IsValidCall(fnValues))
-                throw new ShaderDomException("Number of parameters doesn't match function arity!");
+            if (!fn.IsValidCall(Parameters))
+                throw new ShaderDomException(string.Format("Call to {0} is not valid!", fn.Name));
         }
 
         public override string ToString()
         {
-            throw new NotImplementedException();
+            StringBuilder SB = new StringBuilder();
+
+            SB.AppendFormat("{0} {1} = {2}(", FnValue.ValueType.TypeName(), FnValue, Fn.Name);
+
+            for (int i = 0; i < Parameters.Length; ++i)
+                SB.AppendFormat("{0}{1}", Parameters[i], i < Parameters.Length - 1 ? ", " : "");
+
+            SB.Append(");");
+            return SB.ToString();
         }
     }
 
@@ -365,6 +385,76 @@ namespace Hlsl
         public override string ToString()
         {
             return string.Format("{0} = {1};", LhsValue.Name, RhsValue.Name);
+        }
+    }
+
+    class LiteralExpr : Expr
+    {
+        Type LiteralType;
+        object[] Initializers;
+
+        /// <summary>
+        /// Default instance of LiteralExpr creates a literal zero for the specified type.
+        /// </summary>
+        /// <param name="literalType"></param>
+        public LiteralExpr(Type literalType)
+        {
+            if (literalType is SamplerType)
+                throw new ShaderDomException("Unable to specify literal sampler value.");
+
+            LiteralType = literalType;
+            object initializer = null;
+            Type baseScalarType = literalType.GetScalarBaseType();
+
+            if (baseScalarType is BoolType)
+                initializer = (object)false;
+            else if (baseScalarType is IntType || baseScalarType is UIntType)
+                initializer = (object)0;
+            else if (baseScalarType is FloatType)
+                initializer = (object)(0.0f);
+
+            Initializers = new object[literalType.TotalElements];
+            for (int i = 0; i < literalType.TotalElements; ++i)
+                Initializers[i] = initializer;
+        }
+
+        public LiteralExpr(Type literalType, object[] initializers)
+        {
+            LiteralType = literalType;
+            Initializers = initializers;
+
+            if (initializers == null || initializers.Length == 0)
+                throw new ShaderDomException("Literal initializer must be specified.");
+        }
+
+        public override Value Value
+        {
+            get 
+            {
+                return new Value(LiteralType, ToString());
+            }
+        }
+
+        public override bool HasValue()
+        {
+            return false;
+        }
+
+        public override string ToString()
+        {
+            if (LiteralType is ScalarType)
+            {
+                return Initializers[0].ToString();
+            }
+            else
+            {
+                StringBuilder SB = new StringBuilder();
+                SB.AppendFormat("{0}(", LiteralType.TypeName());
+                for (int i = 0; i < Initializers.Length; ++i)
+                    SB.AppendFormat("{0}{1}", Initializers[i], i < Initializers.Length - 1 ? ", " : "");
+                SB.Append(")");
+                return SB.ToString();
+            }
         }
     }
 
@@ -408,6 +498,16 @@ namespace Hlsl
         public override Value Value
         {
             get { return FieldValue; }
+        }
+
+        public StructMemberExpr(Value value, int fieldIndex)
+        {
+            StructType structType = value.ValueType as StructType;
+            if (structType == null)
+                throw new ShaderDomException("StructMemberExpr only valid on structs!");
+
+            StructField field = structType.Fields[fieldIndex];
+            FieldValue = new Value(field.FieldType, value.Name + "." + field.FieldName);
         }
 
         public StructMemberExpr(Value value, StructField field)

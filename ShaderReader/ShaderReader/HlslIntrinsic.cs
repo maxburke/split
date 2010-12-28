@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
-namespace Hlsl
+namespace Hlsl.Intrinsics
 {
     #region Data Transformation Functions
 
@@ -82,7 +82,6 @@ namespace Hlsl
     {
         public Clip() : base("clip") 
         {
-            throw new NotImplementedException();
         }
 
         public override bool IsValidCall(Value[] args)
@@ -796,7 +795,7 @@ namespace Hlsl
             try
             {
                 foreach (Value arg in args)
-                    if (!(arg.ValueType.GetScalarBaseType() is FloatType) || !(arg.ValueType.GetScalarBaseType() is IntType))
+                    if (!(arg.ValueType.GetScalarBaseType() is FloatType) && !(arg.ValueType.GetScalarBaseType() is IntType))
                         return null;
             }
             catch (Exception)

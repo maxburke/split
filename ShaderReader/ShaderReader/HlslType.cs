@@ -86,6 +86,9 @@ namespace Hlsl
         }
 
         public abstract Type GetScalarBaseType();
+
+        public abstract int Dimension { get; }
+        public abstract int TotalElements { get; }
     }
 
     abstract class ScalarType : Type
@@ -95,6 +98,16 @@ namespace Hlsl
         public override Type GetScalarBaseType()
         {
             return this;
+        }
+
+        public override int Dimension
+        {
+            get { return 1; }
+        }
+
+        public override int TotalElements
+        {
+            get { return 1; }
         }
     }
 
@@ -151,6 +164,16 @@ namespace Hlsl
         {
             throw new NotImplementedException();
         }
+
+        public override int Dimension
+        {
+            get { throw new ShaderDomException("Invalid operation on SamplerType."); }
+        }
+
+        public override int TotalElements
+        {
+            get { throw new ShaderDomException("Invalid operation on SamplerType."); }
+        }
     }
 
     abstract class DerivedType : Type
@@ -161,7 +184,7 @@ namespace Hlsl
     class VectorType : DerivedType
     {
         public readonly Type BaseType;
-        public readonly int Dimension;
+        int VectorDimension;
 
         public VectorType(Type baseType, int dimension)
         {
@@ -169,24 +192,34 @@ namespace Hlsl
                 throw new ShaderDomException("Vector base type must be a scalar!");
 
             BaseType = baseType;
-            Dimension = dimension;
+            VectorDimension = dimension;
         }
 
         public override string TypeName()
         {
-            return BaseType.TypeName() + Dimension.ToString();
+            return BaseType.TypeName() + VectorDimension.ToString();
         }
 
         public override Type GetScalarBaseType()
         {
             return BaseType;
         }
+
+        public override int TotalElements
+        {
+            get { return Dimension; }
+        }
+
+        public override int Dimension
+        {
+            get { return VectorDimension; }
+        }
     }
 
     class MatrixType : DerivedType
     {
         public readonly Type BaseType;
-        public readonly int Dimension;
+        int MatrixDimension;
 
         public MatrixType(Type baseType, int dimension)
         {
@@ -194,17 +227,27 @@ namespace Hlsl
                 throw new ShaderDomException("Matrix base type must be a vector!");
 
             BaseType = baseType;
-            Dimension = dimension;
+            MatrixDimension = dimension;
         }
 
         public override string TypeName()
         {
-            return BaseType.TypeName() + "x" + Dimension.ToString();
+            return BaseType.TypeName() + "x" + MatrixDimension.ToString();
         }
 
         public override Type GetScalarBaseType()
         {
             return ((DerivedType)BaseType).GetScalarBaseType();
+        }
+
+        public override int Dimension
+        {
+            get { return MatrixDimension; }
+        }
+
+        public override int TotalElements
+        {
+            get { return MatrixDimension * ((VectorType)BaseType).Dimension; }
         }
     }
 
@@ -245,6 +288,16 @@ namespace Hlsl
         public override Type GetScalarBaseType()
         {
             throw new NotImplementedException();
+        }
+
+        public override int Dimension
+        {
+            get { throw new ShaderDomException("Invalid operation on StructType."); }
+        }
+
+        public override int TotalElements
+        {
+            get { throw new ShaderDomException("Invalid operation on StructType."); }
         }
     }
 

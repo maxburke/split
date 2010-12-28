@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace Hlsl
 {
@@ -30,7 +32,7 @@ namespace Hlsl
             {
                 using (HlslProgram program = new HlslProgram())
                 {
-                    return program.ToString();
+                    return program.EmitRawShaderCode();
                 }
             }
             catch (ShaderDomException)
@@ -54,9 +56,8 @@ namespace Hlsl
                 udf.AddExpr(output);
                 udf.AddExpr(new ReturnExpr(output));
 
-                program.SetShader(ShaderType.VertexShader, udf, ShaderProfile.vs_3_0);
-                program.SetShader(ShaderType.PixelShader, udf, ShaderProfile.ps_3_0);
-                return program.ToString();
+                program.AddFunction(udf);
+                return program.EmitRawShaderCode();
             }
         }
 
@@ -75,11 +76,20 @@ namespace Hlsl
                     new StructMemberExpr(output.Value, "position").Value, 
                     new StructMemberExpr(argValue, "position").Value));
 
-                udf.AddExpr(new ReturnExpr(output));
-                program.SetShader(ShaderType.VertexShader, udf, ShaderProfile.vs_3_0);
-                program.SetShader(ShaderType.PixelShader, udf, ShaderProfile.ps_3_0);
+                StructMemberExpr[] otherMembers = new StructMemberExpr[] {
+                    new StructMemberExpr(output.Value, 1),
+                    new StructMemberExpr(output.Value, 2),
+                    new StructMemberExpr(output.Value, 3),
+                    new StructMemberExpr(output.Value, 4),
+                };
 
-                return program.ToString();
+                foreach (StructMemberExpr SME in otherMembers)
+                    udf.AddExpr(new AssignmentExpr(SME.Value, new LiteralExpr(SME.Value.ValueType).Value));
+
+                udf.AddExpr(new ReturnExpr(output));
+
+                program.AddFunction(udf);
+                return program.EmitRawShaderCode();
             }
         }
 
@@ -91,37 +101,75 @@ namespace Hlsl
                 Type f1 = TypeRegistry.GetFloatType();
                 Type f4 = TypeRegistry.GetVectorType(f1, 4);
 
-                DeclExpr wvpMatrixDecl = new DeclExpr(TypeRegistry.GetMatrixType(f4, 4));
+                DeclExpr wvpMatrixDecl = new DeclExpr(TypeRegistry.GetMatrixType(f4, 4), "WorldViewProjection");
                 program.AddGlobal(wvpMatrixDecl);
 
                 UserDefinedFunction udf = new UserDefinedFunction("vs_main");
                 Value argValue = udf.AddArgument(vsData);
 
-                Function fn = program.GetFunctionByName("mul");
-                udf.AddExpr(new CallExpr(...));
-
                 DeclExpr output = new DeclExpr(vsData);
                 udf.AddExpr(output);
-                udf.AddExpr(new AssignmentExpr(
-                    new StructMemberExpr(output.Value, "position").Value,
-                    new StructMemberExpr(argValue, "position").Value));
+
+                // Initialize the position element -- multiply input position by WVP matrix.
+                Function fn = program.GetFunctionByName("mul");
+                CallExpr wvpMul = new CallExpr(fn, new Expr[] { new StructMemberExpr(argValue, "position"), wvpMatrixDecl });
+                udf.AddExpr(wvpMul);
+                udf.AddExpr(new AssignmentExpr(new StructMemberExpr(output.Value, "position").Value, wvpMul.Value));
+
+                // Initialize the rest of the struct to zero.
+                StructMemberExpr[] otherMembers = new StructMemberExpr[] {
+                    new StructMemberExpr(output.Value, 1),
+                    new StructMemberExpr(output.Value, 2),
+                    new StructMemberExpr(output.Value, 3),
+                    new StructMemberExpr(output.Value, 4),
+                };
+
+                foreach (StructMemberExpr SME in otherMembers)
+                    udf.AddExpr(new AssignmentExpr(SME.Value, new LiteralExpr(SME.Value.ValueType).Value));
 
                 udf.AddExpr(new ReturnExpr(output));
-                program.SetShader(ShaderType.VertexShader, udf, ShaderProfile.vs_3_0);
-                program.SetShader(ShaderType.PixelShader, udf, ShaderProfile.ps_3_0);
 
-                return program.ToString();
+                program.AddFunction(udf);
+                return program.EmitRawShaderCode();
             }
+        }
+
+        public static bool Validate(string shaderCode, string entryPoint, Microsoft.Xna.Framework.Graphics.ShaderProfile profile)
+        {
+            CompiledShader CS = ShaderCompiler.CompileFromSource(shaderCode, 
+                new CompilerMacro[] { }, 
+                null, 
+                CompilerOptions.None, 
+                entryPoint, 
+                profile, 
+                TargetPlatform.Windows);
+
+            if (!CS.Success)
+            {
+                Console.WriteLine("Failed to compile shader:");
+                Console.WriteLine("{0}", shaderCode);
+                Console.WriteLine("-------------------------");
+                Console.WriteLine("{0}", CS.ErrorsAndWarnings);
+            }
+
+            return CS.Success;
+        }
+
+        public static bool Validate(string shaderCode)
+        {
+            return Validate(shaderCode, "vs_main", Microsoft.Xna.Framework.Graphics.ShaderProfile.VS_3_0);
         }
 
         public static bool RunTests()
         {
-            string test1 = EmptyProgramTest();
-            string test2 = ArgAssignedToOutputTest();
-            string test3 = SimpleStructMemberTest();
-            string test4 = SimpleFunctionCallTest();
+            bool result = true;
 
-            return false;
+            result &= EmptyProgramTest() == null;
+            result &= Validate(ArgAssignedToOutputTest());
+            result &= Validate(SimpleStructMemberTest());
+            result &= Validate(SimpleFunctionCallTest());
+
+            return result;
         }
     }
 }

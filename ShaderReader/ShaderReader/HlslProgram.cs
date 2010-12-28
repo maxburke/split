@@ -178,12 +178,59 @@ namespace Hlsl
     {
         List<DeclExpr> Globals = new List<DeclExpr>();
         List<Function> Functions = new List<Function>();
+        List<UserDefinedFunction> UserFunctions = new List<UserDefinedFunction>();
         Pair<ShaderProfile, Function>[] Shaders = new Pair<ShaderProfile, Function>[(int)ShaderType.NUM_SHADER_TYPES];
         public TypeRegistry Types = new TypeRegistry();
 
         public HlslProgram()
         {
-            // Populate built-in-functions here
+            Functions.AddRange(Intrinsics.DataTransformFunction.CreateDataTransformFunctions());
+            Functions.Add(new Intrinsics.Clip());
+            Functions.Add(new Intrinsics.Atan2());
+            Functions.Add(new Intrinsics.Determinant());
+            Functions.Add(new Intrinsics.Distance());
+            Functions.Add(new Intrinsics.Dot());
+            Functions.Add(new Intrinsics.Faceforward());
+            Functions.Add(new Intrinsics.Frexp());
+            Functions.Add(new Intrinsics.Ldexp());
+            Functions.Add(new Intrinsics.Length());
+            Functions.Add(new Intrinsics.Lerp());
+            Functions.Add(new Intrinsics.Lit());
+            Functions.Add(new Intrinsics.Max());
+            Functions.Add(new Intrinsics.Min());
+            Functions.Add(new Intrinsics.Noise());
+            Functions.Add(new Intrinsics.Normalize());
+            Functions.Add(new Intrinsics.Pow());
+            Functions.Add(new Intrinsics.Reflect());
+            Functions.Add(new Intrinsics.Refract());
+            Functions.Add(new Intrinsics.Sincos());
+            Functions.Add(new Intrinsics.Smoothstep());
+            Functions.Add(new Intrinsics.Transpose());
+            Functions.Add(new Intrinsics.Trunc());
+            Functions.Add(new Intrinsics.Mul());
+            Functions.Add(new Intrinsics.Isfinite());
+            Functions.Add(new Intrinsics.Isinf());
+            Functions.Add(new Intrinsics.Isnan());
+            Functions.Add(new Intrinsics.Tex1D());
+            Functions.Add(new Intrinsics.Tex1DBias());
+            Functions.Add(new Intrinsics.Tex1DGrad());
+            Functions.Add(new Intrinsics.Tex1DLod());
+            Functions.Add(new Intrinsics.Tex1DProj());
+            Functions.Add(new Intrinsics.Tex2D());
+            Functions.Add(new Intrinsics.Tex2DBias());
+            Functions.Add(new Intrinsics.Tex2DGrad());
+            Functions.Add(new Intrinsics.Tex2DLod());
+            Functions.Add(new Intrinsics.Tex2DProj());
+            Functions.Add(new Intrinsics.Tex3D());
+            Functions.Add(new Intrinsics.Tex3DBias());
+            Functions.Add(new Intrinsics.Tex3DGrad());
+            Functions.Add(new Intrinsics.Tex3DLod());
+            Functions.Add(new Intrinsics.Tex3DProj());
+            Functions.Add(new Intrinsics.TexCUBE());
+            Functions.Add(new Intrinsics.TexCUBEBias());
+            Functions.Add(new Intrinsics.TexCUBEGrad());
+            Functions.Add(new Intrinsics.TexCUBELod());
+            Functions.Add(new Intrinsics.TexCUBEProj());
         }
 
         public Function GetFunctionByName(string name)
@@ -197,8 +244,11 @@ namespace Hlsl
 
         public void AddFunction(UserDefinedFunction function)
         {
-            if (!Functions.Contains(function))
-                Functions.Add(function);
+            if (Functions.Contains(function))
+                throw new ShaderDomException(string.Format("Function {0} already exists!", function.Name));
+
+            Functions.Add(function);
+            UserFunctions.Add(function);
         }
 
         public void AddGlobal(DeclExpr globalVariableDecl)
@@ -208,11 +258,13 @@ namespace Hlsl
 
         public void SetShader(ShaderType type, UserDefinedFunction function, ShaderProfile profile)
         {
-            AddFunction(function);
+            if (!UserFunctions.Contains(function))
+                AddFunction(function);
+
             Shaders[(int)type] = new Pair<ShaderProfile, Function>(profile, function);
         }
 
-        public override string ToString()
+        StringBuilder EmitRawShaderCodeToBuilder()
         {
             StringBuilder SB = new StringBuilder();
 
@@ -226,8 +278,20 @@ namespace Hlsl
 
             SB.AppendLine();
 
-            foreach (Function fn in Functions)
+            foreach (Function fn in UserFunctions)
                 SB.AppendLine(fn.ToString());
+
+            return SB;
+        }
+
+        public string EmitRawShaderCode()
+        {
+            return EmitRawShaderCodeToBuilder().ToString();
+        }
+
+        public string EmitEffect()
+        {
+            StringBuilder SB = EmitRawShaderCodeToBuilder();
 
             SB.AppendLine("technique defaultTechnique {");
             SB.AppendLine("    pass P0 {");
@@ -254,6 +318,7 @@ namespace Hlsl
         {
             Globals = null;
             Functions = null;
+            UserFunctions = null;
             Shaders = null;
             Types = null;
         }
