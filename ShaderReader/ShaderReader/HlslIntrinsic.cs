@@ -30,7 +30,7 @@ namespace Hlsl
             return args[0].ValueType;
         }
 
-        public static Function[] CreateOutputTypeMatchesInputFunctions()
+        public static Function[] CreateDataTransformFunctions()
         {
             string[] fnNames = new string[] {
                 "abs",
