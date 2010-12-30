@@ -1024,9 +1024,6 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
 
         static void Main(string[] args)
         {
-            if (!Hlsl.Test.RunTests())
-                return;
-
             if (args.Length == 0)
                 return;
 

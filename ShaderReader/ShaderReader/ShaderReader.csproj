@@ -50,14 +50,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="HlslExpr.cs" />
-    <Compile Include="HlslIntrinsic.cs" />
-    <Compile Include="HlslProgram.cs" />
-    <Compile Include="HlslType.cs" />
-    <Compile Include="HlslValue.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ShaderDomTest.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
