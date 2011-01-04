@@ -7,9 +7,12 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Hlsl;
+using Hlsl.Expressions;
 
 namespace ShaderReader
 {
+    /*
     class ShaderBuilder__refactor_this_crud
     {
         StringBuilder mShaderBuilder = new StringBuilder();
@@ -196,8 +199,9 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
             return mFinalShader;
         }
     }
+     */
 
-    class Shader
+    class Shader : IDisposable
     {
         public enum CullMode
         {
@@ -230,7 +234,7 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
         string mName;
         public CullMode mCullMode = CullMode.Front;
         public List<string> mTextures = new List<string>();
-        public ShaderBuilder__refactor_this_crud mShaderBuilder = new ShaderBuilder__refactor_this_crud();
+        public HlslProgram mProgram = new HlslProgram();
         public uint mFlags;
 
         public void SetFlag(Flag f)
@@ -241,11 +245,168 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
         public Shader(string name)
         {
             mName = name;
+            ShaderInit();
+        }
+
+        void ShaderInit()
+        {
+            Hlsl.Type f = TypeRegistry.GetFloatType();
+            Hlsl.Type f2 = TypeRegistry.GetVectorType(f, 2);
+            Hlsl.Type f3 = TypeRegistry.GetVectorType(f, 3);
+            Hlsl.Type f4 = TypeRegistry.GetVectorType(f, 4);
+
+            Hlsl.Type vsData = mProgram.Types.GetStructType("vs_data", new StructField[] {
+                    new StructField(f4, "position", new Semantic(Semantic.SemanticType.POSITION)),
+                    new StructField(f2, "surfaceST", new Semantic(Semantic.SemanticType.TEXCOORD, 0)),
+                    new StructField(f2, "lightmapST", new Semantic(Semantic.SemanticType.TEXCOORD, 1)),
+                    new StructField(f3, "normal", new Semantic(Semantic.SemanticType.NORMAL)),
+                    new StructField(f4, "color", new Semantic(Semantic.SemanticType.COLOR))
+                });
+
+            Function sin = mProgram.GetFunctionByName("sin");
+            Function asin = mProgram.GetFunctionByName("asin");
+            Function sign = mProgram.GetFunctionByName("sign");
+            Function floor = mProgram.GetFunctionByName("floor");
+            Function abs = mProgram.GetFunctionByName("abs");
+            Expr PI = new LiteralExpr(f, 3.1415926535f);
+            Expr TwoPI = new LiteralExpr(f, 2 * 3.1415926535f);
+
+            #region SinWave
+            {
+                UserDefinedFunction sinWave = new UserDefinedFunction("SinWave");
+                Value t = sinWave.AddArgument(f);
+                Value t0 = sinWave.AddArgument(f);
+                Value amp = sinWave.AddArgument(f);
+                Value phase = sinWave.AddArgument(f);
+                Value freq = sinWave.AddArgument(f);
+
+                Expr t1 = new BinaryExpr(t, TwoPI.Value, OpCode.MUL);
+                Expr sinParam = new BinaryExpr(new BinaryExpr(t1.Value, freq, OpCode.MUL).Value, phase, OpCode.ADD);
+                Expr sinExpr = new CallExpr(sin, new Expr[] { sinParam });
+                sinWave.AddExpr(sinExpr);
+
+                Expr returnExpr = new ReturnExpr(
+                    new BinaryExpr(
+                        new BinaryExpr(sinExpr.Value, amp, OpCode.MUL).Value,
+                        t0, OpCode.ADD));
+
+                sinWave.AddExpr(returnExpr);
+                mProgram.AddFunction(sinWave);
+            }
+            #endregion
+
+            #region SquareWave
+            {
+                UserDefinedFunction squareWave = new UserDefinedFunction("SquareWave");
+                Value t = squareWave.AddArgument(f);
+                Value t0 = squareWave.AddArgument(f);
+                Value amp = squareWave.AddArgument(f);
+                Value phase = squareWave.AddArgument(f);
+                Value freq = squareWave.AddArgument(f);
+
+                Expr t1 = new BinaryExpr(t, TwoPI.Value, OpCode.MUL);
+                Expr sinParam = new BinaryExpr(new BinaryExpr(t1.Value, freq, OpCode.MUL).Value, phase, OpCode.ADD);
+                Expr sinExpr = new CallExpr(sin, new Expr[] { sinParam });
+                squareWave.AddExpr(sinExpr);
+
+                Expr signExpr = new CallExpr(sign, new Expr[] { sinExpr });
+                squareWave.AddExpr(signExpr);
+
+                Expr returnExpr = new ReturnExpr(
+                    new BinaryExpr(new BinaryExpr(signExpr.Value, amp, OpCode.MUL).Value,
+                        t0, OpCode.ADD));
+                squareWave.AddExpr(returnExpr);
+                mProgram.AddFunction(squareWave);
+            }
+            #endregion
+
+            #region TriangleWave
+            {
+                UserDefinedFunction triangleWave = new UserDefinedFunction("TriangleWave");
+                Value t = triangleWave.AddArgument(f);
+                Value t0 = triangleWave.AddArgument(f);
+                Value amp = triangleWave.AddArgument(f);
+                Value phase = triangleWave.AddArgument(f);
+                Value freq = triangleWave.AddArgument(f);
+
+                Expr t1 = new BinaryExpr(t, PI.Value, OpCode.MUL);
+                Expr twoOverPi = new BinaryExpr(new LiteralExpr(f, 2.0f).Value, PI.Value, OpCode.DIV);
+
+                Expr sinExpr = new CallExpr(sin, new Expr[] { t1 });
+                triangleWave.AddExpr(sinExpr);
+
+                Expr asinExpr = new CallExpr(asin, new Expr[] { sinExpr });
+                triangleWave.AddExpr(asinExpr);
+
+                Expr absExpr = new CallExpr(abs, new Expr[] { 
+                    new BinaryExpr(twoOverPi.Value, asinExpr.Value, OpCode.MUL) });
+                triangleWave.AddExpr(absExpr);
+
+                triangleWave.AddExpr(new ReturnExpr(absExpr));
+                mProgram.AddFunction(triangleWave);
+            }
+            #endregion
+
+            #region SawtoothWave
+            {
+                UserDefinedFunction sawtoothWave = new UserDefinedFunction("SawtoothWave");
+                Value t = sawtoothWave.AddArgument(f);
+                Value t0 = sawtoothWave.AddArgument(f);
+                Value amp = sawtoothWave.AddArgument(f);
+                Value phase = sawtoothWave.AddArgument(f);
+                Value freq = sawtoothWave.AddArgument(f);
+
+                Expr t1 = new BinaryExpr(t, TwoPI.Value, OpCode.MUL);
+                Expr sinParam = new BinaryExpr(new BinaryExpr(t1.Value, freq, OpCode.MUL).Value, phase, OpCode.ADD);
+                Expr sinExpr = new CallExpr(sin, new Expr[] { sinParam });
+                sawtoothWave.AddExpr(sinExpr);
+
+                Expr returnExpr = new ReturnExpr(
+                    new BinaryExpr(
+                        new BinaryExpr(sinExpr.Value, amp, OpCode.MUL).Value,
+                        t0, OpCode.ADD));
+
+                sawtoothWave.AddExpr(returnExpr);
+                mProgram.AddFunction(sawtoothWave);
+            }
+            #endregion
+
+            #region InverseSawtooth
+            {
+                UserDefinedFunction inverseSawtooth = new UserDefinedFunction("InverseSawtooth");
+                Value t = inverseSawtooth.AddArgument(f);
+                Value t0 = inverseSawtooth.AddArgument(f);
+                Value amp = inverseSawtooth.AddArgument(f);
+                Value phase = inverseSawtooth.AddArgument(f);
+                Value freq = inverseSawtooth.AddArgument(f);
+
+                Expr t1 = new BinaryExpr(t, TwoPI.Value, OpCode.MUL);
+                Expr sinParam = new BinaryExpr(new BinaryExpr(t1.Value, freq, OpCode.MUL).Value, phase, OpCode.ADD);
+                Expr sinExpr = new CallExpr(sin, new Expr[] { sinParam });
+                inverseSawtooth.AddExpr(sinExpr);
+
+                Expr returnExpr = new ReturnExpr(
+                    new BinaryExpr(
+                        new BinaryExpr(sinExpr.Value, amp, OpCode.MUL).Value,
+                        t0, OpCode.ADD));
+
+                inverseSawtooth.AddExpr(returnExpr);
+                mProgram.AddFunction(inverseSawtooth);
+            }
+            #endregion
+
+
         }
 
         public override string ToString()
         {
             return mName;
+        }
+
+        public void Dispose()
+        {
+            mProgram.Dispose();
+            mProgram = null;
         }
     }
 
@@ -263,7 +424,7 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
 
         public string GetHlsl()
         {
-            return mShader.mShaderBuilder.ToString();
+            return mShader.mProgram.EmitEffect();
         }
 
         class TokenParser
@@ -344,10 +505,10 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
                         string phaseVal = NextToken();
                         string freqVal = NextToken();
 
-                        mShader.mShaderBuilder.AddVSLine(
-                            string.Format("float4 deformVertexesWavePosition = {0}({1}, {2}, {3}, {4}) * {5} * float4(input.normal, 1) + {6};",
-                                func, baseVal, ampVal, phaseVal, freqVal, div, mShader.mShaderBuilder.LastVSValue),
-                            "deformVertexesWavePosition");
+                        //mShader.mShaderBuilder.AddVSLine(
+                        //    string.Format("float4 deformVertexesWavePosition = {0}({1}, {2}, {3}, {4}) * {5} * float4(input.normal, 1) + {6};",
+                        //        func, baseVal, ampVal, phaseVal, freqVal, div, mShader.mShaderBuilder.LastVSValue),
+                        //    "deformVertexesWavePosition");
                     }
                     break;
                 case "normal":
@@ -374,10 +535,10 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
                         string phaseVal = NextToken();
                         string freqVal = NextToken();
 
-                        mShader.mShaderBuilder.AddVSLine(
-                            string.Format("float4 deformVertexesMovePosition = float4({0}, {1}, {2}, 1) * {3}({4}, {5}, {6}, {7}) + {8};",
-                            x, y, z, func, baseVal, ampVal, phaseVal, freqVal, mShader.mShaderBuilder.LastVSValue),
-                            "deformVertexesMovePosition");
+                        //mShader.mShaderBuilder.AddVSLine(
+                        //    string.Format("float4 deformVertexesMovePosition = float4({0}, {1}, {2}, 1) * {3}({4}, {5}, {6}, {7}) + {8};",
+                        //    x, y, z, func, baseVal, ampVal, phaseVal, freqVal, mShader.mShaderBuilder.LastVSValue),
+                        //    "deformVertexesMovePosition");
                     }
                     break;
                 case "autosprite":
@@ -495,7 +656,7 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
             mShader.mTextures.Add(textureMap);
 
             bool isLightmap = textureMap.ToLower() == "$lightmap";
-            string sampler = mShader.mShaderBuilder.AddSampler(isLightmap);
+            //string sampler = mShader.mShaderBuilder.AddSampler(isLightmap);
         }
 
         void ClampMap() 
@@ -503,7 +664,7 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
             string textureMap = NextToken();
             mShader.mTextures.Add(textureMap);
             bool isLightmap = textureMap.ToLower() == "$lightmap";
-            string sampler = mShader.mShaderBuilder.AddSampler(isLightmap);
+            //string sampler = mShader.mShaderBuilder.AddSampler(isLightmap);
 
             // TODO: add more texture setup code here.
         }
@@ -993,22 +1154,21 @@ float InverseSawtooth(float t, float base, float amp, float phase, float freq) {
             if (mCurrentEffect == null)
                 return false;
 
-            mShader = new Shader(mCurrentEffect);
+            using (mShader = new Shader(mCurrentEffect))
+            {
 
-            Expect("{");
+                Expect("{");
 
-            ParseGeneralShaderCode();
-            ParseShaderStages();
+                ParseGeneralShaderCode();
+                ParseShaderStages();
 
-            Expect("}");
+                Expect("}");
 
-            string shader = mShader.mShaderBuilder.ToString();
+                //string shader = mShader.mProgram.EmitEffect();
+                string shader = mShader.mProgram.EmitRawShaderCode();
 
-            CompiledShader VS = ShaderCompiler.CompileFromSource(shader,
-                null, null, CompilerOptions.None, "vs_main", ShaderProfile.VS_3_0, TargetPlatform.Windows);
-            CompiledShader PS = ShaderCompiler.CompileFromSource(shader,
-                null, null, CompilerOptions.None, "ps_main", ShaderProfile.PS_3_0, TargetPlatform.Windows);
-
+                Console.WriteLine(shader);
+            }
             return true;
         }
 
