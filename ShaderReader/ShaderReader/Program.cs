@@ -46,7 +46,7 @@ namespace ShaderReader
         string mName;
         public CullMode mCullMode = CullMode.Front;
 
-        public List<string> mTextures = new List<string>();
+        List<string> mTextures = new List<string>();
         public HlslProgram mProgram = new HlslProgram();
         public UserDefinedFunction mVertexShader = new UserDefinedFunction("vs_main");
         public UserDefinedFunction mPixelShader = new UserDefinedFunction("ps_main");
@@ -59,9 +59,15 @@ namespace ShaderReader
         public Expr mVsPositionExpr;
 
         public Expr mPsAccumulatedColor;
+        public Value mSampler;
+        public Expr mTexCoords;
+        public bool mIsClamped;
 
-        public readonly Value mVSInput;
-        public readonly Value mPSInput;
+        public BlendMode mSrcBlend = BlendMode.INVALID;
+        public BlendMode mDestBlend = BlendMode.INVALID;
+
+        public readonly Value mVsInput;
+        public readonly Value mPsInput;
 
         public uint mFlags;
 
@@ -230,36 +236,33 @@ namespace ShaderReader
 
             #region Vertex shader setup
             {
-                mVSInput = mVertexShader.AddArgument(vsData, "input");
+                mVsInput = mVertexShader.AddArgument(vsData, "input");
 
                 mVsOutput = new DeclExpr(vsData, "output");
                 mVertexShader.AddExpr(mVsOutput);
 
-                mVsPositionExpr = new StructMemberExpr(mVSInput, 0);
+                mVsPositionExpr = new StructMemberExpr(mVsInput, 0);
 
                 // Pass through all non-position members of the vertex shader
-                StructMemberExpr[] otherMembers = new StructMemberExpr[] {
-                    new StructMemberExpr(mVsOutput.Value, 1),
-                    new StructMemberExpr(mVsOutput.Value, 2),
-                    new StructMemberExpr(mVsOutput.Value, 3),
-                    new StructMemberExpr(mVsOutput.Value, 4),
-                };
-
-                foreach (StructMemberExpr SME in otherMembers)
-                    mVertexShader.AddExpr(new AssignmentExpr(SME.Value, new LiteralExpr(SME.Value.ValueType).Value));
+                for (int i = 1; i <= 4; ++i)
+                    mVertexShader.AddExpr(new AssignmentExpr(
+                        new StructMemberExpr(mVsOutput.Value, i).Value,
+                        new StructMemberExpr(mVsInput, i).Value));
             }
             #endregion
 
             #region Pixel shader setup
             {
-                mPSInput = mPixelShader.AddArgument(vsData, "input");
-                mPsAccumulatedColor = new LiteralExpr(f4, 0.0f, 0.0f, 0.0f, 0.0f);
+                mPsInput = mPixelShader.AddArgument(vsData, "input");
             }
             #endregion
         }
 
         public Value AddTexture(string texture)
         {
+            if (mTextures.Contains(texture))
+                throw new Exception("That was unexpected.");
+
             mTextures.Add(texture);
             DeclExpr samplerDeclExpr = new DeclExpr(TypeRegistry.GetSamplerType());
             mProgram.AddGlobal(samplerDeclExpr);
@@ -286,6 +289,12 @@ namespace ShaderReader
 
             #region Finalize pixel shader
             {
+                if (mPsAccumulatedColor == null && mTexCoords != null && mSampler != null)
+                {
+                    Function tex2D = mProgram.GetFunctionByName("tex2D");
+                    mPsAccumulatedColor = new CallExpr(tex2D, new Value[] { mSampler, mTexCoords.Value });
+                }
+
                 mPixelShader.AddExpr(new ReturnExpr(mPsAccumulatedColor));
                 mProgram.SetShader(ShaderType.PixelShader, mPixelShader, Hlsl.ShaderProfile.ps_3_0);
             }
@@ -411,7 +420,7 @@ namespace ShaderReader
                         Function mul = mShader.mProgram.GetFunctionByName("mul");
                         Expr mulExpr = new CallExpr(mul, new Expr[] {
                             new BinaryExpr(deformFnCall.Value, new LiteralExpr(floatType, div).Value, OpCode.MUL),
-                            new LiteralExpr(TypeRegistry.GetVectorType(floatType, 4), new StructMemberExpr(mShader.mVSInput, "normal").Value, 1),
+                            new LiteralExpr(TypeRegistry.GetVectorType(floatType, 4), new StructMemberExpr(mShader.mVsInput, "normal").Value, 1),
                         });
 
                         Expr modifiedPosition = new BinaryExpr(
@@ -439,19 +448,37 @@ namespace ShaderReader
                     break;
                 case "move":
                     {
-                        string x = NextToken();
-                        string y = NextToken();
-                        string z = NextToken();
-                        string func = NextTokenLowerCase();
-                        string baseVal = NextToken();
-                        string ampVal = NextToken();
-                        string phaseVal = NextToken();
-                        string freqVal = NextToken();
+                        float x = float.Parse(NextToken());
+                        float y = float.Parse(NextToken());
+                        float z = float.Parse(NextToken());
+                        string func = NextTokenLowerCase() + "wave";
+                        float baseVal = float.Parse(NextToken());
+                        float ampVal = float.Parse(NextToken());
+                        float phaseVal = float.Parse(NextToken());
+                        float freqVal = float.Parse(NextToken());
 
-                        //mShader.mShaderBuilder.AddVSLine(
-                        //    string.Format("float4 deformVertexesMovePosition = float4({0}, {1}, {2}, 1) * {3}({4}, {5}, {6}, {7}) + {8};",
-                        //    x, y, z, func, baseVal, ampVal, phaseVal, freqVal, mShader.mShaderBuilder.LastVSValue),
-                        //    "deformVertexesMovePosition");
+                        Hlsl.Type floatType = TypeRegistry.GetFloatType();
+
+                        Expr positionExpr = new LiteralExpr(TypeRegistry.GetVectorType(floatType, 4), x, y, z, 1.0f);
+
+                        Function fn = mShader.mProgram.GetFunctionByName(func);
+                        Expr moveCall = new CallExpr(fn, new Expr[] {
+                            mShader.mTime,
+                            new LiteralExpr(floatType, baseVal),
+                            new LiteralExpr(floatType, ampVal),
+                            new LiteralExpr(floatType, phaseVal),
+                            new LiteralExpr(floatType, freqVal)
+                        });
+
+                        Function mul = mShader.mProgram.GetFunctionByName("mul");
+                        Expr modifiedPosition = new BinaryExpr(
+                            new CallExpr(mul, new Expr[] { positionExpr, moveCall }).Value,
+                            mShader.mVsPositionExpr.Value,
+                            OpCode.ADD);
+                        DeclExpr modifiedPositionDeclaration = new DeclExpr(modifiedPosition);
+                        modifiedPositionDeclaration.SetConst(true);
+                        mShader.mVertexShader.AddExpr(modifiedPositionDeclaration);
+                        mShader.mVsPositionExpr = modifiedPositionDeclaration;
                     }
                     break;
                 case "autosprite":
@@ -566,20 +593,20 @@ namespace ShaderReader
         void Map() 
         {
             string textureMap = NextToken();
-            mShader.mTextures.Add(textureMap);
 
-            bool isLightmap = textureMap.ToLower() == "$lightmap";
-            //string sampler = mShader.mShaderBuilder.AddSampler(isLightmap);
+            bool isLightmap = textureMap == "$lightmap";
+            mShader.mSampler = mShader.AddTexture(textureMap);
+            mShader.mTexCoords = new StructMemberExpr(mShader.mPsInput, isLightmap ? "lightmapST" : "surfaceST");
         }
 
         void ClampMap() 
         {
             string textureMap = NextToken();
-            mShader.mTextures.Add(textureMap);
-            bool isLightmap = textureMap.ToLower() == "$lightmap";
-            //string sampler = mShader.mShaderBuilder.AddSampler(isLightmap);
 
-            // TODO: add more texture setup code here.
+            bool isLightmap = textureMap == "$lightmap";
+            mShader.mSampler = mShader.AddTexture(textureMap);
+            mShader.mIsClamped = true;
+            mShader.mTexCoords = new StructMemberExpr(mShader.mPsInput, isLightmap ? "lightmapST" : "surfaceST");
         }
 
         void AnimMap() 
@@ -598,7 +625,7 @@ namespace ShaderReader
                     break;
                 }
 
-                mShader.mTextures.Add(token);
+//                mShader.mTexturesAdd(token);
             }
 
             // Todo: Implement this.
@@ -607,25 +634,23 @@ namespace ShaderReader
         void BlendFunc() 
         {
             string blendFunction = NextTokenLowerCase();
-            BlendMode sourceBlend = BlendMode.INVALID;
-            BlendMode destBlend = BlendMode.INVALID;
             bool parsed = false;
 
             switch (blendFunction)
             {
                 case "add":
-                    sourceBlend = BlendMode.GL_ONE;
-                    destBlend = BlendMode.GL_ONE;
+                    mShader.mSrcBlend = BlendMode.GL_ONE;
+                    mShader.mDestBlend = BlendMode.GL_ONE;
                     parsed = true;
                     break;
                 case "blend":
-                    sourceBlend = BlendMode.GL_SRC_ALPHA;
-                    destBlend = BlendMode.GL_ONE_MINUS_SRC_ALPHA;
+                    mShader.mSrcBlend = BlendMode.GL_SRC_ALPHA;
+                    mShader.mDestBlend = BlendMode.GL_ONE_MINUS_SRC_ALPHA;
                     parsed = true;
                     break;
                 case "filter":
-                    sourceBlend = BlendMode.GL_DST_COLOR;
-                    destBlend = BlendMode.GL_ZERO;
+                    mShader.mSrcBlend = BlendMode.GL_DST_COLOR;
+                    mShader.mDestBlend = BlendMode.GL_ZERO;
                     parsed = true;
                     break;
                 default:
@@ -637,36 +662,174 @@ namespace ShaderReader
 
             string sourceBlendToken = blendFunction.ToUpper();
             string destBlendToken = NextToken().ToUpper();
-            sourceBlend = (BlendMode)Enum.Parse(typeof(BlendMode), sourceBlendToken);
-            destBlend = (BlendMode)Enum.Parse(typeof(BlendMode), destBlendToken);
-
-            /// TODO: Add blend-handling code here.
+            mShader.mSrcBlend = (BlendMode)Enum.Parse(typeof(BlendMode), sourceBlendToken);
+            mShader.mDestBlend = (BlendMode)Enum.Parse(typeof(BlendMode), destBlendToken);
         }
 
         void RgbGen() 
         {
+            Function saturate = mShader.mProgram.GetFunctionByName("saturate");
+            Function tex2D = mShader.mProgram.GetFunctionByName("tex2D");
+
+            Expr texCoords = mShader.mIsClamped 
+                ? new CallExpr(saturate, new Expr[] { mShader.mTexCoords })
+                : mShader.mTexCoords;
+            Expr sample = new CallExpr(tex2D, new Value[] { mShader.mSampler, texCoords.Value });
+
+            Expr stageColor = null;
+
             string function = NextTokenLowerCase();
             switch (function)
             {
+                // In the case of identity/identitylighting, the rgbgen function multiplies the input color by 
+                // float4(1, 1, 1, 1) but as that's a nop we just do nothing.
                 case "identitylighting":
                 case "identity":
+                    stageColor = sample;
+                    break;
+
+                // entity/oneminusentity are not used currently.
                 case "entity":
                 case "oneminusentity":
+
                 case "vertex":
+                    {
+                        Expr color = new StructMemberExpr(mShader.mPsInput, "color");
+                        Function mul = mShader.mProgram.GetFunctionByName("mul");
+                        stageColor = new CallExpr(mul, new Expr[] { 
+                            sample,
+                            color
+                        });
+                        break;
+                    }
                 case "oneminusvertex":
+                    {
+                        Expr one = new LiteralExpr(TypeRegistry.GetVectorType(TypeRegistry.GetFloatType(), 4),
+                            1.0f, 1.0f, 1.0f, 1.0f);
+                        Expr color = new BinaryExpr(one.Value,
+                            new StructMemberExpr(mShader.mPsInput, "color").Value,
+                            OpCode.SUB);
+
+                        Function mul = mShader.mProgram.GetFunctionByName("mul");
+                        stageColor = new CallExpr(mul, new Expr[] { 
+                            sample,
+                            color
+                        });
+
+                        break;
+                    }
+
+                // TODO: need source light vector.
                 case "lightingdiffuse":
                     break;
                 case "wave":
                     {
-                        string func = NextTokenLowerCase();
-                        string baseVal = NextToken();
-                        string ampVal = NextToken();
-                        string phaseVal = NextToken();
-                        string freq = NextToken();
+                        string func = NextTokenLowerCase() + "wave";
+                        float baseVal = float.Parse(NextToken());
+                        float ampVal = float.Parse(NextToken());
+                        float phaseVal = float.Parse(NextToken());
+                        float freqVal = float.Parse(NextToken());
+
+                        Hlsl.Type floatType = TypeRegistry.GetFloatType();
+                        Function fn = mShader.mProgram.GetFunctionByName(func);
+                        Expr waveCall = new CallExpr(fn, new Expr[] {
+                            mShader.mTime,
+                            new LiteralExpr(floatType, baseVal),
+                            new LiteralExpr(floatType, ampVal),
+                            new LiteralExpr(floatType, phaseVal),
+                            new LiteralExpr(floatType, freqVal)
+                        });
+
+                        Function mul = mShader.mProgram.GetFunctionByName("mul");
+                        stageColor = new CallExpr(mul, new Expr[] {
+                            waveCall,
+                            sample
+                        });
                     }
                     break;
             }
 
+            stageColor = new DeclExpr(stageColor);
+            mShader.mPixelShader.AddExpr(stageColor);
+
+            mShader.mSampler = null;
+            mShader.mTexCoords = null;
+            mShader.mIsClamped = false;
+
+            Debug.Assert(stageColor != null);
+
+            if (mShader.mPsAccumulatedColor == null)
+            {
+                Debug.Assert(mShader.mSrcBlend == BlendMode.INVALID);
+
+                mShader.mPsAccumulatedColor = stageColor;
+                return;
+            }
+/*
+            Expr sourceBlend = null;
+            Expr destBlend = null;
+            Expr source = stageColor;
+            Expr dest = mShader.mPsAccumulatedColor;
+*/
+            Expr source = stageColor;
+            Expr dest = mShader.mPsAccumulatedColor;
+            Hlsl.Type f4 = TypeRegistry.GetVectorType(TypeRegistry.GetFloatType(), 4);
+
+            switch (mShader.mSrcBlend)
+            {
+                case BlendMode.GL_ONE:
+                    break;
+                case BlendMode.GL_ZERO:
+                    source = new LiteralExpr(f4, 0.0f, 0.0f, 0.0f, 0.0f);
+                    break;
+                case BlendMode.GL_DST_COLOR:
+                    source = mShader.mPsAccumulatedColor;
+                    break;
+                case BlendMode.GL_ONE_MINUS_DST_COLOR:
+                    source = new DeclExpr(new BinaryExpr(
+                        new LiteralExpr(f4, 1.0f, 1.0f, 1.0f, 1.0f).Value, 
+                        mShader.mPsAccumulatedColor.Value, 
+                        OpCode.SUB));
+                    mShader.mPixelShader.AddExpr(source);
+                    break;
+                case BlendMode.GL_SRC_ALPHA:
+                case BlendMode.GL_ONE_MINUS_SRC_ALPHA:
+                default:
+                    throw new Exception("Whachu talkin about, Willis?");
+            }
+
+            switch (mShader.mDestBlend)
+            {
+                case BlendMode.GL_ONE:
+                    break;
+                case BlendMode.GL_ZERO:
+                    dest = new LiteralExpr(f4, 0.0f, 0.0f, 0.0f, 0.0f);
+                    break;
+                case BlendMode.GL_SRC_COLOR:
+                    dest = stageColor;
+                    break;
+                case BlendMode.GL_ONE_MINUS_SRC_COLOR:
+                    dest = new DeclExpr(new BinaryExpr(
+                        new LiteralExpr(f4, 1.0f, 1.0f, 1.0f, 1.0f).Value,
+                        stageColor.Value,
+                        OpCode.SUB));
+                    mShader.mPixelShader.AddExpr(dest);
+                    break;
+                case BlendMode.GL_SRC_ALPHA:
+                case BlendMode.GL_ONE_MINUS_SRC_ALPHA:
+                default:
+                    throw new Exception("Whachu talkin about, Willis?");
+            }
+
+            mShader.mPsAccumulatedColor = new BinaryExpr(source.Value, dest.Value, OpCode.ADD);
+/*
+            mShader.mPsAccumulatedColor = new BinaryExpr(
+                new BinaryExpr(sourceBlend.Value, source.Value, OpCode.MUL).Value,
+                new BinaryExpr(destBlend.Value, dest.Value, OpCode.MUL).Value,
+                OpCode.ADD);
+*/
+            mShader.mSrcBlend = BlendMode.INVALID;
+            mShader.mDestBlend = BlendMode.INVALID;
             /// TODO: Add rgbgen handling code here.
         }
 
