@@ -761,10 +761,8 @@ namespace ShaderReader
 
         void FinalizeTextureStageAndBlend() 
         {
-            if (mCurrentEffect.Contains("protobanner_still"))
-                Debugger.Break();
-
             PerformRgbGen();
+            PerformAlphaGen();
 
             if (mStageColor == null && mTexCoords != null && mSampler != null)
             {
@@ -807,7 +805,7 @@ namespace ShaderReader
                     break;
                 case BlendMode.GL_SRC_ALPHA:
                     source = new DeclExpr(
-                        new BinaryExpr(new SwizzleExpr(source.Value, "zzzz").Value, source.Value, OpCode.MUL));
+                        new BinaryExpr(new SwizzleExpr(source.Value, "wwww").Value, source.Value, OpCode.MUL));
                     mShader.mPixelShader.AddExpr(source);
                     break;
                 case BlendMode.GL_ONE_MINUS_SRC_ALPHA:                    
@@ -815,7 +813,7 @@ namespace ShaderReader
                         new BinaryExpr(
                             new BinaryExpr(
                                 new LiteralExpr(f4, 1.0f, 1.0f, 1.0f, 1.0f).Value, 
-                                new SwizzleExpr(source.Value, "zzzz").Value, 
+                                new SwizzleExpr(source.Value, "wwww").Value, 
                                 OpCode.SUB).Value,
                             source.Value, OpCode.MUL));
                     mShader.mPixelShader.AddExpr(source);
@@ -848,12 +846,12 @@ namespace ShaderReader
                     break;
                 case BlendMode.GL_DST_ALPHA:
                     dest = new DeclExpr(
-                        new BinaryExpr(new SwizzleExpr(dest.Value, "zzzz").Value, dest.Value, OpCode.MUL));
+                        new BinaryExpr(new SwizzleExpr(dest.Value, "wwww").Value, dest.Value, OpCode.MUL));
                     mShader.mPixelShader.AddExpr(dest);
                     break;
                 case BlendMode.GL_SRC_ALPHA:
                     dest = new DeclExpr(
-                        new BinaryExpr(new SwizzleExpr(mStageColor.Value, "zzzz").Value, dest.Value, OpCode.MUL));
+                        new BinaryExpr(new SwizzleExpr(mStageColor.Value, "wwww").Value, dest.Value, OpCode.MUL));
                     mShader.mPixelShader.AddExpr(dest);
                     break;
                 case BlendMode.GL_ONE_MINUS_DST_ALPHA:
@@ -861,7 +859,7 @@ namespace ShaderReader
                         new BinaryExpr(
                             new BinaryExpr(
                                 new LiteralExpr(f4, 1.0f, 1.0f, 1.0f, 1.0f).Value,
-                                new SwizzleExpr(dest.Value, "zzzz").Value,
+                                new SwizzleExpr(dest.Value, "wwww").Value,
                                 OpCode.SUB).Value,
                             dest.Value, OpCode.MUL));
                     mShader.mPixelShader.AddExpr(dest);
@@ -871,7 +869,7 @@ namespace ShaderReader
                         new BinaryExpr(
                             new BinaryExpr(
                                 new LiteralExpr(f4, 1.0f, 1.0f, 1.0f, 1.0f).Value,
-                                new SwizzleExpr(mStageColor.Value, "zzzz").Value,
+                                new SwizzleExpr(mStageColor.Value, "wwww").Value,
                                 OpCode.SUB).Value,
                             dest.Value, OpCode.MUL));
                     mShader.mPixelShader.AddExpr(dest);
@@ -882,12 +880,7 @@ namespace ShaderReader
 
             if (!skipCombine)
                 mShader.mPsAccumulatedColor = new BinaryExpr(source.Value, dest.Value, OpCode.ADD);
-/*
-            mShader.mPsAccumulatedColor = new BinaryExpr(
-                new BinaryExpr(sourceBlend.Value, source.Value, OpCode.MUL).Value,
-                new BinaryExpr(destBlend.Value, dest.Value, OpCode.MUL).Value,
-                OpCode.ADD);
-*/
+
             mSrcBlend = BlendMode.GL_ONE;
             mDestBlend = BlendMode.GL_ONE;
             mSampler = null;
@@ -896,8 +889,14 @@ namespace ShaderReader
             mStageColor = null;
         }
 
+        void PerformAlphaGen()
+        {
+            Debug.Assert(mStageColor != null);
+        }
+
         void AlphaGen() 
         {
+            // TODO: alphagen stuff.
             string function = NextTokenLowerCase();
             switch (function)
             {
@@ -907,6 +906,7 @@ namespace ShaderReader
                 case "oneminusentity":
                 case "vertex":
                 case "oneminusvertex":
+                    break;
                 case "lightingspecular":
                     break;
                 case "portal":
@@ -917,10 +917,10 @@ namespace ShaderReader
                 case "wave":
                     {
                         string func = NextTokenLowerCase();
-                        string baseVal = NextToken();
-                        string ampVal = NextToken();
-                        string phaseVal = NextToken();
-                        string freq = NextToken();
+                        float baseVal = float.Parse(NextToken());
+                        float ampVal = float.Parse(NextToken());
+                        float phaseVal = float.Parse(NextToken());
+                        float freq = float.Parse(NextToken());
                     }
                     break;
             }
@@ -930,12 +930,20 @@ namespace ShaderReader
 
         void TcGen() 
         {
+            // TODO: Figure out environment mapping.
+
             string function = NextTokenLowerCase();
             switch (function)
             {
                 case "base":
+                    mTexCoords = new StructMemberExpr(mShader.mPsInput, "surfaceST");
+                    break;
                 case "lightmap":
+                    mTexCoords = new StructMemberExpr(mShader.mPsInput, "lightmapST");
+                    break;
                 case "environment":
+                    break;
+                default:
                     break;
             }
 
@@ -950,53 +958,85 @@ namespace ShaderReader
             {
                 case "rotate":
                     {
-                        string degressPerSecond = NextToken();
+                        float degressPerSecond = float.Parse(NextToken());
+                        Function sin = mShader.mProgram.GetFunctionByName("sin");
+                        Function cos = mShader.mProgram.GetFunctionByName("cos");
+                        Function mul = mShader.mProgram.GetFunctionByName("mul");
+                        Hlsl.Type f = TypeRegistry.GetFloatType();
+                        Hlsl.Type f2 = TypeRegistry.GetVectorType(f, 2);
+
+                        Expr toRadians = new BinaryExpr(
+                            new LiteralExpr(f, degressPerSecond).Value,
+                            new LiteralExpr(f, (float)(Math.PI / 180.0)).Value,
+                            OpCode.MUL);
+                        DeclExpr theta = new DeclExpr(
+                            new BinaryExpr(toRadians.Value, mShader.mTime.Value, OpCode.MUL));
+                        theta.SetConst(true);
+                        mShader.mPixelShader.AddExpr(theta);
+
+                        DeclExpr sinTheta = new DeclExpr(new CallExpr(sin, new Expr[] { theta }));
+                        DeclExpr cosTheta = new DeclExpr(new CallExpr(cos, new Expr[] { theta }));
+
+                        sinTheta.SetConst(true);
+                        cosTheta.SetConst(true);
+                        mShader.mPixelShader.AddExpr(sinTheta);
+                        mShader.mPixelShader.AddExpr(cosTheta);
+
+                        DeclExpr matrix = new DeclExpr(new LiteralExpr(TypeRegistry.GetMatrixType(f2, 2),
+                            cosTheta.Value, new BinaryExpr(new LiteralExpr(f, -1.0f).Value, sinTheta.Value, OpCode.MUL).Value,
+                            sinTheta.Value, cosTheta.Value));
+                        matrix.SetConst(true);
+                        mShader.mPixelShader.AddExpr(matrix);
+                        DeclExpr coords = new DeclExpr(new CallExpr(mul, new Expr[] { mTexCoords, matrix }));
+                        coords.SetConst(true);
+                        mShader.mPixelShader.AddExpr(coords);
+                        mTexCoords = coords;
+
+                        REMOVETHIS_BreakAfterEmitting = true;
                     }
                     break;
                 case "scale":
                     {
-                        string sScale = NextToken();
-                        string tScale = NextToken();
+                        float sScale = float.Parse(NextToken());
+                        float tScale = float.Parse(NextToken());
                     }
                     break;
                 case "scroll":
                     {
-                        string sSpeed = NextToken();
-                        string tSpeed = NextToken();
+                        float sSpeed = float.Parse(NextToken());
+                        float tSpeed = float.Parse(NextToken());
                     }
                     break;
                 case "stretch":
                     {
                         string func = NextTokenLowerCase();
-                        string baseVal = NextToken();
-                        string ampVal = NextToken();
-                        string phaseVal = NextToken();
-                        string freq = NextToken();
+                        float baseVal = float.Parse(NextToken());
+                        float ampVal = float.Parse(NextToken());
+                        float phaseVal = float.Parse(NextToken());
+                        float freq = float.Parse(NextToken());
                     }
                     break;
                 case "transform":
                     {
-                        string m00 = NextToken();
-                        string m01 = NextToken();
-                        string m10 = NextToken();
-                        string M11 = NextToken();
-                        string t0 = NextToken();
-                        string t1 = NextToken();
+                        float m00 = float.Parse(NextToken());
+                        float m01 = float.Parse(NextToken());
+                        float m10 = float.Parse(NextToken());
+                        float M11 = float.Parse(NextToken());
+                        float t0 = float.Parse(NextToken());
+                        float t1 = float.Parse(NextToken());
                     }
                     break;
                 case "turb":
                     {
-                        string baseVal = NextToken();
+                        string baseValToken = NextToken();
 
                         // Occasionally a "turb sin" declaration sneaks in.
                         // Discard, for now. 
                         // TODO: fix this.
-                        if (baseVal == "sin")
-                            baseVal = NextToken();
-
-                        string ampVal = NextToken();
-                        string phaseVal = NextToken();
-                        string freq = NextToken();
+                        float baseVal = (baseValToken == "sin") ? float.Parse(NextToken()) : float.Parse(baseValToken);
+                        float ampVal = float.Parse(NextToken());
+                        float phaseVal = float.Parse(NextToken());
+                        float freq = float.Parse(NextToken());
                     }
                     break;
             }
@@ -1315,12 +1355,17 @@ namespace ShaderReader
                     string shader = mShader.mProgram.EmitRawShaderCode();
 
                     Console.WriteLine(shader);
+
+                    if (REMOVETHIS_BreakAfterEmitting)
+                        Debugger.Break();
                 }
 
                 mHasShader = false;
             }
             return true;
         }
+
+        bool REMOVETHIS_BreakAfterEmitting = false;
 
         #endregion
     }
