@@ -48,17 +48,10 @@
       <Project>{6B08F749-17F0-4C75-82FC-05EA2AE0AF8F}</Project>
       <Name>BspImporter</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ShaderBuilder\ShaderBuilder.csproj">
+    <ProjectReference Include="..\..\ShaderBuilder\ShaderDbImporter.csproj">
       <Project>{9EADC8BE-7B60-40C5-AD0F-C7F89723735E}</Project>
-      <Name>ShaderBuilder</Name>
+      <Name>ShaderDbImporter</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="bsp.fx">
-      <Name>bsp</Name>
-      <Importer>EffectImporter</Importer>
-      <Processor>EffectProcessor</Processor>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="models\ammo\grenade.jpg">
@@ -8045,146 +8038,15 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="shaders\base.shader">
-      <Name>base</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\base_button.shader">
-      <Name>base_button</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\base_floor.shader">
-      <Name>base_floor</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\base_light.shader">
-      <Name>base_light</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\base_object.shader">
-      <Name>base_object</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\base_support.shader">
-      <Name>base_support</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\base_trim.shader">
-      <Name>base_trim</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\base_wall.shader">
-      <Name>base_wall</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\common.shader">
-      <Name>common</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\ctf.shader">
-      <Name>ctf</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\eerie.shader">
-      <Name>eerie</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\gfx.shader">
-      <Name>gfx</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\gothic_block.shader">
-      <Name>gothic_block</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\gothic_floor.shader">
-      <Name>gothic_floor</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\gothic_light.shader">
-      <Name>gothic_light</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\gothic_trim.shader">
-      <Name>gothic_trim</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\gothic_wall.shader">
-      <Name>gothic_wall</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\hell.shader">
-      <Name>hell</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\liquid.shader">
-      <Name>liquid</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\menu.shader">
-      <Name>menu</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\models.shader">
-      <Name>models</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\organics.shader">
-      <Name>organics</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\sfx.shader">
-      <Name>sfx</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\shrine.shader">
-      <Name>shrine</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\skin.shader">
-      <Name>skin</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\sky.shader">
-      <Name>sky</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
-    </Compile>
-    <Compile Include="shaders\test.shader">
-      <Name>test</Name>
-      <Importer>ShaderBuilder</Importer>
-      <Processor>ShaderProcessor</Processor>
+    <Compile Include="shader.shaderdb">
+      <Name>shader</Name>
     </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="models\misc\" />
     <Folder Include="models\powerups\health\" />
     <Folder Include="models\powerups\instant\" />
+    <Folder Include="shaders\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
