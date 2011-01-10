@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.IO.Compression;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,6 +14,12 @@ using Hlsl.Expressions;
 
 namespace ShaderReader
 {
+    public enum DepthFunction
+    {
+        LessEqual,
+        Equal
+    }
+
     public enum CullMode
     {
         Front,
@@ -22,8 +29,10 @@ namespace ShaderReader
 
     public enum Flag
     {
-        NOPICMIP,
-        NOMIPMAP,
+        NOPICMIP    = 1,
+        NOMIPMAP    = 1 << 1,
+        TRANSPARENT = 1 << 2,
+        DEPTH_WRITE = 1 << 3,
     }
 
     public enum BlendMode
@@ -43,10 +52,12 @@ namespace ShaderReader
 
     class Shader : IDisposable
     {
-        string mName;
+        public string mName;
         public CullMode mCullMode = CullMode.Front;
+        public DepthFunction mDepthFunc = DepthFunction.LessEqual;
 
         Dictionary<string, Value> mTextures = new Dictionary<string, Value>();
+        public List<string> mTextureList = new List<string>();
         public HlslProgram mProgram = new HlslProgram();
         public UserDefinedFunction mVertexShader = new UserDefinedFunction("vs_main");
         public UserDefinedFunction mPixelShader = new UserDefinedFunction("ps_main");
@@ -115,7 +126,6 @@ namespace ShaderReader
                 Expr t1 = new BinaryExpr(t, TwoPI.Value, OpCode.MUL);
                 Expr sinParam = new BinaryExpr(new BinaryExpr(t1.Value, freq, OpCode.MUL).Value, phase, OpCode.ADD);
                 Expr sinExpr = new CallExpr(sin, new Expr[] { sinParam });
-                sinWave.AddExpr(sinExpr);
 
                 Expr returnExpr = new ReturnExpr(
                     new BinaryExpr(
@@ -139,10 +149,7 @@ namespace ShaderReader
                 Expr t1 = new BinaryExpr(t, TwoPI.Value, OpCode.MUL);
                 Expr sinParam = new BinaryExpr(new BinaryExpr(t1.Value, freq, OpCode.MUL).Value, phase, OpCode.ADD);
                 Expr sinExpr = new CallExpr(sin, new Expr[] { sinParam });
-                squareWave.AddExpr(sinExpr);
-
                 Expr signExpr = new CallExpr(sign, new Expr[] { sinExpr });
-                squareWave.AddExpr(signExpr);
 
                 Expr returnExpr = new ReturnExpr(
                     new BinaryExpr(new BinaryExpr(signExpr.Value, amp, OpCode.MUL).Value,
@@ -165,14 +172,9 @@ namespace ShaderReader
                 Expr twoOverPi = new BinaryExpr(new LiteralExpr(f, 2.0f).Value, PI.Value, OpCode.DIV);
 
                 Expr sinExpr = new CallExpr(sin, new Expr[] { t1 });
-                triangleWave.AddExpr(sinExpr);
-
                 Expr asinExpr = new CallExpr(asin, new Expr[] { sinExpr });
-                triangleWave.AddExpr(asinExpr);
-
                 Expr absExpr = new CallExpr(abs, new Expr[] { 
                     new BinaryExpr(twoOverPi.Value, asinExpr.Value, OpCode.MUL) });
-                triangleWave.AddExpr(absExpr);
 
                 triangleWave.AddExpr(new ReturnExpr(absExpr));
                 mProgram.AddFunction(triangleWave);
@@ -193,7 +195,6 @@ namespace ShaderReader
                 sawtoothWave.AddExpr(t1);
 
                 Expr t1Floor = new CallExpr(floor, new Expr[] { t1 });
-                sawtoothWave.AddExpr(t1Floor);
                 Expr returnExpr = new ReturnExpr(
                     new BinaryExpr(
                         new BinaryExpr(
@@ -215,7 +216,6 @@ namespace ShaderReader
 
                 Function sawtooth = mProgram.GetFunctionByName("sawtoothwave");
                 Expr callExpr = new CallExpr(sawtooth, new Value[] { t, t0, amp, phase, freq });
-                inverseSawtooth.AddExpr(callExpr);
 
                 Expr returnExpr = new ReturnExpr(
                     new BinaryExpr(amp, callExpr.Value, OpCode.SUB));
@@ -259,6 +259,7 @@ namespace ShaderReader
             DeclExpr samplerDeclExpr = new DeclExpr(TypeRegistry.GetSamplerType(), string.Format("gSampler{0}", mTextures.Count));
             mProgram.AddGlobal(samplerDeclExpr);
             mTextures.Add(texture, samplerDeclExpr.Value);
+            mTextureList.Add(texture);
 
             return samplerDeclExpr.Value;
         }
@@ -283,6 +284,7 @@ namespace ShaderReader
             #region Finalize pixel shader
             {
                 mPixelShader.AddExpr(new ReturnExpr(mPsAccumulatedColor));
+                mPixelShader.SetReturnTypeSemantic(new Semantic(Semantic.SemanticType.COLOR));
                 mProgram.SetShader(ShaderType.PixelShader, mPixelShader, Hlsl.ShaderProfile.ps_3_0);
             }
             #endregion
@@ -314,13 +316,33 @@ namespace ShaderReader
         bool mHasShader;
 
         #region Shader stage data
+
         BlendMode mSrcBlend = BlendMode.GL_ONE;
         BlendMode mDestBlend = BlendMode.GL_ONE;
         Value mSampler;
         Expr mTexCoords;
         bool mIsClamped;
         Expr mStageColor;
+        bool mIsAnimMap;
+        List<Value> mAnimMapSamplers;
+        string mRgbGenFunction;
+        Expr mRgbGenMultiplicationExpr;
+        float mAnimFrequency;
+
         #endregion
+
+        void Reset()
+        {
+            mSampler = null;
+            mTexCoords = null;
+            mIsAnimMap = false;
+            mIsClamped = false;
+            mStageColor = null;
+            mAnimFrequency = 0;
+            mAnimMapSamplers = null;
+            mRgbGenFunction = null;
+            mRgbGenMultiplicationExpr = null;
+        }
 
         public string GetHlsl()
         {
@@ -360,6 +382,18 @@ namespace ShaderReader
         }
 
         #region General parsers
+
+        void SurfaceParm()
+        {
+            string token = NextTokenLowerCase();
+
+            switch (token)
+            {
+                case "trans":
+                    mShader.mFlags |= (uint)(Flag.TRANSPARENT);
+                    break;
+            }
+        }
 
         void Cull() 
         {
@@ -609,9 +643,9 @@ namespace ShaderReader
 
         void AnimMap() 
         {
-            string frequency = NextToken();
+            mAnimFrequency = float.Parse(NextToken());
 
-            List<string> frames = new List<string>();
+            mAnimMapSamplers = new List<Value>();
 
             for (; ; )
             {
@@ -622,11 +656,11 @@ namespace ShaderReader
                     PushToken(token);
                     break;
                 }
-
-//                mShader.mTexturesAdd(token);
+                mAnimMapSamplers.Add(mShader.AddTexture(token));
             }
 
-            // Todo: Implement this.
+            mIsAnimMap = true;
+            mTexCoords = new StructMemberExpr(mShader.mPsInput, "surfaceST");
         }
 
         void BlendFunc() 
@@ -664,9 +698,6 @@ namespace ShaderReader
             mDestBlend = (BlendMode)Enum.Parse(typeof(BlendMode), destBlendToken);
         }
 
-        string mRgbGenFunction;
-        Expr mRgbGenMultiplicationExpr;
-
         void RgbGen()
         {
             mRgbGenFunction = NextTokenLowerCase();
@@ -677,11 +708,13 @@ namespace ShaderReader
                 case "identitylighting":
                 case "identity":
                     break;
+
                 // entity/oneminusentity are not used currently.
                 case "entity":
                 case "oneminusentity":
-                    throw new Exception("Unsupported");
+                    break;
 
+                case "exactvertex":
                 case "vertex":
                     mRgbGenMultiplicationExpr = new StructMemberExpr(mShader.mPsInput, "color");
                     break;
@@ -701,12 +734,23 @@ namespace ShaderReader
                 case "wave":
                     {
                         string func = NextTokenLowerCase() + "wave";
+
                         float baseVal = float.Parse(NextToken());
                         float ampVal = float.Parse(NextToken());
                         float phaseVal = float.Parse(NextToken());
                         float freqVal = float.Parse(NextToken());
 
                         Hlsl.Type floatType = TypeRegistry.GetFloatType();
+
+                        if (func == "noisewave")
+                        {
+                            // Need to add a noise texture at runtime.
+                            Value noiseTexture = mShader.AddTexture("noise");
+                            Function tex1D = mShader.mProgram.GetFunctionByName("tex1D");
+                            mRgbGenMultiplicationExpr = new SwizzleExpr(new CallExpr(tex1D, new Value[] { noiseTexture, mShader.mTime.Value }).Value, "xxxx");
+                            return;
+                        }
+
                         Function fn = mShader.mProgram.GetFunctionByName(func);
                         Expr waveCall = new DeclExpr(new CallExpr(fn, new Expr[] {
                             mShader.mTime,
@@ -723,6 +767,48 @@ namespace ShaderReader
             }
         }
 
+        Expr CalculateAnimMapSample()
+        {
+            int numSamplers = mAnimMapSamplers.Count;
+            float period = 1.0f / mAnimFrequency;
+            float interval = period / (float)numSamplers;
+
+            Function fmod = mShader.mProgram.GetFunctionByName("fmod");
+            DeclExpr timeModPeriod = new DeclExpr(
+                new CallExpr(
+                    fmod,
+                    new Expr[] { 
+                            mShader.mTime,
+                            new LiteralExpr(TypeRegistry.GetFloatType(), period)
+                        }));
+            timeModPeriod.SetConst(true);
+            mShader.mPixelShader.AddExpr(timeModPeriod);
+
+            float[] intervals = new float[numSamplers - 1];
+            for (int i = 0; i < numSamplers - 1; ++i)
+                intervals[numSamplers - 2 - i] = interval * (float)(i + 1);
+
+            Function tex2D = mShader.mProgram.GetFunctionByName("tex2D");
+            Expr elseExpr = new CallExpr(tex2D, new Value[] { mAnimMapSamplers[numSamplers - 1], mTexCoords.Value });
+            Hlsl.Type f = TypeRegistry.GetFloatType();
+
+            for (int i = 0; i < intervals.Length; ++i)
+            {
+                TernaryExpr TE = new TernaryExpr(
+                    new ComparisonExpr(timeModPeriod.Value, new LiteralExpr(f, intervals[i]).Value, Comparison.LESS),
+                    new CallExpr(tex2D, new Value[] { mAnimMapSamplers[numSamplers - 2 - i], mTexCoords.Value }),
+                    elseExpr);
+                elseExpr = TE;
+            }
+
+            DeclExpr oneUnholyMess = new DeclExpr(elseExpr);
+            mShader.mPixelShader.AddExpr(oneUnholyMess);
+            mIsAnimMap = false;
+            mAnimMapSamplers = null;
+
+            return oneUnholyMess;
+        }
+
         void PerformRgbGen()
         {
             Function saturate = mShader.mProgram.GetFunctionByName("saturate");
@@ -731,22 +817,29 @@ namespace ShaderReader
             Expr texCoords = mIsClamped
                 ? new CallExpr(saturate, new Expr[] { mTexCoords })
                 : mTexCoords;
-            Expr sample = new CallExpr(tex2D, new Value[] { mSampler, texCoords.Value });
+
+            Expr sample = mIsAnimMap 
+                ? CalculateAnimMapSample() 
+                : new CallExpr(tex2D, new Value[] { mSampler, texCoords.Value });
+
+            // Some effects, like the lagometer, just specify a texture map
+            // and don't have any rgbgen keywords.
+            if (mRgbGenFunction == null)
+                mRgbGenFunction = "identity";
 
             switch (mRgbGenFunction)
             {
                 case "identitylighting":
                 case "identity":
+                case "entity":
+                case "oneminusentity":
+                case "lightingdiffuse":
                     mStageColor = sample;
                     break;
 
-                case "entity":
-                case "oneminusentity":
-                    break;
-
+                case "exactvertex":
                 case "vertex":
                 case "oneminusvertex":
-                case "lightingdiffuse":
                 case "wave":
                     mStageColor = new BinaryExpr(mRgbGenMultiplicationExpr.Value, sample.Value, OpCode.MUL);
                     break;
@@ -904,6 +997,7 @@ namespace ShaderReader
                 case "identity":
                 case "entity":
                 case "oneminusentity":
+                case "exactvertex":
                 case "vertex":
                 case "oneminusvertex":
                     break;
@@ -953,6 +1047,9 @@ namespace ShaderReader
         void TcMod() 
         {
             string function = NextTokenLowerCase();
+            Hlsl.Type f = TypeRegistry.GetFloatType();
+            Hlsl.Type f2 = TypeRegistry.GetVectorType(f, 2);
+            Function mul = mShader.mProgram.GetFunctionByName("mul");
 
             switch (function)
             {
@@ -961,9 +1058,6 @@ namespace ShaderReader
                         float degressPerSecond = float.Parse(NextToken());
                         Function sin = mShader.mProgram.GetFunctionByName("sin");
                         Function cos = mShader.mProgram.GetFunctionByName("cos");
-                        Function mul = mShader.mProgram.GetFunctionByName("mul");
-                        Hlsl.Type f = TypeRegistry.GetFloatType();
-                        Hlsl.Type f2 = TypeRegistry.GetVectorType(f, 2);
 
                         Expr toRadians = new BinaryExpr(
                             new LiteralExpr(f, degressPerSecond).Value,
@@ -992,28 +1086,61 @@ namespace ShaderReader
                         mShader.mPixelShader.AddExpr(coords);
                         mTexCoords = coords;
 
-                        REMOVETHIS_BreakAfterEmitting = true;
                     }
                     break;
                 case "scale":
                     {
                         float sScale = float.Parse(NextToken());
                         float tScale = float.Parse(NextToken());
+                        DeclExpr matrix = new DeclExpr(
+                            new BinaryExpr(
+                                new LiteralExpr(f2, sScale, tScale).Value,
+                                mTexCoords.Value,
+                                OpCode.MUL));
+                        matrix.SetConst(true);
+                        mShader.mPixelShader.AddExpr(matrix);
+                        mTexCoords = matrix;
                     }
                     break;
                 case "scroll":
                     {
                         float sSpeed = float.Parse(NextToken());
                         float tSpeed = float.Parse(NextToken());
+                        DeclExpr scroll = new DeclExpr(
+                            new BinaryExpr(
+                                new LiteralExpr(f2, mShader.mTime.Value, mShader.mTime.Value).Value,
+                                new LiteralExpr(f2, sSpeed, tSpeed).Value,
+                                OpCode.MUL));
+                        scroll.SetConst(true);
+                        mShader.mPixelShader.AddExpr(scroll);
+
+                        mTexCoords = new BinaryExpr(scroll.Value, mTexCoords.Value, OpCode.MUL);
                     }
                     break;
                 case "stretch":
                     {
-                        string func = NextTokenLowerCase();
+                        string func = NextTokenLowerCase() + "wave";
                         float baseVal = float.Parse(NextToken());
                         float ampVal = float.Parse(NextToken());
                         float phaseVal = float.Parse(NextToken());
-                        float freq = float.Parse(NextToken());
+                        float freqVal = float.Parse(NextToken());
+
+                        Function fn = mShader.mProgram.GetFunctionByName(func);
+                        CallExpr stretchFn = new CallExpr(fn, new Expr[] {
+                            mShader.mTime,
+                            new LiteralExpr(f, baseVal),
+                            new LiteralExpr(f, ampVal),
+                            new LiteralExpr(f, phaseVal),
+                            new LiteralExpr(f, freqVal)
+                        });
+                        DeclExpr stretchFnResult = new DeclExpr(stretchFn);
+                        stretchFnResult.SetConst(true);
+                        mShader.mPixelShader.AddExpr(stretchFnResult);
+
+                        mTexCoords = new CallExpr(
+                            mul, 
+                            new Expr[] { stretchFnResult, mTexCoords }
+                        );
                     }
                     break;
                 case "transform":
@@ -1021,9 +1148,21 @@ namespace ShaderReader
                         float m00 = float.Parse(NextToken());
                         float m01 = float.Parse(NextToken());
                         float m10 = float.Parse(NextToken());
-                        float M11 = float.Parse(NextToken());
+                        float m11 = float.Parse(NextToken());
                         float t0 = float.Parse(NextToken());
                         float t1 = float.Parse(NextToken());
+
+                        DeclExpr mat = new DeclExpr(new LiteralExpr(TypeRegistry.GetMatrixType(f2, 2), m00, m01, m10, m11));
+                        mat.SetConst(true);
+
+                        DeclExpr constantVector = new DeclExpr(new LiteralExpr(f2, t0, t1));
+                        constantVector.SetConst(true);
+
+                        mShader.mPixelShader.AddExprs(mat, constantVector);
+                        mTexCoords = new BinaryExpr(
+                            new CallExpr(mul, new Expr[] { mat, mTexCoords }).Value,
+                            constantVector.Value,
+                            OpCode.ADD);
                     }
                     break;
                 case "turb":
@@ -1047,18 +1186,25 @@ namespace ShaderReader
         void DepthFunc() 
         {
             string function = NextTokenLowerCase();
-            Debug.Assert(function == "equal" || function == "lequal");
+            switch (function)
+            {
+                case "lequal":
+                    if (mShader.mDepthFunc == DepthFunction.Equal)
+                        throw new Exception("Shit's broken!");
 
-            // TODO: add depth function handling code here.
+                    mShader.mDepthFunc = DepthFunction.LessEqual;
+                    break;
+                case "equal":
+                    mShader.mDepthFunc = DepthFunction.Equal;
+                    break;
+                default:
+                    throw new Exception("Expected depthfunc values of equal or lessequal only!");
+            }
         }
 
         void DepthWrite() 
         {
-            // NOTE: transparent surfaces do not write to the depth buffer generally.
-            // This causes a depth buffer write to occur. Record this information in
-            // the shader structure above.
-
-            // TODO: implement this.
+            mShader.mFlags |= (uint)(Flag.DEPTH_WRITE);
         }
 
         void AlphaFunc() 
@@ -1103,7 +1249,7 @@ namespace ShaderReader
                 new TokenParser("q3map_flare", PassAndContinue),
                 new TokenParser("light", DiscardOneTokenAndContinue),
                 new TokenParser("light1", PassAndContinue),
-                new TokenParser("surfaceparm", DiscardOneTokenAndContinue),
+                new TokenParser("surfaceparm", SurfaceParm),
                 new TokenParser("qer_editorimage", DiscardOneTokenAndContinue),
                 new TokenParser("qer_nocarve", QerNoCarve),
                 new TokenParser("qer_trans", DiscardOneTokenAndContinue),
@@ -1331,6 +1477,11 @@ namespace ShaderReader
             }
         }
 
+        public static List<Shader> AllShaders = new List<Shader>();
+        public static List<String> AllShaderSource = new List<string>();
+        public static List<CompiledEffect> AllCompiledShaders = new List<CompiledEffect>();
+        public static int NumShaders = 0;
+
         bool ParseShader()
         {
             mCurrentEffect = NextToken();
@@ -1339,6 +1490,7 @@ namespace ShaderReader
 
             using (mShader = new Shader(mCurrentEffect))
             {
+                mShader.mPixelShader.AddExpr(new CommentExpr(mCurrentEffect));
 
                 Expect("{");
 
@@ -1352,20 +1504,31 @@ namespace ShaderReader
                 if (mHasShader)
                 {
                     mShader.FinalizeShader();
-                    string shader = mShader.mProgram.EmitRawShaderCode();
+                    string shader = mShader.mProgram.EmitEffect();
+                    ++NumShaders;
+                    AllShaders.Add(mShader);
+                    AllShaderSource.Add(shader);
 
-                    Console.WriteLine(shader);
+                    CompiledEffect CE = Effect.CompileEffectFromSource(shader, null, null, CompilerOptions.None, TargetPlatform.Windows);
+                    AllCompiledShaders.Add(CE);
 
-                    if (REMOVETHIS_BreakAfterEmitting)
+                    if (!CE.Success)
+                    {
+                        Console.WriteLine("---------------------------");
+                        Console.WriteLine(shader);
+                        Console.WriteLine("---------------------------");
+                        Console.WriteLine("Errors/warnings:");
+                        Console.WriteLine(CE.ErrorsAndWarnings);
+
                         Debugger.Break();
+                    }
                 }
 
                 mHasShader = false;
+                Reset();
             }
             return true;
         }
-
-        bool REMOVETHIS_BreakAfterEmitting = false;
 
         #endregion
     }
@@ -1375,6 +1538,172 @@ namespace ShaderReader
         static void Process(string shaderContent)
         {
             ShaderParser SP = new ShaderParser(shaderContent);
+        }
+
+        static List<int> UniqueIndices = new List<int>();
+        static int[] OldToNew;
+//        static Dictionary<int, int> OldIndexToNew = new Dictionary<int, int>();
+        static int NumUniqueEffects;
+
+        static void DetermineUniqueShaders()
+        {
+            Debug.Assert(ShaderParser.AllCompiledShaders.Count == ShaderParser.AllShaders.Count);
+            OldToNew = new int[ShaderParser.AllCompiledShaders.Count];
+
+            List<CompiledEffect> uniqueEffects = new List<CompiledEffect>();
+
+            for (int i = 0; i < ShaderParser.AllCompiledShaders.Count; ++i)
+            {
+                byte[] code = ShaderParser.AllCompiledShaders[i].GetEffectCode();
+
+                bool unique = true;
+                for (int ii = 0; ii < uniqueEffects.Count; ++ii)
+                {
+                    byte[] uniqueCode = uniqueEffects[ii].GetEffectCode();
+
+                    if (code.Length != uniqueCode.Length)
+                        continue;
+
+                    for (int iii = 0; iii < code.Length; ++iii)
+                        if (code[iii] != uniqueCode[iii])
+                            goto next;
+
+                    unique = false;
+                    OldToNew[i] = ii;
+                next:
+                    ;
+                }
+
+                if (unique)
+                {
+                    int idx = uniqueEffects.Count;
+                    OldToNew[i] = idx;
+                    UniqueIndices.Add(i);
+                    uniqueEffects.Add(ShaderParser.AllCompiledShaders[i]);
+
+                    Debug.Assert(UniqueIndices.Count == uniqueEffects.Count);
+                }
+            }
+
+            NumUniqueEffects = uniqueEffects.Count;
+        }
+
+        static void CreateShaderDatabase()
+        {
+            int[] offsets = new int[NumUniqueEffects];
+
+            List<byte> shaderSource = new List<byte>();
+            for (int i = 0; i < UniqueIndices.Count; ++i)
+            {
+                int index = UniqueIndices[i];
+                string S = ShaderParser.AllShaderSource[index];
+                byte[] shaderBytes = ASCIIEncoding.ASCII.GetBytes(S);
+
+                offsets[i] = shaderSource.Count;
+                shaderSource.AddRange(shaderBytes);
+                shaderSource.Add(0);
+            }
+
+            byte[] array = shaderSource.ToArray();
+
+            List<string> textureNames = new List<string>();
+            Dictionary<int, int> textureIndexMap = new Dictionary<int, int>();
+
+            List<byte> shaderNameBytes = new List<byte>();
+            List<byte> textureNameBytes = new List<byte>();
+            List<int> textureOffsets = new List<int>();
+
+            int numShaders = ShaderParser.AllShaders.Count;
+            int[] nameOffsets = new int[numShaders];
+            int[] textureCounts = new int[numShaders];
+            int[] textureOffsetStarts = new int[numShaders];
+            int[] shaderSourceOffset = new int[numShaders];
+
+            for (int i = 0; i < ShaderParser.AllShaders.Count; ++i)
+            {
+                Shader S = ShaderParser.AllShaders[i];
+
+                nameOffsets[i] = shaderNameBytes.Count;
+                shaderNameBytes.AddRange(ASCIIEncoding.ASCII.GetBytes(S.mName));
+                shaderNameBytes.Add(0);
+
+                textureCounts[i] = S.mTextureList.Count;
+                textureOffsetStarts[i] = textureOffsets.Count;
+
+                for (int ii = 0; ii < S.mTextureList.Count; ++ii)
+                {
+                    int idx = textureNames.FindIndex(str => S.mTextureList[ii] == str);
+
+                    if (idx == -1)
+                    {
+                        int byteOffset = textureNameBytes.Count;
+                        int stringIdx = textureNames.Count;
+                        string texture = S.mTextureList[ii];
+
+                        // Trim the end off of the texture as all lookups with 
+                        // the XNA asset system ignore the extension.
+                        if (texture.Contains('.'))
+                            texture = texture.Substring(0, texture.LastIndexOf('.'));
+
+                        textureNames.Add(texture);
+                        textureNameBytes.AddRange(ASCIIEncoding.ASCII.GetBytes(texture));
+                        textureNameBytes.Add(0);
+                        textureIndexMap[stringIdx] = byteOffset;
+
+                        textureOffsets.Add(byteOffset);
+                    }
+                    else
+                    {
+                        textureOffsets.Add(textureIndexMap[idx]);
+                    }
+                }
+
+                int index = OldToNew[i];
+                shaderSourceOffset[i] = offsets[index];
+            }
+
+            FileStream FS = File.Open("shader.db", FileMode.Create, FileAccess.Write);
+
+            // Write the file header, 'SHDR'
+            FS.WriteByte((byte)'S'); FS.WriteByte((byte)'H'); FS.WriteByte((byte)'D'); FS.WriteByte((byte)'R');
+
+            int dataStart = 4 + 4 + 16;
+            int shaderNameBegin = dataStart + numShaders * 4 * sizeof(int);
+            int textureNameBegin = shaderNameBegin + shaderNameBytes.Count;
+            int shaderTextBegin = textureNameBegin + textureNameBytes.Count;
+
+            WriteInt(FS, dataStart);
+            WriteInt(FS, shaderNameBegin);
+            WriteInt(FS, textureNameBegin);
+            WriteInt(FS, shaderTextBegin);
+            WriteInt(FS, numShaders);
+
+            for (int i = 0; i < numShaders; ++i)
+            {
+                WriteInt(FS, nameOffsets[i]);
+                WriteInt(FS, textureCounts[i]);
+                WriteInt(FS, textureOffsetStarts[i]);
+                WriteInt(FS, shaderSourceOffset[i]);
+            }
+
+            Debug.Assert(FS.Position == shaderNameBegin);
+            FS.Write(shaderNameBytes.ToArray(), 0, shaderNameBytes.Count);
+
+            Debug.Assert(FS.Position == textureNameBegin);
+            FS.Write(textureNameBytes.ToArray(), 0, textureNameBytes.Count);
+
+            Debug.Assert(FS.Position == shaderTextBegin);
+            FS.Write(shaderSource.ToArray(), 0, shaderSource.Count);
+
+            FS.Close();
+        }
+
+        static void WriteInt(Stream FS, int val)
+        {
+            FS.WriteByte((byte)(val & 0xFF));
+            FS.WriteByte((byte)((val >> 8) & 0xFF));
+            FS.WriteByte((byte)((val >> 16) & 0xFF));
+            FS.WriteByte((byte)((val >> 24) & 0xFF));
         }
 
         static void Main(string[] args)
@@ -1394,7 +1723,8 @@ namespace ShaderReader
                 Process(content);
             }
 
-            Debugger.Break();
+            DetermineUniqueShaders();
+            CreateShaderDatabase();
         }
     }
 }
