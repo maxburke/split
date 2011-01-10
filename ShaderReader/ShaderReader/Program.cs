@@ -1662,7 +1662,7 @@ namespace ShaderReader
                 shaderSourceOffset[i] = offsets[index];
             }
 
-            FileStream FS = File.Open("shader.db", FileMode.Create, FileAccess.Write);
+            FileStream FS = File.Open("shader.shaderdb", FileMode.Create, FileAccess.Write);
 
             // Write the file header, 'SHDR'
             FS.WriteByte((byte)'S'); FS.WriteByte((byte)'H'); FS.WriteByte((byte)'D'); FS.WriteByte((byte)'R');
