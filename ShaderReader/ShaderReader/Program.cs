@@ -14,12 +14,6 @@ using Hlsl.Expressions;
 
 namespace ShaderReader
 {
-    public enum DepthFunction
-    {
-        LessEqual,
-        Equal
-    }
-
     public enum CullMode
     {
         Front,
@@ -33,6 +27,7 @@ namespace ShaderReader
         NOMIPMAP    = 1 << 1,
         TRANSPARENT = 1 << 2,
         DEPTH_WRITE = 1 << 3,
+        DEPTH_EQUAL = 1 << 4
     }
 
     public enum BlendMode
@@ -54,7 +49,6 @@ namespace ShaderReader
     {
         public string mName;
         public CullMode mCullMode = CullMode.Front;
-        public DepthFunction mDepthFunc = DepthFunction.LessEqual;
 
         Dictionary<string, Value> mTextures = new Dictionary<string, Value>();
         public List<string> mTextureList = new List<string>();
@@ -1188,14 +1182,8 @@ namespace ShaderReader
             string function = NextTokenLowerCase();
             switch (function)
             {
-                case "lequal":
-                    if (mShader.mDepthFunc == DepthFunction.Equal)
-                        throw new Exception("Shit's broken!");
-
-                    mShader.mDepthFunc = DepthFunction.LessEqual;
-                    break;
                 case "equal":
-                    mShader.mDepthFunc = DepthFunction.Equal;
+                    mShader.SetFlag(Flag.DEPTH_EQUAL);
                     break;
                 default:
                     throw new Exception("Expected depthfunc values of equal or lessequal only!");
@@ -1667,20 +1655,23 @@ namespace ShaderReader
             // Write the file header, 'SHDR'
             FS.WriteByte((byte)'S'); FS.WriteByte((byte)'H'); FS.WriteByte((byte)'D'); FS.WriteByte((byte)'R');
 
-            int dataStart = 4 + 4 + 16;
-            int shaderNameBegin = dataStart + numShaders * 4 * sizeof(int);
+            int dataStart = 4 + 4 + 20;
+            int shaderNameBegin = dataStart + numShaders * 5 * sizeof(int);
             int textureNameBegin = shaderNameBegin + shaderNameBytes.Count;
-            int shaderTextBegin = textureNameBegin + textureNameBytes.Count;
+            int textureOffsetsBegin = textureNameBegin + textureNameBytes.Count;
+            int shaderTextBegin = textureOffsetsBegin + textureOffsets.Count * sizeof(int);
 
             WriteInt(FS, dataStart);
             WriteInt(FS, shaderNameBegin);
             WriteInt(FS, textureNameBegin);
+            WriteInt(FS, textureOffsetsBegin);
             WriteInt(FS, shaderTextBegin);
             WriteInt(FS, numShaders);
 
             for (int i = 0; i < numShaders; ++i)
             {
                 WriteInt(FS, nameOffsets[i]);
+                WriteInt(FS, (int)ShaderParser.AllShaders[i].mFlags);
                 WriteInt(FS, textureCounts[i]);
                 WriteInt(FS, textureOffsetStarts[i]);
                 WriteInt(FS, shaderSourceOffset[i]);
@@ -1692,9 +1683,14 @@ namespace ShaderReader
             Debug.Assert(FS.Position == textureNameBegin);
             FS.Write(textureNameBytes.ToArray(), 0, textureNameBytes.Count);
 
+            Debug.Assert(FS.Position == textureOffsetsBegin);
+            foreach (int i in textureOffsets)
+                WriteInt(FS, i);
+
             Debug.Assert(FS.Position == shaderTextBegin);
             FS.Write(shaderSource.ToArray(), 0, shaderSource.Count);
 
+            FS.Flush();
             FS.Close();
         }
 
