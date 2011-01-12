@@ -8043,10 +8043,23 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="bsp.fx">
+      <Name>bsp</Name>
+      <Importer>EffectImporter</Importer>
+      <Processor>EffectProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="gfx\misc\flare.jpg">
+      <Name>flare</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <Folder Include="models\misc\" />
     <Folder Include="models\powerups\health\" />
     <Folder Include="models\powerups\instant\" />
-    <Folder Include="shaders\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
