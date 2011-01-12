@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Slim", "..\Slim\Slim.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BspImporter", "..\BSPImporter\BspImporter.csproj", "{6B08F749-17F0-4C75-82FC-05EA2AE0AF8F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShaderDbImporter", "..\ShaderBuilder\ShaderDbImporter.csproj", "{9EADC8BE-7B60-40C5-AD0F-C7F89723735E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShaderDbImporter", "..\ShaderDb\ShaderDbImporter.csproj", "{9EADC8BE-7B60-40C5-AD0F-C7F89723735E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
