@@ -10,7 +10,7 @@ namespace Split
     interface IRenderable
     {
         int RenderPriority { get; }
-        void Render(Matrix worldViewProjection);
+        void Render(Matrix worldViewProjection, float gameTime);
     }
 
     class Renderer
@@ -18,6 +18,7 @@ namespace Split
         Matrix WorldViewProjection;
         List<IRenderable> Renderables = new List<IRenderable>();
         GraphicsDevice Device;
+        float Time;
 
         public Renderer(GraphicsDevice device)
         {
@@ -35,16 +36,21 @@ namespace Split
             WorldViewProjection = M;
         }
 
+        public void SetTime(float time)
+        {
+            Time = time;
+        }
+
         public void Render()
         {
 #if DEBUG
-            Device.Clear(Color.Black);
+            Device.Clear(Color.CornflowerBlue);
 #endif
 
             int numRenderables = Renderables.Count;
             for (int i = 0; i < numRenderables; ++i)
             {
-                Renderables[i].Render(WorldViewProjection);
+                Renderables[i].Render(WorldViewProjection, Time);
             }
         }
     }
