@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Content;
@@ -82,6 +83,19 @@ namespace Slim
                         break;
                 }
                 return new string(name);
+            }
+        }
+
+        public string ReadCString()
+        {
+            List<byte> bytes = new List<byte>();
+            for (; ; )
+            {
+                byte b = BaseStream.ReadByte();
+                if (b == 0)
+                    return ASCIIEncoding.ASCII.GetString(bytes.ToArray());
+
+                bytes.Add(b);
             }
         }
     }
