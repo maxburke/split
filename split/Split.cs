@@ -31,6 +31,8 @@ namespace Split
         int mBackBufferWidth;
         int mBackBufferHeight;
         SurfaceFormat mBackBufferFormat;
+        int mNumFrames;
+        float mTime;
 
         public Split()
         {
@@ -69,7 +71,10 @@ namespace Split
         protected override void LoadContent()
         {
             Renderer = new Renderer(GraphicsDevice);
-            Renderer.Register(new BspRenderer(Content.Load<Bsp>("q3dm11"), GraphicsDevice, Content));
+            using (ShaderDb shaderDb = Content.Load<ShaderDb>("shader"))
+            {
+                Renderer.Register(new BspRenderer(Content.Load<Bsp>("q3dm11"), GraphicsDevice, Content, shaderDb));
+            }
         }
 
         /// <summary>
@@ -135,7 +140,12 @@ namespace Split
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
+            ++mNumFrames;
+            mTime += ((float)mNumFrames / 60.0f);
+
             Matrix wvp = Matrix.Multiply(Matrix.Multiply(World, Camera.View), Projection);
+
+            Renderer.SetTime(mTime);
             Renderer.SetWorldViewProjection(wvp);
             Renderer.Render();
             base.Draw(gameTime);
