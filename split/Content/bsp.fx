@@ -10,8 +10,8 @@ float4x4 gWorld;
 float4x4 gViewProjection;
 float gTime;
 
-sampler gSampler0;
-sampler gSampler1;
+sampler gSampler0 : register(s0);
+sampler gSampler1 : register(s1);
 
 vs_input vs_main(in vs_input input) {
     vs_input output;
