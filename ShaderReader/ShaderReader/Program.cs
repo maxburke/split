@@ -14,20 +14,15 @@ using Hlsl.Expressions;
 
 namespace ShaderReader
 {
-    public enum CullMode
-    {
-        Front,
-        Back,
-        None
-    }
-
     public enum Flag
     {
         NOPICMIP    = 1,
         NOMIPMAP    = 1 << 1,
         TRANSPARENT = 1 << 2,
         DEPTH_WRITE = 1 << 3,
-        DEPTH_EQUAL = 1 << 4
+        DEPTH_EQUAL = 1 << 4,
+        CULL_BACK = 1 << 5,
+        CULL_NONE = 1 << 6,
     }
 
     public enum BlendMode
@@ -48,8 +43,6 @@ namespace ShaderReader
     class Shader : IDisposable
     {
         public string mName;
-        public CullMode mCullMode = CullMode.Front;
-
         Dictionary<string, Value> mTextures = new Dictionary<string, Value>();
         public List<string> mTextureList = new List<string>();
         public HlslProgram mProgram = new HlslProgram();
@@ -97,7 +90,6 @@ namespace ShaderReader
             Function floor = mProgram.GetFunctionByName("floor");
             Function abs = mProgram.GetFunctionByName("abs");
             Expr PI = new LiteralExpr(f, 3.1415926535f);
-            Expr TwoPI = new LiteralExpr(f, 2 * 3.1415926535f);
 
             mWorld = new DeclExpr(TypeRegistry.GetMatrixType(f4, 4), "gWorld");
             mProgram.AddGlobal(mWorld);
@@ -117,8 +109,7 @@ namespace ShaderReader
                 Value phase = sinWave.AddArgument(f, "phase");
                 Value freq = sinWave.AddArgument(f, "freq");
 
-                Expr t1 = new BinaryExpr(t, TwoPI.Value, OpCode.MUL);
-                Expr sinParam = new BinaryExpr(new BinaryExpr(t1.Value, freq, OpCode.MUL).Value, phase, OpCode.ADD);
+                Expr sinParam = new BinaryExpr(new BinaryExpr(t, freq, OpCode.MUL).Value, phase, OpCode.ADD);
                 Expr sinExpr = new CallExpr(sin, new Expr[] { sinParam });
 
                 Expr returnExpr = new ReturnExpr(
@@ -140,8 +131,7 @@ namespace ShaderReader
                 Value phase = squareWave.AddArgument(f, "phase");
                 Value freq = squareWave.AddArgument(f, "freq");
 
-                Expr t1 = new BinaryExpr(t, TwoPI.Value, OpCode.MUL);
-                Expr sinParam = new BinaryExpr(new BinaryExpr(t1.Value, freq, OpCode.MUL).Value, phase, OpCode.ADD);
+                Expr sinParam = new BinaryExpr(new BinaryExpr(t, freq, OpCode.MUL).Value, phase, OpCode.ADD);
                 Expr sinExpr = new CallExpr(sin, new Expr[] { sinParam });
                 Expr signExpr = new CallExpr(sign, new Expr[] { sinExpr });
 
@@ -162,10 +152,9 @@ namespace ShaderReader
                 Value phase = triangleWave.AddArgument(f, "phase");
                 Value freq = triangleWave.AddArgument(f, "freq");
 
-                Expr t1 = new BinaryExpr(t, PI.Value, OpCode.MUL);
                 Expr twoOverPi = new BinaryExpr(new LiteralExpr(f, 2.0f).Value, PI.Value, OpCode.DIV);
 
-                Expr sinExpr = new CallExpr(sin, new Expr[] { t1 });
+                Expr sinExpr = new CallExpr(sin, new Value[] { t });
                 Expr asinExpr = new CallExpr(asin, new Expr[] { sinExpr });
                 Expr absExpr = new CallExpr(abs, new Expr[] { 
                     new BinaryExpr(twoOverPi.Value, asinExpr.Value, OpCode.MUL) });
@@ -250,7 +239,10 @@ namespace ShaderReader
             if (mTextures.ContainsKey(texture))
                 return mTextures[texture];
 
-            DeclExpr samplerDeclExpr = new DeclExpr(TypeRegistry.GetSamplerType(), string.Format("gSampler{0}", mTextures.Count));
+            int idx = mTextures.Count;
+            DeclExpr samplerDeclExpr = new DeclExpr(TypeRegistry.GetSamplerType(), string.Format("gSampler{0}", idx));
+            samplerDeclExpr.SetRegister(string.Format("s{0}", idx));
+
             mProgram.AddGlobal(samplerDeclExpr);
             mTextures.Add(texture, samplerDeclExpr.Value);
             mTextureList.Add(texture);
@@ -264,9 +256,8 @@ namespace ShaderReader
             {
                 // Transform the position after the shader code below has first applied any particular 
                 // model-space deformations.
-                Expr worldViewProjExpr = new BinaryExpr(mWorld.Value, mViewProjection.Value, OpCode.MUL);
                 Function mul = mProgram.GetFunctionByName("mul");
-
+                Expr worldViewProjExpr = new CallExpr(mul, new Expr[] { mWorld, mViewProjection });
                 Expr transformedPos = new CallExpr(mul, new Expr[] { mVsPositionExpr, worldViewProjExpr});
                 mVertexShader.AddExpr(new AssignmentExpr(new StructMemberExpr(mVsOutput.Value, 0).Value, transformedPos.Value));
                 mVertexShader.AddExpr(new ReturnExpr(mVsOutput));
@@ -277,7 +268,17 @@ namespace ShaderReader
 
             #region Finalize pixel shader
             {
-                mPixelShader.AddExpr(new ReturnExpr(mPsAccumulatedColor));
+                Function mul = mProgram.GetFunctionByName("mul");
+                Hlsl.Type f = TypeRegistry.GetFloatType();
+                Hlsl.Type f4 = TypeRegistry.GetVectorType(f, 4);
+
+                mPixelShader.AddExpr(new ReturnExpr(
+                    new CallExpr(
+                        mul,
+                        new Expr[] { 
+                            mPsAccumulatedColor,
+                            new LiteralExpr(f, 2.0f)
+                        })));
                 mPixelShader.SetReturnTypeSemantic(new Semantic(Semantic.SemanticType.COLOR));
                 mProgram.SetShader(ShaderType.PixelShader, mPixelShader, Hlsl.ShaderProfile.ps_3_0);
             }
@@ -396,15 +397,14 @@ namespace ShaderReader
             switch (cullMode)
             {
                 case "front":
-                    mShader.mCullMode = CullMode.Front;
                     break;
                 case "back":
-                    mShader.mCullMode = CullMode.Back;
+                    mShader.SetFlag(Flag.CULL_BACK);
                     break;
                 case "disable":
                 case "none":
                 case "twosided":
-                    mShader.mCullMode = CullMode.None;
+                    mShader.SetFlag(Flag.CULL_NONE);
                     break;
             }
         }

@@ -106,7 +106,9 @@ namespace Split
                 this.Exit();
 
             if (KS.IsKeyDown(Keys.F11))
-                mSpecial = !mSpecial;
+                mSpecial = true;//!mSpecial;
+            if (KS.IsKeyUp(Keys.F11))
+                mSpecial = false;
 
             if (KS.IsKeyDown(Keys.PrintScreen))
                 TakeScreenshot();
@@ -138,10 +140,14 @@ namespace Split
         /// This is called when the game should draw itself.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        TimeSpan mLastTime;
         protected override void Draw(GameTime gameTime)
         {
-            ++mNumFrames;
-            mTime += ((float)mNumFrames / 60.0f);
+            if (++mNumFrames == 60)
+                mNumFrames = 0;
+
+            TimeSpan TS = gameTime.TotalRealTime - mLastTime;
+            mTime += TS.Milliseconds / 1000.0f;
 
             Matrix wvp = Matrix.Multiply(Matrix.Multiply(World, Camera.View), Projection);
 
@@ -149,6 +155,8 @@ namespace Split
             Renderer.SetWorldViewProjection(wvp);
             Renderer.Render();
             base.Draw(gameTime);
+
+            mLastTime = gameTime.TotalRealTime;
         }
     }
 }
