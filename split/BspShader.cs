@@ -12,23 +12,25 @@ namespace Split
         TRANSPARENT = 1 << 2,
         DEPTH_WRITE = 1 << 3,
         DEPTH_EQUAL = 1 << 4,
-        NODRAW = 1 << 5,
+        CULL_BACK = 1 << 5,
+        CULL_NONE = 1 << 6,
+        NODRAW = 1 << 7,
     }
 
     class BspShader
     {
         public int mEffectIndex;
-        public int mLightmapIndex;
         public int mNumTextures;
         public int mLastAddedIdx;
         public int mFlags;
         public int[] mTextureIndices;
         public string mName;
 
-        public BspShader(int effectIndex, int lightmapIndex, int numTextures, params int[] textureIndices)
+        public const int LIGHTMAP = -1;
+
+        public BspShader(int effectIndex, int numTextures, params int[] textureIndices)
         {
             mEffectIndex = effectIndex;
-            mLightmapIndex = lightmapIndex;
             mNumTextures = numTextures;
             mTextureIndices = textureIndices;
         }
@@ -43,9 +45,6 @@ namespace Split
         public void AddIndex(int idx)
         {
             mTextureIndices[mLastAddedIdx++] = idx;
-
-            if (idx == -1)
-                mLightmapIndex = mLastAddedIdx;
         }
     }
 }
