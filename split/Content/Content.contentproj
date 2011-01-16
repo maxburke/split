@@ -48,7 +48,7 @@
       <Project>{6B08F749-17F0-4C75-82FC-05EA2AE0AF8F}</Project>
       <Name>BspImporter</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\ShaderBuilder\ShaderDbImporter.csproj">
+    <ProjectReference Include="..\..\ShaderDb\ShaderDbImporter.csproj">
       <Project>{9EADC8BE-7B60-40C5-AD0F-C7F89723735E}</Project>
       <Name>ShaderDbImporter</Name>
     </ProjectReference>
