@@ -319,7 +319,7 @@ namespace Split.Pipeline
         }
     }
 
-    struct VisData
+    public class VisData
     {
         public readonly int NumVectors;
         public readonly int VectorSize;
@@ -334,6 +334,13 @@ namespace Split.Pipeline
 
             for (int i = 0; i < vectorBytes; ++i)
                 Vectors[i] = ER.ReadI1();
+        }
+
+        public bool IsVisible(int fromCluster, int toCluster)
+        {
+            int idx = toCluster * VectorSize + (fromCluster / 8);
+            int b = Vectors[idx];
+            return (b & (1 << (fromCluster % 8))) != 0;
         }
     }
 
@@ -404,11 +411,11 @@ namespace Split.Pipeline
         VisData BspVisData;
 
         public Surface[] Textures { get { return BspSurfaceData; } set { BspSurfaceData = value; } }
-        public Plane[] Planes { get { return BspPlaneData; } }
-        public Node[] Nodes { get { return BspNodeData; } }
-        public Leaf[] Leafs { get { return BspLeafData; } }
-        public int[] LeafFaces { get { return BspLeafFaceData; } }
-        public int[] LeafBrushes { get { return BspLeafBrushData; } }
+        public Plane[] Planes { get { return BspPlaneData; } set { BspPlaneData = value; } }
+        public Node[] Nodes { get { return BspNodeData; } set { BspNodeData = value; } }
+        public Leaf[] Leafs { get { return BspLeafData; } set { BspLeafData = value; } }
+        public int[] LeafFaces { get { return BspLeafFaceData; } set { BspLeafFaceData = value; } }
+        public int[] LeafBrushes { get { return BspLeafBrushData; } set { BspLeafBrushData = value; } }
         public Model[] Models { get { return BspModelData; } }
         public Brush[] Brushes { get { return BspBrushData; } }
         public BrushSide[] BrushSides { get { return BspBrushSideData; } }
@@ -418,6 +425,7 @@ namespace Split.Pipeline
         public Face[] Faces { get { return BspFaceData; } }
         public LightMapData[] LightMaps { get { return BspLightMapData; } set { BspLightMapData = value; } }
         public LightVol[] LightVols { get { return BspLightVolData; } }
+        public VisData VisData { get { return BspVisData; } set { BspVisData = value; } }
 
         EndianReader Reader;
         long ByteOffset;

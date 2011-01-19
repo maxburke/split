@@ -34,5 +34,10 @@ namespace Split.Pipeline
             // class which will be used to load this data.
             return "Split.BspReader, Split";
         }
+
+        protected override bool ShouldCompressContent(TargetPlatform targetPlatform, object value)
+        {
+            return false;
+        }
     }
 }
