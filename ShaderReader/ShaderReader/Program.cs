@@ -435,19 +435,45 @@ namespace ShaderReader
 
                         Hlsl.Type floatType = TypeRegistry.GetFloatType();
                         Function fn = mShader.mProgram.GetFunctionByName(func);
+                        Value pos = mShader.mVsPositionExpr.Value;
+
+                        Expr offsetExpr = new BinaryExpr(
+                            new BinaryExpr(
+                                new BinaryExpr(
+                                    new SwizzleExpr(pos, "x").Value, 
+                                    new SwizzleExpr(pos, "y").Value,
+                                    OpCode.ADD).Value,
+                                new SwizzleExpr(pos, "z").Value,
+                                OpCode.ADD).Value,
+                            new LiteralExpr(floatType, div).Value,
+                            OpCode.MUL);
+                        DeclExpr offsetDecl = new DeclExpr(offsetExpr);
+                        offsetDecl.SetConst(true);
+                        mShader.mVertexShader.AddExpr(offsetDecl);
+
                         Expr deformFnCall = new CallExpr(fn, new Expr[] {
                             mShader.mTime,
                             new LiteralExpr(floatType, baseVal),
                             new LiteralExpr(floatType, ampVal),
-                            new LiteralExpr(floatType, phaseVal),
+                            new BinaryExpr(new LiteralExpr(floatType, phaseVal).Value, offsetDecl.Value, OpCode.ADD),
                             new LiteralExpr(floatType, freqVal)
                         });
 
                         Function mul = mShader.mProgram.GetFunctionByName("mul");
-                        Expr mulExpr = new CallExpr(mul, new Expr[] {
+                        DeclExpr fnValue = new DeclExpr(deformFnCall);
+                        fnValue.SetConst(true);
+                        mShader.mVertexShader.AddExpr(fnValue);
+
+                        Hlsl.Type f4 = TypeRegistry.GetVectorType(floatType, 4);
+
+                        Expr mulExpr = new BinaryExpr(
+                            new LiteralExpr(f4, fnValue.Value, fnValue.Value, fnValue.Value, 0.0f).Value,
+                            new LiteralExpr(TypeRegistry.GetVectorType(floatType, 4), new StructMemberExpr(mShader.mVsInput, "normal").Value, 1).Value,
+                            OpCode.MUL);
+/*                        Expr mulExpr = new CallExpr(mul, new Expr[] {
                             new BinaryExpr(deformFnCall.Value, new LiteralExpr(floatType, div).Value, OpCode.MUL),
                             new LiteralExpr(TypeRegistry.GetVectorType(floatType, 4), new StructMemberExpr(mShader.mVsInput, "normal").Value, 1),
-                        });
+                        });*/
 
                         Expr modifiedPosition = new BinaryExpr(
                             mulExpr.Value,
@@ -1497,6 +1523,9 @@ namespace ShaderReader
                     AllShaders.Add(mShader);
                     AllShaderSource.Add(shader);
 
+                    if (mBreak)
+                        Debugger.Break();
+
                     CompiledEffect CE = Effect.CompileEffectFromSource(shader, null, null, CompilerOptions.None, TargetPlatform.Windows);
                     AllCompiledShaders.Add(CE);
 
@@ -1518,6 +1547,8 @@ namespace ShaderReader
             return true;
         }
 
+        bool mBreak;
+
         #endregion
     }
 
@@ -1530,7 +1561,6 @@ namespace ShaderReader
 
         static List<int> UniqueIndices = new List<int>();
         static int[] OldToNew;
-//        static Dictionary<int, int> OldIndexToNew = new Dictionary<int, int>();
         static int NumUniqueEffects;
 
         static void DetermineUniqueShaders()
