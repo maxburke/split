@@ -260,7 +260,7 @@ namespace Split
         #endregion
 
         #region Member data
-        Bsp mBsp;
+        BspTree mBspTree;
         GraphicsDevice mDevice;
         DrawData[] mDrawData = new DrawData[(int)SurfaceType.NUM_SURFACE_TYPES];
         Texture2D[] mLightMapTextures;
@@ -274,9 +274,10 @@ namespace Split
         Matrix mViewProjection;
         float mTime;
         int mLastDrawIdx = -1;
+        VisData mVisData;
         #endregion
 
-        static BspRenderer Instance;
+        public static BspRenderer Instance;
 
         enum SurfaceType
         {
@@ -285,30 +286,33 @@ namespace Split
             NUM_SURFACE_TYPES
         }
 
-        public BspRenderer(Bsp b, GraphicsDevice device, ContentManager contentManager, ShaderDb shaderDb)
+        public BspRenderer(Bsp bsp, BspTree bspTree, GraphicsDevice device, ContentManager contentManager, ShaderDb shaderDb)
         {
             Instance = this;
 
-            mBsp = b;
+            mBspTree = bspTree;
             mDevice = device;
 
-            mDrawCalls = new DrawCall[b.Faces.Length];
+            mDrawCalls = new DrawCall[bsp.Faces.Length];
             for (int i = 0; i < mDrawCalls.Length; ++i)
                 mDrawCalls[i].DrawDataIndex = DrawCall.UNUSED_DRAW_CALL;
 
-            mDrawCallIndices = new int[b.Faces.Length];
+            mDrawCallIndices = new int[bsp.Faces.Length];
             mVertexDeclaration = new VertexDeclaration(device, BspVertexFormat);
 
             for (int i = 0; i < mDrawCallIndices.Length; ++i)
                 mDrawCallIndices[i] = i;
 
-            CreateSurfaceTextures(contentManager, shaderDb);
-            CreateLightMapTextures();
+            CreateSurfaceTextures(bsp, contentManager, shaderDb);
+            CreateLightMapTextures(bsp);
 
-            CreatePatchDrawData();
+            CreatePatchDrawData(bsp);
 
-            CreateMeshDrawData();
-            CreateMeshDrawCalls();
+            CreateMeshDrawData(bsp);
+            CreateMeshDrawCalls(bsp);
+
+            mVisData = bsp.VisData;
+            bsp.VisData = null;
 
             for (int i = 0; i < mDrawCalls.Length; ++i)
                 mDrawCalls[i].CreateSortKey();
@@ -365,12 +369,12 @@ namespace Split
                 texture.GenerateMipMaps(TextureFilter.Anisotropic);
                 mTextures.Add(texture);
             }
-            Debug.WriteLine(string.Format("    {0} {1}", idx, textureName));
+//            Debug.WriteLine(string.Format("    {0} {1}", idx, textureName));
 
             return idx;
         }
 
-        void CreateSurfaceTextures(ContentManager contentManager, ShaderDb shaderDb)
+        void CreateSurfaceTextures(Bsp bsp, ContentManager contentManager, ShaderDb shaderDb)
         {
             List<Effect> effects = new List<Effect>();
 
@@ -379,18 +383,18 @@ namespace Split
 
             int[] shaderIdxToEffectIdx = new int[shaderDb.NumTextShaders()];
 
-            int numSurfaces = mBsp.Textures.Length;
+            int numSurfaces = bsp.Textures.Length;
             mShaders = new BspShader[numSurfaces];
 
             for (int i = 0; i < numSurfaces; ++i)
             {
-                Surface sfc = mBsp.Textures[i];
+                Surface sfc = bsp.Textures[i];
 
                 GeneratedShader GS = shaderDb.Find(sfc.Name);
                 if (GS != null)
                 {
                     int effectIdx = shaderIdxToEffectIdx[GS.mShaderTextIndex];
-                    Debug.WriteLine(string.Format("{0} Using SWEET AWESOME CUSTOM shader for {1}", i, sfc.Name));
+//                    Debug.WriteLine(string.Format("{0} Using SWEET AWESOME CUSTOM shader for {1}", i, sfc.Name));
 
                     if (effectIdx == 0)
                     {
@@ -431,12 +435,12 @@ namespace Split
                         mShaders[i] = new BspShader(0, 2, idx, BspShader.LIGHTMAP);
                         mShaders[i].mName = sfc.Name;
 
-                        Debug.WriteLine(string.Format("{0} Using default shader for {1} {2}", i, sfc.Name, idx));
+//                        Debug.WriteLine(string.Format("{0} Using default shader for {1} {2}", i, sfc.Name, idx));
                     }
                     catch
                     {
                         mTextures.Add(null);
-                        Debug.WriteLine(string.Format("{0} Unable to load texture {1}!", i, sfc.Name));
+//                        Debug.WriteLine(string.Format("{0} Unable to load texture {1}!", i, sfc.Name));
                     }
                 }
             }
@@ -444,18 +448,18 @@ namespace Split
             mEffects = effects.ToArray();
         }
 
-        void CreateLightMapTextures()
+        void CreateLightMapTextures(Bsp bsp)
         {
-            int numLightMaps = mBsp.LightMaps.Length;
+            int numLightMaps = bsp.LightMaps.Length;
             Texture2D[] lightMaps = new Texture2D[numLightMaps + 1];
             for (int i = 0; i < numLightMaps; ++i)
             {
                 Texture2D LM = new Texture2D(mDevice, 128, 128, 1, TextureUsage.Linear, SurfaceFormat.Color);
-                LM.SetData<Color>(mBsp.LightMaps[i].LightMap);
+                LM.SetData<Color>(bsp.LightMaps[i].LightMap);
                 lightMaps[i] = LM;
                 LM.GenerateMipMaps(TextureFilter.Linear);
             }
-            mBsp.LightMaps = null;
+            bsp.LightMaps = null;
             mLightMapTextures = lightMaps;
 
             Texture2D defaultLightMap = new Texture2D(mDevice, 1, 1, 1, TextureUsage.Linear, SurfaceFormat.Color);
@@ -467,11 +471,11 @@ namespace Split
         #endregion
 
         #region Mesh drawing prep code
-        void CreateMeshDrawCalls()
+        void CreateMeshDrawCalls(Bsp bsp)
         {
-            for (int i = 0; i < mBsp.Faces.Length; ++i)
+            for (int i = 0; i < bsp.Faces.Length; ++i)
             {
-                Face F = mBsp.Faces[i];
+                Face F = bsp.Faces[i];
                 if (F.Type == Face.FaceType.Mesh || F.Type == Face.FaceType.Polygon)
                 {
                     int lightmapIndex = (F.LightMapIndex != -1) ? F.LightMapIndex : mLightMapTextures.Length - 1;
@@ -487,33 +491,33 @@ namespace Split
             }
         }
 
-        void CreateMeshDrawData()
+        void CreateMeshDrawData(Bsp bsp)
         {
-            VertexBuffer VB = new VertexBuffer(mDevice, BspVertexSize * mBsp.Vertices.Length, BufferUsage.WriteOnly);
-            VB.SetData<Vertex>(mBsp.Vertices);
-            mBsp.Vertices = null;
+            VertexBuffer VB = new VertexBuffer(mDevice, BspVertexSize * bsp.Vertices.Length, BufferUsage.WriteOnly);
+            VB.SetData<Vertex>(bsp.Vertices);
+            bsp.Vertices = null;
 
-            IndexBuffer IB = new IndexBuffer(mDevice, typeof(int), mBsp.MeshVerts.Length, BufferUsage.WriteOnly);
-            IB.SetData<int>(mBsp.MeshVerts);
-            mBsp.MeshVerts = null;
+            IndexBuffer IB = new IndexBuffer(mDevice, typeof(int), bsp.MeshVerts.Length, BufferUsage.WriteOnly);
+            IB.SetData<int>(bsp.MeshVerts);
+            bsp.MeshVerts = null;
 
             mDrawData[(int)SurfaceType.MESH] = new DrawData(VB, IB);
         }
         #endregion
         
         #region Patch drawing prep code
-        void CreatePatchDrawData()
+        void CreatePatchDrawData(Bsp bsp)
         {
             /// TODO: Calculate the number of verts we create during tesselation
             /// and create an array of that size.
-            PatchTesselator PT = new PatchTesselator(mBsp, mDevice);
+            PatchTesselator PT = new PatchTesselator(bsp, mDevice);
             mDrawData[(int)SurfaceType.PATCH] = new DrawData(PT.VertexBuffer, PT.IndexBuffer);
 
             int numPatches = PT.PatchDrawData.Count;
             for (int i = 0; i < numPatches; ++i)
             {
                 PatchTesselator.PatchData PD = PT.PatchDrawData[i];
-                Face F = mBsp.Faces[i];
+                Face F = bsp.Faces[PD.FaceIndex];
                 int lightmapIndex = (F.LightMapIndex != -1) ? F.LightMapIndex : mLightMapTextures.Length - 1;
                 mDrawCalls[PD.FaceIndex] = new DrawCall(
                     PD.StartVertex,
@@ -528,25 +532,13 @@ namespace Split
         #endregion
 
         #region Rendering code
-        public void MarkAllFacesInvisible()
+        void MarkAllFacesInvisible()
         {
             for (int i = 0; i < mDrawCalls.Length; ++i)
                 mDrawCalls[i].Visible = false;
         }
 
-        public void DetermineVisibility()
-        {
-            /// TODO: make this actually determine visibility.
-            BoundingFrustum BF = new BoundingFrustum(mViewProjection);
-            
-            for (int i = 0; i < mDrawCalls.Length; ++i)
-            {
-                mDrawCalls[i].Visible = true;
-                mDrawCalls[i].UpdateSortKey();
-            }
-        }
-
-        public void InitializeDevice()
+        void InitializeDevice()
         {
             mDevice.RenderState.AlphaBlendEnable = true;
             mDevice.RenderState.SourceBlend = Blend.SourceAlpha;
@@ -577,7 +569,8 @@ namespace Split
         int shaderIdx = -1;
         bool BeginDrawCall(int callIdx)
         {
-            if (mDrawCalls[callIdx].SortKey == DrawCall.INVALID_DRAW_CALL)
+            if (mDrawCalls[callIdx].SortKey == DrawCall.INVALID_DRAW_CALL
+                || !mDrawCalls[callIdx].Visible)
                 return false;
 
             int drawIdx = mDrawCalls[callIdx].DrawDataIndex;
@@ -626,13 +619,17 @@ namespace Split
             return true;
         }
 
-        public void DrawFaces()
+        void DrawFaces()
         {
             mDevice.VertexDeclaration = mVertexDeclaration;
 
+            System.Diagnostics.Stopwatch SW = new Stopwatch();
+            SW.Start();
+
             int numDrawCalls = mDrawCalls.Length;
-            int i = 0;
-            for (; i < numDrawCalls; ++i)
+            int numDrawn = 0;
+
+            for (int i = 0; i < numDrawCalls; ++i)
             {
                 int callIdx = mDrawCallIndices[i];
 
@@ -646,11 +643,20 @@ namespace Split
                     mDrawCalls[callIdx].NumIndices,
                     mDrawCalls[callIdx].StartIndex,
                     mDrawCalls[callIdx].PrimitiveCount);
+                ++numDrawn;
             }
 
-            mCurrentEffect.CurrentTechnique.Passes[0].End();
-            mCurrentEffect.End();
-            mCurrentEffect = null;
+            SW.Stop();
+
+            if (Split.Special)
+                Debugger.Break();
+
+            if (mCurrentEffect != null)
+            {
+                mCurrentEffect.CurrentTechnique.Passes[0].End();
+                mCurrentEffect.End();
+                mCurrentEffect = null;
+            }
             mLastDrawIdx = -1;
         }
 
@@ -660,9 +666,9 @@ namespace Split
             mTime = time;
 
             mViewProjection = viewProjection;
-
             MarkAllFacesInvisible();
-            DetermineVisibility();
+            UpdateVisible(FreeCam.Instance.Position);
+
             Array.Sort(mDrawCallIndices, 
                 (a, b) => 
                 { 
@@ -675,6 +681,33 @@ namespace Split
 
             DrawFaces();
         }
+
+        public void UpdateVisible(Vector3 cameraPosition)
+        {
+            Leaf[] leafs = mBspTree.mLeafs;
+            int leaf = mBspTree.FindLeafForPoint(cameraPosition);
+            int cluster = leafs[leaf].Cluster;
+
+            for (int i = 0; i < leafs.Length; ++i)
+            {
+                if (leafs[i].Cluster >= 0 
+                    && mVisData.IsVisible(cluster, leafs[i].Cluster))
+                {
+                    int[] leafFaces = mBspTree.mLeafFaces;
+                    int begin = leafs[i].LeafFace;
+                    int end = begin + leafs[i].NumLeafFaces;
+                    for (int ii = begin; ii < end; ++ii)
+                    {
+                        int drawCallIdx = leafFaces[ii];
+                        mDrawCalls[drawCallIdx].Visible = true;
+                    }
+                }
+            }
+
+            for (int i = 0; i < mDrawCalls.Length; ++i)
+                mDrawCalls[i].UpdateSortKey();
+        }
+
         #endregion
     }
 }

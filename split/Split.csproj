@@ -89,6 +89,7 @@
     <Compile Include="BspReader.cs" />
     <Compile Include="BspRenderer.cs" />
     <Compile Include="BspShader.cs" />
+    <Compile Include="BspTree.cs" />
     <Compile Include="Camera.cs" />
     <Compile Include="Pix.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

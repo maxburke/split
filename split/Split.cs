@@ -33,6 +33,8 @@ namespace Split
         SurfaceFormat mBackBufferFormat;
         int mNumFrames;
         float mTime;
+        TimeSpan mLastTime;
+        BspTree mBspTree;
 
         public Split()
         {
@@ -71,9 +73,12 @@ namespace Split
         protected override void LoadContent()
         {
             Renderer = new Renderer(GraphicsDevice);
+            Bsp B = Content.Load<Bsp>("q3dm11");
+            mBspTree = new BspTree(B);
+
             using (ShaderDb shaderDb = Content.Load<ShaderDb>("shader"))
             {
-                Renderer.Register(new BspRenderer(Content.Load<Bsp>("q3dm11"), GraphicsDevice, Content, shaderDb));
+                Renderer.Register(new BspRenderer(B, mBspTree, GraphicsDevice, Content, shaderDb));
             }
         }
 
@@ -140,7 +145,6 @@ namespace Split
         /// This is called when the game should draw itself.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        TimeSpan mLastTime;
         protected override void Draw(GameTime gameTime)
         {
             if (++mNumFrames == 60)
@@ -148,6 +152,9 @@ namespace Split
 
             TimeSpan TS = gameTime.TotalRealTime - mLastTime;
             mTime += TS.Milliseconds / 1000.0f;
+
+            if (mTime > 10)
+                mTime = 0;
 
             Matrix wvp = Matrix.Multiply(Matrix.Multiply(World, Camera.View), Projection);
 

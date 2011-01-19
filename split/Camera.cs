@@ -15,10 +15,13 @@ namespace Split
         Matrix mView = new Matrix();
         Quaternion mCameraQuaternion;
 
+        public static FreeCam Instance;
+
         public FreeCam(int windowX, int windowY)
         {
             mHalfWindowSize = new int[] { windowX / 2, windowY / 2 };
             Mouse.SetPosition(mHalfWindowSize[0], mHalfWindowSize[1]);
+            Instance = this;
         }
 
         void ResetMouse()
@@ -77,15 +80,17 @@ namespace Split
             Quaternion xRotationQuaternion = Quaternion.CreateFromAxisAngle(new Vector3(0, -1, 0), mRotation.X);
             Quaternion yRotationQuaternion = Quaternion.CreateFromAxisAngle(new Vector3(-1, 0, 0), mRotation.Y);
             mCameraQuaternion = xRotationQuaternion * yRotationQuaternion;
+            mView = Matrix.Invert(Matrix.CreateFromQuaternion(mCameraQuaternion) * Matrix.CreateTranslation(mPosition));
         }
 
         public Matrix View
         {
-            get 
-            { 
-                mView = Matrix.Invert(Matrix.CreateFromQuaternion(mCameraQuaternion) * Matrix.CreateTranslation(mPosition)); 
-                return mView; 
-            }
+            get { return mView; }
+        }
+
+        public Vector3 Position
+        {
+            get { return mPosition; }
         }
 
         public void Update()
