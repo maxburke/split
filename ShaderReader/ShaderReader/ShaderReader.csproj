@@ -54,7 +54,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\HlslDom\HlslDom\HlslDom\HlslDom.csproj">
+    <ProjectReference Include="..\..\..\HlslDom\HlslDom\HlslDom.csproj">
       <Project>{3F8E935A-6A95-4438-8F15-ED4D7F0FBD38}</Project>
       <Name>HlslDom</Name>
     </ProjectReference>
