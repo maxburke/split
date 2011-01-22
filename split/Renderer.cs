@@ -11,6 +11,7 @@ namespace Split
     {
         int RenderPriority { get; }
         void Render(Matrix worldViewProjection, float gameTime);
+
     }
 
     class Renderer
