@@ -1,0 +1,28 @@
+textures/base_trim/techborder
+{
+	q3map_surfacelight 300	
+        q3map_lightimage textures/base_trim/techborder_fx.tga
+	{
+		map $lightmap
+		rgbGen identity
+	}
+	{
+		map textures/base_trim/techborder.tga
+		rgbGen identity
+		blendFunc GL_DST_COLOR GL_ZERO
+	}
+	{
+		map textures/base_trim/techborder_fx.tga
+                                   
+                tcmod scroll .1 0
+                
+		blendfunc GL_ONE GL_ONE
+	}
+        {
+		map textures/base_trim/techborder_fx.tga
+                tcmod scale  .1 1
+                tcmod scroll .1 0
+                
+		blendfunc GL_ONE GL_ONE
+	}
+}

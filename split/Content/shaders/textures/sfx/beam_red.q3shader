@@ -1,0 +1,17 @@
+textures/sfx/beam_red
+{
+        surfaceparm trans	
+        surfaceparm nomarks	
+        surfaceparm nonsolid
+	surfaceparm nolightmap
+        qer_trans .5
+	cull none
+	surfaceparm nomipmaps
+                  
+	{
+		map textures/sfx/beam_red.tga
+                tcMod Scroll .3 0
+                blendFunc add
+        }
+     
+}

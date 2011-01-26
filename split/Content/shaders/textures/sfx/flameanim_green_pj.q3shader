@@ -1,0 +1,31 @@
+textures/sfx/flameanim_green_pj
+{
+	                                                    
+	                            
+	                                                   
+	                               
+	                                                    
+	qer_editorimage textures/sfx/g_flame6.tga
+	q3map_lightimage textures/sfx/g_flame6.tga
+	surfaceparm trans
+	surfaceparm nomarks
+	surfaceparm nolightmap
+	cull none
+	q3map_surfacelight 2500
+	                                         
+	{
+		animMap 10 textures/sfx/g_flame1.tga textures/sfx/g_flame2.tga textures/sfx/g_flame3.tga textures/sfx/g_flame4.tga textures/sfx/g_flame5.tga textures/sfx/g_flame6.tga textures/sfx/g_flame7.tga textures/sfx/g_flame8.tga
+		blendFunc GL_ONE GL_ONE
+		rgbGen wave inverseSawtooth 0 1 0 10	
+	}	
+	{
+		animMap 10 textures/sfx/g_flame2.tga textures/sfx/g_flame3.tga textures/sfx/g_flame4.tga textures/sfx/g_flame5.tga textures/sfx/g_flame6.tga textures/sfx/g_flame7.tga textures/sfx/g_flame8.tga textures/sfx/g_flame1.tga
+		blendFunc GL_ONE GL_ONE
+		rgbGen wave sawtooth 0 1 0 10
+	}	
+	{
+		map textures/sfx/g_flameball.tga
+		blendFunc GL_ONE GL_ONE
+		rgbGen wave sin .6 .2 0 .6	
+	}
+}

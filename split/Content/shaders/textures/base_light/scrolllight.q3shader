@@ -1,0 +1,27 @@
+textures/base_light/scrolllight
+{
+	q3map_lightimage textures/sfx/scrolllight2.tga
+	q3map_surfacelight 100
+	
+        {
+		map $lightmap
+		rgbGen identity
+	}
+        {
+		Map textures/base_light/scrolllight.tga
+		blendfunc gl_dst_color gl_zero
+                rgbGen identity
+	}	
+        {    
+		Map textures/base_light/scrolllight2.tga
+		blendFunc GL_ONE GL_ONE
+                tcmod scroll -1 0
+	}	
+        {    
+      	        Map textures/base_light/scrolllight2.tga
+      	        blendFunc GL_ONE GL_ONE
+                tcmod scroll -2 0
+        }	
+    
+	
+}

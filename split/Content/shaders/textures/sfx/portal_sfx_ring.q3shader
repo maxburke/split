@@ -1,0 +1,43 @@
+textures/sfx/portal_sfx_ring
+{
+
+	                                                    
+	                           
+	                              
+	                               
+	                                                    
+		
+		deformVertexes wave 100 sin 0 2 0 .5
+		cull none
+	
+	{
+		map textures/sfx/portal_sfx_ring_blue1.tga 
+		blendfunc gl_src_alpha gl_one_minus_src_alpha
+	}
+
+	
+	{	
+		map textures/sfx/portal_sfx_ring_electric.tga 
+		blendfunc gl_one gl_one
+		rgbgen wave inversesawtooth 0 1 .2 .5
+		tcmod scroll 0 .5
+
+	}
+
+	{
+		map textures/sfx/portal_sfx1.tga
+		blendfunc gl_dst_color gl_zero
+		tcMod rotate 360
+	}
+
+	{
+		map textures/sfx/portal_sfx_ring.tga
+		blendfunc gl_one gl_one
+		rgbgen wave inversesawtooth 0 .5 .2 .5
+	}
+
+	
+
+	
+
+}

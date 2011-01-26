@@ -1,0 +1,21 @@
+textures/base_light/ceil1_38_70k
+{
+	qer_editorimage textures/base_light/ceil1_38.tga
+	surfaceparm nomarks
+	q3map_surfacelight 70000
+	light 1
+	                            
+	{
+		map $lightmap
+		rgbGen identity
+	}
+	{
+		map textures/base_light/ceil1_38.tga
+		blendFunc GL_DST_COLOR GL_ZERO
+		rgbGen identity
+	}
+	{
+		map textures/base_light/ceil1_38.blend.tga
+		blendfunc GL_ONE GL_ONE
+	}
+}

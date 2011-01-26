@@ -1,0 +1,21 @@
+textures/sfx/beam_blue
+	{
+        qer_editorimage textures/sfx/beam_blue4.tga
+	                     
+	surfaceparm trans	
+        surfaceparm nomarks	
+        surfaceparm nonsolid
+	surfaceparm nolightmap
+        qer_trans .6
+	cull none
+	surfaceparm nomipmaps
+                  
+	{
+		map textures/sfx/beam_blue4.tga
+	                      
+	                              
+		tcMod Scroll .3 0
+                blendFunc add
+        }
+     
+}

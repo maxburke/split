@@ -1,0 +1,37 @@
+textures/base_wall/comp3b_dark
+{
+	q3map_lightimage textures/base_wall/comp3textb.tga
+        q3map_surfacelight 1
+        {
+		map textures/base_wall/comp3textb.tga
+	        rgbGen identity
+		tcmod scroll 3 3
+	}
+	      
+        {
+		map textures/base_wall/comp3env.tga
+                tcGen environment
+                blendFunc GL_ONE GL_ONE
+                rgbGen wave sin .98 .02 0 5
+	}
+	
+	{
+		map $lightmap
+                tcGen environment
+                blendFunc GL_DST_COLOR GL_ONE
+	}
+
+
+	{
+		map textures/base_wall/comp3b.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+		rgbGen identity
+	}
+       
+	{
+		map $lightmap
+                blendFunc GL_DST_COLOR GL_ONE_MINUS_DST_ALPHA
+		rgbGen identity
+	}
+
+}

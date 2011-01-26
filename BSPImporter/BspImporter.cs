@@ -16,28 +16,31 @@ using TOutput = System.String;
 
 namespace Split.Pipeline
 {
-    public class BspString
+    public class BspData
     {
-        public string Filename;
+        public byte[] MapData;
     }
 
     [ContentProcessor(DisplayName="MapMaker")]
-    public class MapMaker : ContentProcessor<BspString, BspString>
+    public class MapMaker : ContentProcessor<BspData, BspData>
     {
-        public override BspString Process(BspString input, ContentProcessorContext context)
+        public override BspData Process(BspData input, ContentProcessorContext context)
         {
             return input;
         }
     }
 
     [ContentImporter(".bsp", DisplayName = "BspImporter", DefaultProcessor="MapMaker")]
-    public class BspImporter : ContentImporter<BspString>
+    public class BspImporter : ContentImporter<BspData>
     {
-        public override BspString Import(string filename, ContentImporterContext context)
+        public override BspData Import(string filename, ContentImporterContext context)
         {
-            BspString bspString = new BspString();
-            bspString.Filename = filename;
-            return bspString;
+            BspData bspData = new BspData();
+            FileStream FS = File.OpenRead(filename);
+            bspData.MapData = new byte[FS.Length];
+            FS.Read(bspData.MapData, 0, (int)FS.Length);
+
+            return bspData;
         }
     }
 }

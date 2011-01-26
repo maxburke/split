@@ -1,0 +1,55 @@
+textures/liquids/proto_poolpass
+        {
+		                                           
+	                                                   
+		                                           
+                
+		q3map_globaltexture
+	    	                                                  
+                 q3map_lightimage textures/liquids/proto_pool3.tga
+	        q3map_globaltexture	
+	        q3map_surfacelight 240
+		               
+	                                               
+	        surfaceparm slime
+		
+		{
+	        	map textures/liquids/proto_gruel2.tga
+		                         
+                         tcMod scale .5 .6
+			                     
+                        tcMod turb .1 .25 0 -.1
+                       
+		}
+	          
+		                                           
+		                          
+		                    
+		                        
+                                                 
+		   
+	        {
+			map textures/liquids/proto_poolpass.tga
+			blendfunc GL_ONE GL_ONE
+			tcMod scale .2 .2
+			                     
+                        tcMod turb .1 .25 0 .07
+		}
+	        {
+		        map $lightmap
+			rgbgen identity
+			blendfunc GL_DST_COLOR GL_ZERO
+                }
+                {
+			map textures/sfx/bolts.tga
+			blendfunc GL_ONE GL_ONE
+			tcMod scale .2 .2
+                                           
+			tcMod scroll .1 .1
+                        tcmod rotate 290
+                                                   
+		}
+		
+
+		      
+	}

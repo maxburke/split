@@ -1,0 +1,25 @@
+textures/base_floor/clang_floorshiny2
+{
+	qer_editorimage textures/base_floor/clang_floor.tga
+
+	{
+		map $lightmap
+               	tcGen environment
+		tcmod scale .25 .25 
+		rgbgen identity 
+	}
+
+
+	{
+		map textures/base_floor/clang_floorshiny_alpha2.tga
+		blendFunc GL_ONE GL_SRC_ALPHA
+		alphagen wave triangle .98 .02 0 10
+		rgbGen identity
+	}
+	{
+		map $lightmap
+		rgbgen identity
+		blendFunc GL_DST_COLOR GL_ZERO
+	}
+
+}

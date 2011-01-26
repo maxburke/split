@@ -1,0 +1,17 @@
+textures/sfx/fan3
+{
+       cull disable
+       surfaceparm alphashadow	
+       sort 6
+        {
+	        map textures/sfx/fan3.tga
+		blendFunc blend
+	        rgbGen identity
+	}
+        
+        {
+		map $lightmap
+		rgbGen identity
+		blendFunc GL_DST_COLOR GL_ZERO
+	}
+}

@@ -1,0 +1,26 @@
+textures/sfx/beam_water
+	{
+        qer_editorimage textures/sfx/beam_cyan4.tga
+	q3map_surfacelight 20
+	surfaceparm trans	
+        surfaceparm nomarks	
+        surfaceparm nonsolid
+	surfaceparm nolightmap
+        qer_trans .3
+	cull none
+	surfaceparm nomipmaps
+                  
+	{
+		map textures/sfx/beam_cyan4.tga
+		tcMod turb 0 0.025 0.5 0.03
+		tcMod Scroll .15 0
+                blendFunc GL_ONE GL_ONE
+        }
+     	{
+		map textures/sfx/beam_cyan5.tga
+		tcMod turb 0 0.025 0.5 0.03
+		tcMod Scroll .15 .15
+                blendFunc add
+        }
+
+}

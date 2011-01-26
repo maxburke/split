@@ -1,0 +1,17 @@
+models/mapobjects/slamp/slamp3
+{
+    deformVertexes autoSprite2
+    surfaceparm	trans
+	surfaceparm nomarks
+	surfaceparm nolightmap
+	cull none
+   q3map_surfacelight	100
+    
+        {
+                map models/mapobjects/slamp/slamp3.tga
+                blendFunc GL_ONE GL_ONE
+                
+        }
+
+
+}

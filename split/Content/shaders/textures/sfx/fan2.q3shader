@@ -1,0 +1,23 @@
+textures/sfx/fan2
+{
+        surfaceparm trans	
+        surfaceparm nomarks	
+	cull disable
+        nopicmip
+	{
+		clampmap textures/sfx/fan2.tga
+		tcMod rotate 256 
+		                          
+		                 
+                blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+                alphaFunc GT0
+		depthWrite
+		rgbGen identity
+	}
+	{
+		map $lightmap
+		rgbGen identity
+		blendFunc GL_DST_COLOR GL_ZERO
+		depthFunc equal
+	}
+}

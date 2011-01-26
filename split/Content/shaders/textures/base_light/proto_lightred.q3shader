@@ -1,0 +1,21 @@
+textures/base_light/proto_lightred
+{
+	q3map_lightimage textures/base_light/proto_lightred.tga
+	surfaceparm nomarks
+	q3map_surfacelight 300
+	light 1
+	{
+		map $lightmap
+		rgbGen identity
+	}
+	{
+		map textures/base_light/proto_lightred.tga
+		blendFunc filter
+		rgbGen identity
+	}
+        {
+		map textures/base_light/proto_lightred.tga
+		blendFunc add
+	}
+	
+}

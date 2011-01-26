@@ -1,0 +1,21 @@
+models/mapobjects/portal_2/portal_3
+{
+	                                                    
+	                            
+	                              
+	                               
+	                                                    
+
+
+	{
+		map models/mapobjects/portal_2/portal_3.tga
+		rgbGen vertex
+	}
+
+	{
+		map models/mapobjects/portal_2/portal_3_glo.tga
+		blendfunc gl_one gl_one
+		rgbgen wave inversesawtooth 0 1 .2 .5
+	}
+
+}

@@ -1,0 +1,48 @@
+textures/liquids/slime1_2000
+	{
+	                                                      
+	                            
+	                                                   
+	                                                     
+
+		                                                
+		qer_editorimage textures/liquids/slime7.tga
+		q3map_lightimage textures/liquids/slime7.tga
+		q3map_globaltexture
+		qer_trans .5
+
+		surfaceparm noimpact
+		surfaceparm slime
+		surfaceparm nolightmap
+		surfaceparm trans		
+
+		q3map_surfacelight 2000
+		tessSize 32
+		cull disable
+
+		deformVertexes wave 100 sin 0 1 .5 .5
+
+		{
+			map textures/liquids/slime7c.tga
+			tcMod turb .3 .2 1 .05
+			tcMod scroll .01 .01
+		}
+	
+		{
+			map textures/liquids/slime7.tga
+			blendfunc GL_ONE GL_ONE
+			tcMod turb .2 .1 1 .05
+			tcMod scale .5 .5
+			tcMod scroll .01 .01
+		}
+
+		{
+			map textures/liquids/bubbles.tga
+			blendfunc GL_ZERO GL_SRC_COLOR
+			tcMod turb .2 .1 .1 .2
+			tcMod scale .05 .05
+			tcMod scroll .001 .001
+		}		
+
+		       
+	}

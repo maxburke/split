@@ -1,0 +1,27 @@
+textures/skies/pj_dm9sky
+{
+	qer_editorimage textures/skies/toxicbluesky.tga
+	q3map_lightimage textures/skies/topclouds.tga
+	surfaceparm noimpact
+	surfaceparm nomarks
+	surfaceparm nolightmap
+	q3map_globaltexture
+	q3map_lightsubdivide 512 
+
+	q3map_sun	.5 .6 .8 140 165 60
+	q3map_surfacelight 80
+
+	skyparms - 512 -
+	{
+		map textures/skies/bluedimclouds.tga
+		tcMod scale 3 2
+		tcMod scroll 0.15 0.15
+		depthWrite
+	}
+	{
+		map textures/skies/topclouds.tga
+		blendFunc GL_ONE GL_ONE
+		tcMod scale 3 3
+		tcMod scroll 0.05 0.05
+	}
+}

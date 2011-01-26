@@ -1,0 +1,24 @@
+textures/sfx/largerblock3b3x128_pent
+{
+	q3map_lightimage textures/sfx/pentagramfloor_blue3glowtest.tga
+	q3map_surfacelight 100
+	surfaceparm nomarks
+	
+	{
+		map $lightmap
+		rgbgen identity
+	}
+
+	{
+		map textures/sfx/largerblock3b3x128_pent.tga
+		blendfunc gl_dst_color gl_zero
+		rgbgen identity
+	}
+
+	{
+		map textures/sfx/pentagramfloor_blue3glowtest.tga
+		blendfunc gl_one gl_one
+		rgbgen wave sin .9 .1 0 5
+	}
+
+}

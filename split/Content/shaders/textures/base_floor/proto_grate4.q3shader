@@ -1,0 +1,24 @@
+textures/base_floor/proto_grate4
+{
+	surfaceparm	metalsteps	
+        surfaceparm trans		
+	surfaceparm nonsolid                 
+	cull none
+        nopicmip
+
+	                                                    
+	{
+		map textures/base_floor/proto_grate4.tga
+		                 
+		blendFunc GL_ONE GL_ZERO
+		alphaFunc GE128
+		depthWrite
+		rgbGen identity
+	}
+	{
+		map $lightmap
+		rgbGen identity
+		blendFunc GL_DST_COLOR GL_ZERO
+		depthFunc equal
+	}
+}

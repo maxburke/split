@@ -1,0 +1,19 @@
+textures/base_light/patch10_pj_lite
+{
+	q3map_surfacelight 2500
+	surfaceparm nomarks
+	light 1
+	{
+		map $lightmap
+		rgbGen identity
+	}
+	{
+		map textures/base_light/patch10_pj_lite.tga
+		blendFunc GL_DST_COLOR GL_ZERO
+		rgbGen identity
+	}
+	{
+		map textures/base_light/patch10_pj_lite.blend.tga
+		blendFunc GL_ONE GL_ONE
+	}
+}

@@ -1,0 +1,13 @@
+textures/base_support/support2rust
+{
+	qer_editorimage textures/base_support/support1rust.tga
+        {
+		rgbGen identity
+		map $lightmap
+	}
+	{
+		map textures/base_support/support1rust.tga
+		blendFunc GL_DST_COLOR GL_ZERO
+		rgbGen identity
+	}
+}

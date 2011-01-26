@@ -1,0 +1,35 @@
+textures/sfx/q3dm9fog
+                                        
+                                                       
+                                        
+{
+	qer_editorimage textures/sfx/hellfog.tga
+	surfaceparm	trans
+	surfaceparm	nonsolid
+	surfaceparm	fog
+	surfaceparm 	nodrop
+	surfaceparm 	nolightmap
+	q3map_globaltexture
+	q3map_surfacelight 100
+	fogparms ( .55 .11 .1 ) 256
+	
+	
+
+	
+	{
+		map textures/liquids/kc_fogcloud3.tga
+		blendfunc gl_dst_color gl_zero
+		tcmod scale -.05 -.05
+		tcmod scroll .01 -.01
+		rgbgen identity
+	}
+
+	{
+		map textures/liquids/kc_fogcloud3.tga
+		blendfunc gl_dst_color gl_zero
+		tcmod scale .05 .05
+		tcmod scroll .01 -.01
+		rgbgen identity
+	}
+		
+}

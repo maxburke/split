@@ -1,0 +1,28 @@
+models/mapobjects/teleporter/energy
+{
+   cull disable
+   
+               
+       {
+               map models/mapobjects/teleporter/energy.tga
+               blendfunc GL_ONE GL_ONE
+               tcMod scroll 2.2 1.3
+               rgbGen wave inversesawtooth -.3 1.3 0 1.3
+             
+       }
+	{    
+		map models/mapobjects/teleporter/energy2.tga
+		blendfunc GL_ONE GL_ONE
+		tcMod scroll -1 .5
+		rgbGen wave inversesawtooth -.2 1.2 0 .5
+              
+	}
+	{    
+                map models/mapobjects/teleporter/energy3.tga
+                blendfunc GL_ONE GL_ONE
+                tcMod scroll 3 0
+		rgbGen wave triangle 1 1 0 5.3
+              
+	}
+
+}

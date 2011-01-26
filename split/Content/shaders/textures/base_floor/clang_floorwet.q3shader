@@ -1,0 +1,25 @@
+textures/base_floor/clang_floorwet
+{
+	qer_editorimage textures/base_floor/clang_floor.tga
+
+	{
+		map textures/effects/tinfx3.tga
+               	tcGen environment
+		                      
+		rgbgen identity 
+	}
+
+
+	{
+		map textures/base_floor/clang_floorwet.tga
+		blendFunc GL_ONE GL_SRC_ALPHA
+		                                     
+		rgbGen identity
+	}
+	{
+		map $lightmap
+		rgbgen identity
+		blendFunc GL_DST_COLOR GL_ZERO
+	}
+
+}

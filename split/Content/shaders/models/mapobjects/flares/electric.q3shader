@@ -1,0 +1,25 @@
+models/mapobjects/flares/electric
+{
+	
+
+	q3map_surfacelight	200
+
+	surfaceparm	trans
+	surfaceparm nomarks
+	surfaceparm nolightmap
+	cull none
+	
+	{
+		clampmap models/mapobjects/flares/electric.tga
+		blendFunc GL_ONE GL_ONE
+                rgbgen wave triangle .8 2 0 9
+                tcMod rotate 360
+	}	
+        {
+		clampmap models/mapobjects/flares/electric.tga
+		blendFunc GL_ONE GL_ONE
+                rgbgen wave triangle 1 1.4 0 9.5
+                tcMod rotate -202
+	}	
+	
+}

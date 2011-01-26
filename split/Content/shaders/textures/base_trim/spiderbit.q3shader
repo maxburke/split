@@ -1,0 +1,21 @@
+textures/base_trim/spiderbit
+{
+	q3map_lightimage textures/base_trim/spiderbit_fx.tga
+	q3map_surfacelight 100
+	
+        {
+		map $lightmap
+		rgbGen identity
+	}
+        {
+		map textures/base_trim/spiderbit.tga
+		blendfunc gl_dst_color gl_zero
+                rgbGen identity
+	}	
+        {
+		map textures/base_trim/spiderbit_fx.tga
+		blendfunc GL_ONE GL_ONE
+                rgbgen wave triangle .1 .5 0 7
+	}
+    	
+}

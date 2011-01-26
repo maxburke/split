@@ -1,0 +1,22 @@
+models/mapobjects/barrel/barrel2
+{
+	
+	{
+		Map models/mapobjects/barrel/barrel2.tga
+                rgbgen vertex
+               
+	}	
+        {
+		clampmap models/mapobjects/barrel/barrel2fx.tga
+		blendFunc GL_ONE GL_ONE
+                                                  
+                tcMod rotate 403
+	}	
+        {
+		clampmap models/mapobjects/barrel/barrel2fx.tga
+		blendFunc GL_ONE GL_ONE
+                                                
+                tcMod rotate -100
+	}	
+	
+}

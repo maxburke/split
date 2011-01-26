@@ -1,0 +1,14 @@
+models/mapobjects/portal_2/portal_3_edge
+{
+        {
+                map models/mapobjects/portal_2/portal_3_edge.tga
+                rgbGen vertex
+        }
+
+	{
+		map models/mapobjects/portal_2/portal_3_edge_glo.tga
+		blendFunc GL_ONE GL_ONE
+		tcMod scroll 9.7 .5
+	}
+
+}

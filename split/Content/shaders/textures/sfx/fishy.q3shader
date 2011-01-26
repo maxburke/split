@@ -1,0 +1,18 @@
+textures/sfx/fishy
+{
+    tesssize 32
+    deformVertexes wave 10 sin 0 3 0 .5  
+    cull disable
+    surfaceparm nolightmap
+    surfaceparm nomarks	
+    
+        {
+                clampmap textures/sfx/fishy.tga
+                alphaFunc GE128
+                tcMod stretch sin .8 0.10 0 .07
+		depthWrite
+		
+        }
+
+
+}

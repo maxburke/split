@@ -1,0 +1,25 @@
+textures/base_wall/glass_frame
+{
+     cull none
+     surfaceparm alphashadow
+
+        {
+		map textures/effects/tinfx2.tga
+                blendFunc GL_ONE GL_ONE
+                tcgen environment
+                rgbGen identity
+	}
+	{
+		map textures/base_wall/glass_frame.tga
+                alphaFunc GE128
+                depthWrite
+		               
+                                  
+	}
+        {
+		map $lightmap
+		rgbGen identity
+		blendFunc filter
+	}
+
+}

@@ -1,0 +1,17 @@
+textures/base_floor/clangdark
+{
+	surfaceparm	metalsteps		
+
+	                                    
+	{
+		map $lightmap
+		rgbGen identity
+	}
+	{
+		map textures/base_floor/clangdark.tga
+		blendFunc GL_DST_COLOR GL_ZERO
+		rgbGen identity
+	}
+
+
+}

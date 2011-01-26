@@ -22,9 +22,8 @@ namespace Split
         public int mEffectIndex;
         public int mNumTextures;
         public int mLastAddedIdx;
-        public int mFlags;
+        public uint mFlags;
         public int[] mTextureIndices;
-        public string mName;
 
         public const int LIGHTMAP = -1;
 

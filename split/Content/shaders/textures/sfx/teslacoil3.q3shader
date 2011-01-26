@@ -1,0 +1,35 @@
+textures/sfx/teslacoil3
+{
+	cull none
+	q3map_lightimage textures/sfx/tesla1b.tga	
+	q3map_surfacelight 100
+	qer_editorimage textures/sfx/teslacoil.tga
+	surfaceparm nolightmap
+	
+	
+
+	{
+		map textures/sfx/cabletest2.tga
+		blendfunc blend
+	}
+
+	
+	{
+		map textures/sfx/electricslime2.tga
+		blendfunc add
+		rgbGen wave square .25 .25 0 2.5
+		tcmod scale 1 1
+		tcMod scroll 1 1
+	}
+
+
+
+	{
+		map textures/sfx/tesla1b.tga
+		blendfunc add
+		rgbgen wave square 0 1 0 3
+		tcmod scale 1 1
+		tcMod scroll -2 1
+	}
+	
+}
