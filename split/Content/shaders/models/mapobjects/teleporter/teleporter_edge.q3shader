@@ -1,0 +1,15 @@
+models/mapobjects/teleporter/teleporter_edge
+{
+         
+
+        {
+          map models/mapobjects/teleporter/teleporter_edge.tga 
+          rgbGen vertex  
+        }  
+        {
+                map models/mapobjects/teleporter/teleporter_edge2.tga
+                blendfunc GL_ONE GL_ONE
+                rgbgen wave inversesawtooth 0 1 .2 1.5
+        }
+    
+}

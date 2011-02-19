@@ -1,0 +1,21 @@
+textures/base_light/ceil1_22a_8k
+{
+	surfaceparm nomarks
+	qer_editorimage textures/base_light/ceil1_22a
+	q3map_surfacelight 8000
+	light 1
+	                                          
+	{
+		map $lightmap
+		rgbGen identity
+	}
+	{
+		map textures/base_light/ceil1_22a.tga
+		blendFunc GL_DST_COLOR GL_ZERO
+		rgbGen identity
+	}
+	{
+		map textures/base_light/ceil1_22a.blend.tga
+		blendfunc GL_ONE GL_ONE
+	}
+}

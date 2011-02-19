@@ -1,0 +1,24 @@
+textures/sfx/console01
+{
+        surfaceparm trans	
+        surfaceparm nomarks	
+	surfaceparm nolightmap
+        qer_trans .5
+        q3map_surfacelight 150
+        q3map_lightimage textures/sfx/console01.tga
+	cull none
+                  
+	{
+		clampmap textures/sfx/console01.tga
+               
+		tcMod rotate 20
+		blendFunc GL_ONE GL_ONE
+	}
+        {
+		clampmap textures/sfx/console02.tga
+                
+		tcMod rotate -200
+		blendFunc GL_ONE GL_ONE
+	}
+       
+}

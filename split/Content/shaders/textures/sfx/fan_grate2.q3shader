@@ -1,0 +1,21 @@
+textures/sfx/fan_grate2
+{
+        surfaceparm trans	
+        surfaceparm nomarks	
+        surfaceparm	metalsteps	
+	cull none
+        nopicmip
+	{
+		map textures/sfx/fan_grate2.tga
+		blendFunc GL_ONE GL_ZERO
+		alphaFunc GE128
+		depthWrite
+		rgbGen identity
+	}
+	{
+		map $lightmap
+		rgbGen identity
+		blendFunc GL_DST_COLOR GL_ZERO
+		depthFunc equal
+	}
+}

@@ -1,0 +1,19 @@
+textures/sfx/beam_dusty
+	{
+        qer_editorimage textures/sfx/beam_3.tga
+	surfaceparm trans	
+        surfaceparm nomarks	
+        surfaceparm nonsolid
+	surfaceparm nolightmap
+        qer_trans .3
+	cull none
+	surfaceparm nomipmaps
+                  
+	{
+		map textures/sfx/beam_3.tga
+	                        
+		tcMod turb 0 0.015 0.5 0.07
+		tcMod Scroll .15 0
+                blendFunc add
+        }
+}

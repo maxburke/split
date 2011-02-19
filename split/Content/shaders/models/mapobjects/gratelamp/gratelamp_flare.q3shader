@@ -1,0 +1,17 @@
+models/mapobjects/gratelamp/gratelamp_flare
+{
+	deformVertexes autoSprite
+
+	q3map_surfacelight	300
+
+	surfaceparm	trans
+	surfaceparm nomarks
+	surfaceparm nolightmap
+	cull none
+	
+	{
+		Map models/mapobjects/gratelamp/gratelamp_flare.tga
+		blendFunc GL_ONE GL_ONE
+	}	
+	
+}

@@ -18,14 +18,11 @@ namespace Split.Pipeline
     /// This should be part of a Content Pipeline Extension Library project.
     /// </summary>
     [ContentTypeWriter]
-    public class BspWriter : ContentTypeWriter<BspString>
+    public class BspWriter : ContentTypeWriter<BspData>
     {
-        protected override void Write(ContentWriter output, BspString bspFile)
+        protected override void Write(ContentWriter output, BspData bspData)
         {
-            FileStream bsp = File.OpenRead(bspFile.Filename);
-            byte[] bspBytes = new byte[bsp.Length];
-            bsp.Read(bspBytes, 0, (int)bsp.Length);
-            output.Write(bspBytes);
+            output.Write(bspData.MapData);
         }
 
         public override string GetRuntimeReader(TargetPlatform targetPlatform)

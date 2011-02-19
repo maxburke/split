@@ -1,0 +1,36 @@
+textures/base_trim/spiderbite
+{
+
+        {
+		map textures/sfx/proto_zzztblu2.tga
+                tcMod turb 0 .3 0 .2
+                tcmod scroll 6 .7
+                tcmod scale .4 1
+                blendFunc GL_ONE GL_ZERO
+                rgbGen identity
+	}
+        {
+	        map textures/base_trim/spiderbite.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+                tcMod stretch sin .8 0.4 0 .2
+                tcmod scroll .3 0
+	        rgbGen identity
+	}
+        {
+	        map textures/base_trim/spiderbite.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+                tcMod stretch sin .8 0.2 0 .1
+                tcmod scroll -.5 0
+	        rgbGen identity
+	}
+	{
+	        map textures/base_trim/spiderbite.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+	        rgbGen identity
+	}
+        {
+		map $lightmap
+                blendFunc GL_DST_COLOR GL_ONE_MINUS_DST_ALPHA
+		rgbGen identity
+	}
+}

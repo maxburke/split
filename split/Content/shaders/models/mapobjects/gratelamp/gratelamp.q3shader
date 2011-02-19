@@ -1,0 +1,13 @@
+models/mapobjects/gratelamp/gratelamp
+{
+    cull disable
+    
+        {
+                map models/mapobjects/gratelamp/gratelamp.tga
+                alphaFunc GE128
+		depthWrite
+		rgbGen vertex
+        }
+
+
+}

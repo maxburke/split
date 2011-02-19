@@ -1,0 +1,33 @@
+textures/base_light/proto_light_2k
+{
+	qer_editorimage textures/base_light/proto_light.tga
+	q3map_lightimage textures/base_light/proto_lightmap.tga
+	surfaceparm nomarks
+	q3map_surfacelight 2000
+	light 1
+	{
+		map $lightmap
+		rgbGen identity
+	}
+	{
+		map textures/base_light/proto_light.tga
+		blendFunc GL_DST_COLOR GL_ZERO
+		rgbGen identity
+	}
+	{	
+		map textures/base_light/proto_lightmap.tga
+		blendfunc GL_ONE GL_ONE
+                rgbGen wave sin .5 0.5 1 .1
+	}
+        {	
+		map textures/base_light/proto_light2.tga
+		blendfunc GL_ONE GL_ONE
+                rgbgen wave triangle 1 5 1 3
+	}
+        {	
+		map textures/base_light/proto_light2.tga
+		blendfunc GL_ONE GL_ONE
+                tcmod scale -1 -1
+                 rgbgen wave triangle 1 2 0 7
+	}
+}

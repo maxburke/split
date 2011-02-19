@@ -1,0 +1,29 @@
+textures/base_floor/hfloor3
+{
+	                                      
+        {
+		rgbGen identity
+		map $lightmap
+	}
+	{
+		map textures/base_floor/hfloor3.tga
+		blendFunc GL_DST_COLOR GL_SRC_ALPHA
+		rgbGen identity
+		alphaGen lightingSpecular
+	}
+        {
+		map textures/effects/tinfx.tga
+                tcgen environment
+		blendFunc GL_ONE GL_ONE
+		rgbGen identity
+	}
+       
+        {
+		map textures/base_floor/hfloor3.tga
+		                         
+                blendFunc GL_DST_COLOR GL_ZERO
+		rgbGen identity
+	}
+       
+              
+}

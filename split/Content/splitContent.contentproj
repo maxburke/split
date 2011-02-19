@@ -1,0 +1,2169 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <ProjectGuid>{8601277E-EA4E-4FF9-A9A2-1523A2A2C3CC}</ProjectGuid>
+    <ProjectTypeGuids>{96E2B04D-8817-42c6-938A-82C39BA4D311};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <XnaFrameworkVersion>v4.0</XnaFrameworkVersion>
+    <PlatformTarget>x86</PlatformTarget>
+    <OutputPath>bin\$(Platform)\$(Configuration)</OutputPath>
+    <ContentRootDirectory>Content</ContentRootDirectory>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <XnaPlatform>Windows</XnaPlatform>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <XnaPlatform>Windows</XnaPlatform>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Xna.Framework.Content.Pipeline.EffectImporter, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Content.Pipeline.FBXImporter, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Content.Pipeline.TextureImporter, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Content.Pipeline.XImporter, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Content.Pipeline.AudioImporters, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL">
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Content.Pipeline.VideoImporters, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL">
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="q3dm11.bsp">
+      <Name>q3dm11</Name>
+      <Importer>BspImporter</Importer>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\BSPImporter\BspImporter.csproj">
+      <Project>{6B08F749-17F0-4C75-82FC-05EA2AE0AF8F}</Project>
+      <Name>BspImporter</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ShaderDb\ShaderProcessor.csproj">
+      <Project>{9EADC8BE-7B60-40C5-AD0F-C7F89723735E}</Project>
+      <Name>ShaderProcessor</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="bsp.fx">
+      <Name>bsp</Name>
+      <Importer>EffectImporter</Importer>
+      <Processor>EffectProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="gfx\misc\flare.jpg">
+      <Name>flare</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\barrel\barrel.jpg">
+      <Name>barrel</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\barrel\barrel2.jpg">
+      <Name>barrel2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\barrel\barrel2fx.jpg">
+      <Name>barrel2fx</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\barrel\barrelq3.jpg">
+      <Name>barrelq3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\barrel\barrelq32.jpg">
+      <Name>barrelq32</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\flares\electric.jpg">
+      <Name>electric</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\gratelamp\gratelamp_b.jpg">
+      <Name>gratelamp_b</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\gratelamp\gratelamp_flare.jpg">
+      <Name>gratelamp_flare</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\grenadel\grenadel.jpg">
+      <Name>grenadel</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\portal_2\portal_3.jpg">
+      <Name>portal_3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\portal_2\portal_3_edge.jpg">
+      <Name>portal_3_edge</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\portal_2\portal_3_edge_glo.jpg">
+      <Name>portal_3_edge_glo</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\portal_2\portal_3_glo.jpg">
+      <Name>portal_3_glo</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\slamp\slamp.jpg">
+      <Name>slamp</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\slamp\slamp2.jpg">
+      <Name>slamp2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\slamp\slamp3.jpg">
+      <Name>slamp3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\teleporter\energy.jpg">
+      <Name>energy</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\teleporter\energy2.jpg">
+      <Name>energy2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\teleporter\energy3.jpg">
+      <Name>energy3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\teleporter\pad.jpg">
+      <Name>pad</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\teleporter\teleporter.jpg">
+      <Name>teleporter</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\teleporter\teleporter_edge.jpg">
+      <Name>teleporter_edge</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\teleporter\teleporter_edge2.jpg">
+      <Name>teleporter_edge2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\teleporter\transparency.jpg">
+      <Name>transparency</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\teleporter\transparency2.jpg">
+      <Name>transparency2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\teleporter\widget.jpg">
+      <Name>widget</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_button\shootme_glow.jpg">
+      <Name>shootme_glow</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_ceiling\metceil1d.jpg">
+      <Name>metceil1d</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\achtung_clang.jpg">
+      <Name>achtung_clang</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\clangdark.jpg">
+      <Name>clangdark</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\clangdark_ow.jpg">
+      <Name>clangdark_ow</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\clangdark_ow2.jpg">
+      <Name>clangdark_ow2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\clang_floor.jpg">
+      <Name>clang_floor</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\clang_floor2.jpg">
+      <Name>clang_floor2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\clang_floor3b.jpg">
+      <Name>clang_floor3b</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\clang_floor3bstairtop.jpg">
+      <Name>clang_floor3bstairtop</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\clang_floor3bstairtop2.jpg">
+      <Name>clang_floor3bstairtop2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\clang_floor_ow2.jpg">
+      <Name>clang_floor_ow2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\diamond2.jpg">
+      <Name>diamond2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\diamond2c.jpg">
+      <Name>diamond2c</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\floor3_3dark.jpg">
+      <Name>floor3_3dark</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\hfloor3.jpg">
+      <Name>hfloor3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\proto_grill.jpg">
+      <Name>proto_grill</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\baslt4_1.blend.jpg">
+      <Name>baslt4_1.blend</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\baslt4_1.jpg">
+      <Name>baslt4_1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\ceil1_22a.blend.jpg">
+      <Name>ceil1_22a.blend</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\ceil1_22a.jpg">
+      <Name>ceil1_22a</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\ceil1_37.blend.jpg">
+      <Name>ceil1_37.blend</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\ceil1_37.jpg">
+      <Name>ceil1_37</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\ceil1_38.blend.jpg">
+      <Name>ceil1_38.blend</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\ceil1_38.jpg">
+      <Name>ceil1_38</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\ceil1_39.blend.jpg">
+      <Name>ceil1_39.blend</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\ceil1_39.jpg">
+      <Name>ceil1_39</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\jaildr1_3.blend.jpg">
+      <Name>jaildr1_3.blend</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\jaildr1_3.jpg">
+      <Name>jaildr1_3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\patch10_pj_lite.blend.jpg">
+      <Name>patch10_pj_lite.blend</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\patch10_pj_lite.jpg">
+      <Name>patch10_pj_lite</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\patch10_pj_lite2.blend.jpg">
+      <Name>patch10_pj_lite2.blend</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\patch10_pj_lite2.jpg">
+      <Name>patch10_pj_lite2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\proto_light.jpg">
+      <Name>proto_light</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\proto_light2.jpg">
+      <Name>proto_light2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\proto_lightmap.jpg">
+      <Name>proto_lightmap</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\proto_lightred.jpg">
+      <Name>proto_lightred</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\scrolllight.jpg">
+      <Name>scrolllight</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\scrolllight2.jpg">
+      <Name>scrolllight2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\wsupprt1_12.blend.jpg">
+      <Name>wsupprt1_12.blend</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\wsupprt1_12.jpg">
+      <Name>wsupprt1_12</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_support\flat1_1.jpg">
+      <Name>flat1_1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_support\grate1_4.jpg">
+      <Name>grate1_4</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_support\grate1_4_small.jpg">
+      <Name>grate1_4_small</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_support\grate2_7_small.jpg">
+      <Name>grate2_7_small</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_support\metal3_3.jpg">
+      <Name>metal3_3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_support\support1rust.jpg">
+      <Name>support1rust</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_support\surface2.jpg">
+      <Name>surface2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_support\vert_pipe1.jpg">
+      <Name>vert_pipe1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_support\wplat1_1.jpg">
+      <Name>wplat1_1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\border12.jpg">
+      <Name>border12</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\border12b.jpg">
+      <Name>border12b</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\border12bfx.jpg">
+      <Name>border12bfx</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\dirty_pewter.jpg">
+      <Name>dirty_pewter</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\dirty_pewter_big.jpg">
+      <Name>dirty_pewter_big</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\greenoct28.jpg">
+      <Name>greenoct28</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\melty_pewter.jpg">
+      <Name>melty_pewter</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\panel01.jpg">
+      <Name>panel01</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\panel02.jpg">
+      <Name>panel02</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\panel03.jpg">
+      <Name>panel03</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\panelbrn01scr.jpg">
+      <Name>panelbrn01scr</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\pewter.jpg">
+      <Name>pewter</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\pewterstep.jpg">
+      <Name>pewterstep</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\pewter_spec.jpg">
+      <Name>pewter_spec</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\slots1_1.jpg">
+      <Name>slots1_1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\spiderbit.jpg">
+      <Name>spiderbit</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\spiderbit2.jpg">
+      <Name>spiderbit2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\spiderbit3.jpg">
+      <Name>spiderbit3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\spiderbit4.jpg">
+      <Name>spiderbit4</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\spiderbit6.jpg">
+      <Name>spiderbit6</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\spiderbit_fx.jpg">
+      <Name>spiderbit_fx</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\spiderbit_ow.jpg">
+      <Name>spiderbit_ow</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\spidertrim.jpg">
+      <Name>spidertrim</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\techborder.jpg">
+      <Name>techborder</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\techborder_fx.jpg">
+      <Name>techborder_fx</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\tin.jpg">
+      <Name>tin</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\tinfx.jpg">
+      <Name>tinfx</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\atech1_b.jpg">
+      <Name>atech1_b</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\basewall01.jpg">
+      <Name>basewall01</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\basewall01bitfx.jpg">
+      <Name>basewall01bitfx</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\basewall01_ow.jpg">
+      <Name>basewall01_ow</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\basewall01_owfx.jpg">
+      <Name>basewall01_owfx</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\basewall03.jpg">
+      <Name>basewall03</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\basewall04.jpg">
+      <Name>basewall04</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\comp3env.jpg">
+      <Name>comp3env</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\comp3text.jpg">
+      <Name>comp3text</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\comp3textb.jpg">
+      <Name>comp3textb</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\comp3textd.jpg">
+      <Name>comp3textd</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\concrete.jpg">
+      <Name>concrete</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\concreteb2.jpg">
+      <Name>concreteb2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\concretepipe01.jpg">
+      <Name>concretepipe01</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\concrete_dark.jpg">
+      <Name>concrete_dark</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\concrete_dark2.jpg">
+      <Name>concrete_dark2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\patch10_beatup2.jpg">
+      <Name>patch10_beatup2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\patch10_beatup3.jpg">
+      <Name>patch10_beatup3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\redmet.jpg">
+      <Name>redmet</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\redmet4small.jpg">
+      <Name>redmet4small</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\redpad.jpg">
+      <Name>redpad</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\rusted3.jpg">
+      <Name>rusted3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\shiny3.jpg">
+      <Name>shiny3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\steed2f.jpg">
+      <Name>steed2f</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\effects\envmapblue.jpg">
+      <Name>envmapblue</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\effects\envmapblue2.jpg">
+      <Name>envmapblue2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\effects\envmapdimb.jpg">
+      <Name>envmapdimb</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\effects\tinfx.jpg">
+      <Name>tinfx</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\effects\tinfx2.jpg">
+      <Name>tinfx2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\effects\tinfx2b.jpg">
+      <Name>tinfx2b</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\effects\tinfx2c.jpg">
+      <Name>tinfx2c</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\effects\tinfx2d.jpg">
+      <Name>tinfx2d</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\effects\tinfx3.jpg">
+      <Name>tinfx3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\effects\tinfxb.jpg">
+      <Name>tinfxb</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\gothic_block\block10d.jpg">
+      <Name>block10d</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\gothic_block\smblk3b3dim_wall.jpg">
+      <Name>smblk3b3dim_wall</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\gothic_floor\largerblock3b3x128.jpg">
+      <Name>largerblock3b3x128</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\gothic_light\gothic_light2.jpg">
+      <Name>gothic_light2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\gothic_light\gothic_light2_blend.jpg">
+      <Name>gothic_light2_blend</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\gothic_light\gothic_light2_lrg.jpg">
+      <Name>gothic_light2_lrg</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\gothic_light\gothic_light3.jpg">
+      <Name>gothic_light3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\gothic_trim\baseboard08_b.jpg">
+      <Name>baseboard08_b</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\gothic_trim\km_arena1tower4_a.jpg">
+      <Name>km_arena1tower4_a</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\gothic_trim\metalsupport4i.jpg">
+      <Name>metalsupport4i</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\gothic_trim\metalsupport4i_bit.jpg">
+      <Name>metalsupport4i_bit</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\gothic_trim\pjwal5q.jpg">
+      <Name>pjwal5q</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\gothic_trim\stucco7bord1.jpg">
+      <Name>stucco7bord1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\gothic_trim\stucco7trim.jpg">
+      <Name>stucco7trim</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\gothic_trim\zinc.jpg">
+      <Name>zinc</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\gothic_wall\oct20c.jpg">
+      <Name>oct20c</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\gothic_wall\oct20clava.jpg">
+      <Name>oct20clava</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\gothic_wall\support2b.jpg">
+      <Name>support2b</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\liquids\bubbles.jpg">
+      <Name>bubbles</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\liquids\kc_fogcloud3.jpg">
+      <Name>kc_fogcloud3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\liquids\proto_poolpass.jpg">
+      <Name>proto_poolpass</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\liquids\slime7.jpg">
+      <Name>slime7</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\liquids\slime7c.jpg">
+      <Name>slime7c</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\organics\dirt2.jpg">
+      <Name>dirt2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\organics\pjrock7d.jpg">
+      <Name>pjrock7d</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\beam.jpg">
+      <Name>beam</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\beam_1.jpg">
+      <Name>beam_1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\beam_blue4.jpg">
+      <Name>beam_blue4</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\beam_red.jpg">
+      <Name>beam_red</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\beam_waterlight.jpg">
+      <Name>beam_waterlight</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\bolts.jpg">
+      <Name>bolts</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\bouncepad01b_layer1.jpg">
+      <Name>bouncepad01b_layer1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\bouncepad01_diamond2cTGA.jpg">
+      <Name>bouncepad01_diamond2cTGA</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\console01.jpg">
+      <Name>console01</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\console02.jpg">
+      <Name>console02</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\console03.jpg">
+      <Name>console03</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\electricslime2.jpg">
+      <Name>electricslime2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\fanfx.jpg">
+      <Name>fanfx</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\firegorre2.jpg">
+      <Name>firegorre2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\flame1.jpg">
+      <Name>flame1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\flame2.jpg">
+      <Name>flame2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\flame3.jpg">
+      <Name>flame3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\flame4.jpg">
+      <Name>flame4</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\flame5.jpg">
+      <Name>flame5</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\flame6.jpg">
+      <Name>flame6</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\flame7.jpg">
+      <Name>flame7</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\flame8.jpg">
+      <Name>flame8</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\flameball.jpg">
+      <Name>flameball</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\g_flame1.jpg">
+      <Name>g_flame1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\g_flame2.jpg">
+      <Name>g_flame2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\g_flame3.jpg">
+      <Name>g_flame3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\g_flame4.jpg">
+      <Name>g_flame4</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\g_flame5.jpg">
+      <Name>g_flame5</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\g_flame6.jpg">
+      <Name>g_flame6</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\g_flame7.jpg">
+      <Name>g_flame7</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\g_flame8.jpg">
+      <Name>g_flame8</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\g_flameball.jpg">
+      <Name>g_flameball</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\hologirl.jpg">
+      <Name>hologirl</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\jumppadsmall.jpg">
+      <Name>jumppadsmall</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\largerblock3b3x128_pent.jpg">
+      <Name>largerblock3b3x128_pent</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\pentagramfloor_blue3glowtest.jpg">
+      <Name>pentagramfloor_blue3glowtest</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\portalfog.jpg">
+      <Name>portalfog</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\portal_sfx.jpg">
+      <Name>portal_sfx</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\portal_sfx_ring.jpg">
+      <Name>portal_sfx_ring</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\portal_sfx_ring_electric.jpg">
+      <Name>portal_sfx_ring_electric</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\tesla1b.jpg">
+      <Name>tesla1b</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\skies\bluedimclouds.jpg">
+      <Name>bluedimclouds</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\skies\topclouds.jpg">
+      <Name>topclouds</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="models\mapobjects\gratelamp\gratelamp.tga">
+      <Name>gratelamp</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="models\mapobjects\grenadel\grenadelx.tga">
+      <Name>grenadelx</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\flareShader.q3shader">
+      <Name>flareShader</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\models\mapobjects\barrel\barrel2.q3shader">
+      <Name>barrel2</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\models\mapobjects\flares\electric.q3shader">
+      <Name>electric</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\models\mapobjects\gratelamp\gratelamp.q3shader">
+      <Name>gratelamp</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\models\mapobjects\gratelamp\gratelamp_flare.q3shader">
+      <Name>gratelamp_flare</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\models\mapobjects\grenadel\grenadelx.q3shader">
+      <Name>grenadelx</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\models\mapobjects\portal_2\portal_3.q3shader">
+      <Name>portal_3</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\models\mapobjects\portal_2\portal_3_edge.q3shader">
+      <Name>portal_3_edge</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\models\mapobjects\slamp\slamp2.q3shader">
+      <Name>slamp2</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\models\mapobjects\slamp\slamp3.q3shader">
+      <Name>slamp3</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\models\mapobjects\teleporter\energy.q3shader">
+      <Name>energy</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\models\mapobjects\teleporter\teleporter_edge.q3shader">
+      <Name>teleporter_edge</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\models\mapobjects\teleporter\transparency.q3shader">
+      <Name>transparency</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\models\mapobjects\teleporter\transparency2.q3shader">
+      <Name>transparency2</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\models\mapobjects\teleporter\widget.q3shader">
+      <Name>widget</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_button\shootme2.q3shader">
+      <Name>shootme2</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_floor\clangdark.q3shader">
+      <Name>clangdark</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_floor\clangdarkspot.q3shader">
+      <Name>clangdarkspot</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_floor\clangdark_ow.q3shader">
+      <Name>clangdark_ow</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_floor\clangdark_ow3.q3shader">
+      <Name>clangdark_ow3</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_floor\clang_floor3blava.q3shader">
+      <Name>clang_floor3blava</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_floor\clang_floorshiny.q3shader">
+      <Name>clang_floorshiny</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_floor\clang_floorshiny2.q3shader">
+      <Name>clang_floorshiny2</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_floor\clang_floorwet.q3shader">
+      <Name>clang_floorwet</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_floor\clang_floor_ow.q3shader">
+      <Name>clang_floor_ow</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_floor\clang_floor_ow3.q3shader">
+      <Name>clang_floor_ow3</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_floor\cybergrate3.q3shader">
+      <Name>cybergrate3</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_floor\diamond2cspot.q3shader">
+      <Name>diamond2cspot</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_floor\diamond2c_ow.q3shader">
+      <Name>diamond2c_ow</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_floor\floor3_3dark_ow.q3shader">
+      <Name>floor3_3dark_ow</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_floor\hfloor3.q3shader">
+      <Name>hfloor3</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_floor\pjgrate1.q3shader">
+      <Name>pjgrate1</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_floor\pjgrate1kc.q3shader">
+      <Name>pjgrate1kc</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_floor\proto_grate4.q3shader">
+      <Name>proto_grate4</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_floor\proto_rustygrate.q3shader">
+      <Name>proto_rustygrate</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_floor\proto_rustygrate2.q3shader">
+      <Name>proto_rustygrate2</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\baslt4_1_2k.q3shader">
+      <Name>baslt4_1_2k</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\baslt4_1_4k.q3shader">
+      <Name>baslt4_1_4k</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\ceil1_22a.q3shader">
+      <Name>ceil1_22a</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\ceil1_22a_8k.q3shader">
+      <Name>ceil1_22a_8k</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\ceil1_22a_trans.q3shader">
+      <Name>ceil1_22a_trans</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\ceil1_37.q3shader">
+      <Name>ceil1_37</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\ceil1_38.q3shader">
+      <Name>ceil1_38</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\ceil1_38_10k.q3shader">
+      <Name>ceil1_38_10k</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\ceil1_38_20k.q3shader">
+      <Name>ceil1_38_20k</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\ceil1_38_30k.q3shader">
+      <Name>ceil1_38_30k</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\ceil1_38_40k.q3shader">
+      <Name>ceil1_38_40k</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\ceil1_38_50k.q3shader">
+      <Name>ceil1_38_50k</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\ceil1_38_70k.q3shader">
+      <Name>ceil1_38_70k</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\ceil1_38_90k.q3shader">
+      <Name>ceil1_38_90k</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\ceil1_39.q3shader">
+      <Name>ceil1_39</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\jaildr1_3.q3shader">
+      <Name>jaildr1_3</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\patch10_pj_lite.q3shader">
+      <Name>patch10_pj_lite</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\patch10_pj_lite2.q3shader">
+      <Name>patch10_pj_lite2</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\patch10_pj_lite2_1000.q3shader">
+      <Name>patch10_pj_lite2_1000</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\proto_light.q3shader">
+      <Name>proto_light</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\proto_lightgreen.q3shader">
+      <Name>proto_lightgreen</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\proto_lightred.q3shader">
+      <Name>proto_lightred</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\proto_lightred2.q3shader">
+      <Name>proto_lightred2</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\proto_light_2k.q3shader">
+      <Name>proto_light_2k</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\scrolllight.q3shader">
+      <Name>scrolllight</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\trianglelight.q3shader">
+      <Name>trianglelight</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\wsupprt1_12.q3shader">
+      <Name>wsupprt1_12</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_light\wsupprt1_12h.q3shader">
+      <Name>wsupprt1_12h</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_support\grate1_3.q3shader">
+      <Name>grate1_3</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_support\support1rust.q3shader">
+      <Name>support1rust</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_support\support2rust.q3shader">
+      <Name>support2rust</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_support\x_support.q3shader">
+      <Name>x_support</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_support\x_support2.q3shader">
+      <Name>x_support2</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_support\x_support3.q3shader">
+      <Name>x_support3</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_support\x_support4.q3shader">
+      <Name>x_support4</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_support\z_support.q3shader">
+      <Name>z_support</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_trim\border12b.q3shader">
+      <Name>border12b</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_trim\border12b_pj.q3shader">
+      <Name>border12b_pj</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_trim\dark_tin2.q3shader">
+      <Name>dark_tin2</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_trim\dark_tin2_trans.q3shader">
+      <Name>dark_tin2_trans</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_trim\panelbrn010w.q3shader">
+      <Name>panelbrn010w</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_trim\pewter_nonsolid.q3shader">
+      <Name>pewter_nonsolid</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_trim\pewter_shiney.q3shader">
+      <Name>pewter_shiney</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_trim\pewter_spec.q3shader">
+      <Name>pewter_spec</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_trim\proto_fence.q3shader">
+      <Name>proto_fence</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_trim\spiderbit.q3shader">
+      <Name>spiderbit</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_trim\spiderbite.q3shader">
+      <Name>spiderbite</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_trim\spidertrim3.q3shader">
+      <Name>spidertrim3</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_trim\spidertrim4.q3shader">
+      <Name>spidertrim4</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_trim\techborder.q3shader">
+      <Name>techborder</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_trim\tin.q3shader">
+      <Name>tin</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_wall\basewall01bit.q3shader">
+      <Name>basewall01bit</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_wall\basewall01_ow.q3shader">
+      <Name>basewall01_ow</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_wall\comp3.q3shader">
+      <Name>comp3</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_wall\comp3b.q3shader">
+      <Name>comp3b</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_wall\comp3b_dark.q3shader">
+      <Name>comp3b_dark</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_wall\comp3c.q3shader">
+      <Name>comp3c</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_wall\concrete4.q3shader">
+      <Name>concrete4</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_wall\concrete_ow.q3shader">
+      <Name>concrete_ow</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_wall\glass01.q3shader">
+      <Name>glass01</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\base_wall\glass_frame.q3shader">
+      <Name>glass_frame</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\gothic_floor\largerblock3b_ow.q3shader">
+      <Name>largerblock3b_ow</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\gothic_light\gothic_light2_1k.q3shader">
+      <Name>gothic_light2_1k</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\gothic_light\gothic_light2_2K.q3shader">
+      <Name>gothic_light2_2K</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\gothic_light\gothic_light2_4K.q3shader">
+      <Name>gothic_light2_4K</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\gothic_light\gothic_light2_lrg_1k.q3shader">
+      <Name>gothic_light2_lrg_1k</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\gothic_light\gothic_light2_lrg_200.q3shader">
+      <Name>gothic_light2_lrg_200</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\gothic_light\gothic_light2_lrg_2k.q3shader">
+      <Name>gothic_light2_lrg_2k</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\gothic_light\gothic_light2_lrg_500.q3shader">
+      <Name>gothic_light2_lrg_500</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\gothic_light\gothic_light3_10K.q3shader">
+      <Name>gothic_light3_10K</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\gothic_light\gothic_light3_15K.q3shader">
+      <Name>gothic_light3_15K</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\gothic_light\gothic_light3_1K.q3shader">
+      <Name>gothic_light3_1K</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\gothic_light\gothic_light3_20K.q3shader">
+      <Name>gothic_light3_20K</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\gothic_light\gothic_light3_2K.q3shader">
+      <Name>gothic_light3_2K</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\gothic_light\gothic_light3_3k.q3shader">
+      <Name>gothic_light3_3k</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\gothic_light\gothic_light3_4K.q3shader">
+      <Name>gothic_light3_4K</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\gothic_light\gothic_light3_5K.q3shader">
+      <Name>gothic_light3_5K</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\gothic_light\gothic_light3_6K.q3shader">
+      <Name>gothic_light3_6K</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\gothic_light\gothic_light3_7K.q3shader">
+      <Name>gothic_light3_7K</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\gothic_light\gothic_light3_8K.q3shader">
+      <Name>gothic_light3_8K</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\gothic_light\goth_lt2_lrg2k.q3shader">
+      <Name>goth_lt2_lrg2k</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\gothic_trim\zinc_shiny.q3shader">
+      <Name>zinc_shiny</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\liquids\proto_poolpass.q3shader">
+      <Name>proto_poolpass</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\liquids\slime1.q3shader">
+      <Name>slime1</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\liquids\slime1_2000.q3shader">
+      <Name>slime1_2000</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\beam.q3shader">
+      <Name>beam</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\beam_blue.q3shader">
+      <Name>beam_blue</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\beam_dusty.q3shader">
+      <Name>beam_dusty</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\beam_dusty2.q3shader">
+      <Name>beam_dusty2</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\beam_red.q3shader">
+      <Name>beam_red</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\beam_water.q3shader">
+      <Name>beam_water</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\beam_water2.q3shader">
+      <Name>beam_water2</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\beam_waterlight1.q3shader">
+      <Name>beam_waterlight1</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\beam_waterlight2.q3shader">
+      <Name>beam_waterlight2</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\console01.q3shader">
+      <Name>console01</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\console03.q3shader">
+      <Name>console03</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\diamond2cjumppad.q3shader">
+      <Name>diamond2cjumppad</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\fan.q3shader">
+      <Name>fan</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\fan2.q3shader">
+      <Name>fan2</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\fan3.q3shader">
+      <Name>fan3</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\fan3blade.q3shader">
+      <Name>fan3blade</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\fan3bladeb.q3shader">
+      <Name>fan3bladeb</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\fanfx.q3shader">
+      <Name>fanfx</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\fan_grate.q3shader">
+      <Name>fan_grate</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\fan_grate2.q3shader">
+      <Name>fan_grate2</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\fishy.q3shader">
+      <Name>fishy</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\flame1.q3shader">
+      <Name>flame1</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\flame1dark.q3shader">
+      <Name>flame1dark</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\flame1km.q3shader">
+      <Name>flame1km</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\flame1side.q3shader">
+      <Name>flame1side</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\flame1_hell.q3shader">
+      <Name>flame1_hell</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\flame2.q3shader">
+      <Name>flame2</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\flameanim_green_pj.q3shader">
+      <Name>flameanim_green_pj</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\largerblock3b3x128_pent.q3shader">
+      <Name>largerblock3b3x128_pent</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\largerblock3b3x128_pentred.q3shader">
+      <Name>largerblock3b3x128_pentred</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\portal_sfx.q3shader">
+      <Name>portal_sfx</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\portal_sfx_ring.q3shader">
+      <Name>portal_sfx_ring</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\q3dm9fog.q3shader">
+      <Name>q3dm9fog</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\sfx\teslacoil3.q3shader">
+      <Name>teslacoil3</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="shaders\textures\skies\pj_dm9sky.q3shader">
+      <Name>pj_dm9sky</Name>
+      <Importer>Q3ShaderImporter</Importer>
+      <Processor>ShaderProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\clang_floor3blava.tga">
+      <Name>clang_floor3blava</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\cybergrate3.tga">
+      <Name>cybergrate3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\diamond2cspot.tga">
+      <Name>diamond2cspot</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\diamond2c_ow.tga">
+      <Name>diamond2c_ow</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\floor3_3dark_ow.tga">
+      <Name>floor3_3dark_ow</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\pjgrate1.tga">
+      <Name>pjgrate1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\proto_grate4.tga">
+      <Name>proto_grate4</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\proto_rustygrate.tga">
+      <Name>proto_rustygrate</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_floor\proto_rustygrate2.tga">
+      <Name>proto_rustygrate2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\trianglelight.blend.tga">
+      <Name>trianglelight.blend</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_light\trianglelight.tga">
+      <Name>trianglelight</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_support\grate1_3.tga">
+      <Name>grate1_3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_support\pipecolumn4.tga">
+      <Name>pipecolumn4</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_support\x_support.tga">
+      <Name>x_support</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_support\x_support2.tga">
+      <Name>x_support2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_support\x_support3.tga">
+      <Name>x_support3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_support\z_support.tga">
+      <Name>z_support</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\dark_tin2.tga">
+      <Name>dark_tin2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\metal2_2.tga">
+      <Name>metal2_2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\panelbrn010w.tga">
+      <Name>panelbrn010w</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\pewter_shiney.tga">
+      <Name>pewter_shiney</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\proto_fence.tga">
+      <Name>proto_fence</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\spiderbite.tga">
+      <Name>spiderbite</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\spidertrim3.tga">
+      <Name>spidertrim3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_trim\spidertrim4.tga">
+      <Name>spidertrim4</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\basewall01bit.tga">
+      <Name>basewall01bit</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\comp3.tga">
+      <Name>comp3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\comp3b.tga">
+      <Name>comp3b</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\comp3c.tga">
+      <Name>comp3c</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\comp3frame.tga">
+      <Name>comp3frame</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\concrete_ow.tga">
+      <Name>concrete_ow</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\concrete_ow2.tga">
+      <Name>concrete_ow2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\base_wall\glass_frame.tga">
+      <Name>glass_frame</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\gothic_floor\largerblock3b_ow.tga">
+      <Name>largerblock3b_ow</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\gothic_trim\zinc_shiny.tga">
+      <Name>zinc_shiny</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\liquids\proto_gruel2.tga">
+      <Name>proto_gruel2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\cabletest2.tga">
+      <Name>cabletest2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\fan.tga">
+      <Name>fan</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\fan3.tga">
+      <Name>fan3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\fan3bladeb.tga">
+      <Name>fan3bladeb</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\fan_grate.tga">
+      <Name>fan_grate</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\firegorre.tga">
+      <Name>firegorre</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\fishy.tga">
+      <Name>fishy</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\hologirl2.tga">
+      <Name>hologirl2</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\portal_sfx1.tga">
+      <Name>portal_sfx1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\portal_sfx3.tga">
+      <Name>portal_sfx3</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="textures\sfx\portal_sfx_ring_blue1.tga">
+      <Name>portal_sfx_ring_blue1</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

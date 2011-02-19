@@ -1,0 +1,24 @@
+textures/base_wall/concrete4
+{
+	
+        {
+		map textures/liquids/protolava2.tga
+                tcmod scale .2 .2
+                tcmod scroll .04 .03
+                tcMod turb 0 .1 0 .01
+                blendFunc GL_ONE GL_ZERO
+                rgbGen identity
+	}
+	{
+		map textures/base_wall/concrete4.tga
+                blendfunc blend
+                rgbGen identity
+		
+	}
+        {
+		map $lightmap
+		rgbGen identity
+		blendFunc filter
+	}
+
+}

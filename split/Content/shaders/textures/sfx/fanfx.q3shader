@@ -1,0 +1,19 @@
+textures/sfx/fanfx
+             
+{
+	qer_editorimage textures/sfx/fanfx.tga
+        surfaceparm nolightmap
+        surfaceparm trans	
+        surfaceparm nomarks	
+	cull none
+        nopicmip
+
+	{
+		clampmap textures/sfx/fanfx.tga
+		tcMod rotate 256 
+		blendFunc GL_ZERO GL_ONE_MINUS_SRC_COLOR
+		rgbGen exactVertex
+                depthWrite
+		                 
+	}
+}

@@ -1,0 +1,15 @@
+models/mapobjects/grenadel/grenadelx
+{
+        surfaceparm trans	
+        surfaceparm nomarks	
+	cull none
+        nopicmip
+	{
+		clampmap models/mapobjects/grenadel/grenadelx.tga
+		tcMod rotate 10 
+		blendFunc GL_ONE GL_ZERO
+		alphaFunc GE128
+		depthWrite
+		rgbGen identity
+	}
+}

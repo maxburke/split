@@ -1,0 +1,27 @@
+textures/sfx/beam_dusty2
+{
+	qer_editorimage textures/sfx/beam.tga
+        surfaceparm trans	
+        surfaceparm nomarks	
+        surfaceparm nonsolid
+	surfaceparm nolightmap
+	cull none
+	surfaceparm nomipmaps
+                  
+	{
+		map textures/sfx/beam_1.tga
+                                   
+                blendFunc add
+        }
+            
+                                 
+                   
+                                 
+                                      
+                                         
+            
+     	   
+	                                 
+                                                                 
+          
+}

@@ -1,0 +1,25 @@
+textures/base_floor/pjgrate1kc
+{
+	qer_editorimage textures/base_floor/proto_grate5.tga
+	surfaceparm	metalsteps		
+	cull none
+
+	                                                    
+	
+	
+	{
+		map textures/base_floor/proto_grate5.tga
+		blendFunc GL_ONE GL_ZERO
+		alphaFunc GE128
+		depthWrite
+		rgbGen identity
+	}
+
+
+	{
+		map $lightmap
+		rgbGen identity
+		blendFunc GL_DST_COLOR GL_ZERO
+		depthFunc equal
+	}
+}

@@ -75,11 +75,7 @@ namespace Split
             Renderer = new Renderer(GraphicsDevice);
             Bsp B = Content.Load<Bsp>("q3dm11");
             mBspTree = new BspTree(B);
-
-            using (ShaderDb shaderDb = Content.Load<ShaderDb>("shader"))
-            {
-                Renderer.Register(new BspRenderer(B, mBspTree, GraphicsDevice, Content, shaderDb));
-            }
+            Renderer.Register(new BspRenderer(B, mBspTree, GraphicsDevice, Content));
         }
 
         /// <summary>
@@ -124,7 +120,7 @@ namespace Split
 
         void TakeScreenshot()
         {
-#if !XBOX
+#if THISISNTDEFINEDFORNOW
             int i = 0;
             string fileName = null;
 
@@ -150,7 +146,7 @@ namespace Split
             if (++mNumFrames == 60)
                 mNumFrames = 0;
 
-            TimeSpan TS = gameTime.TotalRealTime - mLastTime;
+            TimeSpan TS = gameTime.TotalGameTime - mLastTime;
             mTime += TS.Milliseconds / 1000.0f;
 
             if (mTime > 10)
@@ -163,7 +159,7 @@ namespace Split
             Renderer.Render();
             base.Draw(gameTime);
 
-            mLastTime = gameTime.TotalRealTime;
+            mLastTime = gameTime.TotalGameTime;
         }
     }
 }

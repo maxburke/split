@@ -34,7 +34,7 @@ namespace Split
 
             const int TESSELATION_DEGREE = 16;
 
-            public PatchTesselator(Bsp b, GraphicsDevice device)
+            public PatchTesselator(Bsp b, GraphicsDevice device, VertexDeclaration vertexDeclaration)
             {
                 mBsp = b;
 
@@ -45,7 +45,7 @@ namespace Split
                 if (mVertices.Count == 0)
                     return;
 
-                mVertexBuffer = new VertexBuffer(device, BspVertexSize * mVertices.Count, BufferUsage.WriteOnly);
+                mVertexBuffer = new VertexBuffer(device, vertexDeclaration, mVertices.Count, BufferUsage.WriteOnly);
                 mVertexBuffer.SetData<Vertex>(mVertices.ToArray());
                 mVertices = null;
 
@@ -286,7 +286,7 @@ namespace Split
             NUM_SURFACE_TYPES
         }
 
-        public BspRenderer(Bsp bsp, BspTree bspTree, GraphicsDevice device, ContentManager contentManager, ShaderDb shaderDb)
+        public BspRenderer(Bsp bsp, BspTree bspTree, GraphicsDevice device, ContentManager contentManager)
         {
             Instance = this;
 
@@ -298,12 +298,12 @@ namespace Split
                 mDrawCalls[i].DrawDataIndex = DrawCall.UNUSED_DRAW_CALL;
 
             mDrawCallIndices = new int[bsp.Faces.Length];
-            mVertexDeclaration = new VertexDeclaration(device, BspVertexFormat);
+            mVertexDeclaration = new VertexDeclaration(BspVertexFormat);
 
             for (int i = 0; i < mDrawCallIndices.Length; ++i)
                 mDrawCallIndices[i] = i;
 
-            CreateSurfaceTextures(bsp, contentManager, shaderDb);
+            CreateSurfaceTextures(bsp, contentManager);
             CreateLightMapTextures(bsp);
 
             CreatePatchDrawData(bsp);
@@ -326,11 +326,11 @@ namespace Split
 
         static VertexElement[] mBspVertexFormat =
         {
-            new VertexElement(0, 0, VertexElementFormat.Vector4, VertexElementMethod.Default, VertexElementUsage.Position, 0),
-            new VertexElement(0, 16, VertexElementFormat.Vector2, VertexElementMethod.Default, VertexElementUsage.TextureCoordinate, 0),
-            new VertexElement(0, 24, VertexElementFormat.Vector2, VertexElementMethod.Default, VertexElementUsage.TextureCoordinate, 1),
-            new VertexElement(0, 32, VertexElementFormat.Vector3, VertexElementMethod.Default, VertexElementUsage.Normal, 0),
-            new VertexElement(0, 44, VertexElementFormat.Color, VertexElementMethod.Default, VertexElementUsage.Color, 0)
+            new VertexElement(0, VertexElementFormat.Vector4, VertexElementUsage.Position, 0),
+            new VertexElement(16, VertexElementFormat.Vector2, VertexElementUsage.TextureCoordinate, 0),
+            new VertexElement(24, VertexElementFormat.Vector2, VertexElementUsage.TextureCoordinate, 1),
+            new VertexElement(32, VertexElementFormat.Vector3, VertexElementUsage.Normal, 0),
+            new VertexElement(44, VertexElementFormat.Color, VertexElementUsage.Color, 0)
         };
 
         #endregion
@@ -338,110 +338,72 @@ namespace Split
         public int RenderPriority { get { return 1; } }
 
         #region Texture prep code
-#if WINDOWS
-        TargetPlatform mTargetPlatform = TargetPlatform.Windows;
-#endif
+        int mDefaultTextureIndex = -1;
 
-#if XBOX360
-        TargetPlatform mTargetPlatform = TargetPlatform.Xbox360;
-#endif
-
-#if ZUNE
-        TargetPlatform mTargetPlatform = TargetPlatform.Zune;
-#endif
-
-        int GetLoadedTextureIndex(int texIndex,
-            ContentManager contentManager,
-            ShaderDb shaderDb)
+        int GetLoadedTextureIndex(string textureName, ContentManager contentManager)
         {
-            string textureName = shaderDb.mTextureNames[texIndex];
-
-            int idx;
             if (textureName == "$lightmap")
-            {
-                idx = BspShader.LIGHTMAP;
-            }
-            else
-            {
-                idx = mTextures.Count;
+                return BspShader.LIGHTMAP;
 
+            try
+            {
+                int idx = mTextures.Count;
                 Texture2D texture = contentManager.Load<Texture2D>(textureName);
-                texture.GenerateMipMaps(TextureFilter.Anisotropic);
                 mTextures.Add(texture);
+                return idx;
             }
-//            Debug.WriteLine(string.Format("    {0} {1}", idx, textureName));
+            catch (ContentLoadException)
+            {
+                if (mDefaultTextureIndex == -1)
+                {
+                    Texture2D defaultTexture = new Texture2D(mDevice, 1, 1, false, SurfaceFormat.Color);
+                    Color[] defaultTextureColor = new Color[1];
+                    defaultTextureColor[0] = new Color(1.0f, 0.0f, 0.0f, 1.0f);
+                    defaultTexture.SetData<Color>(defaultTextureColor);
 
-            return idx;
+                    mDefaultTextureIndex = mTextures.Count;
+                    mTextures.Add(defaultTexture);
+                }
+                Debug.WriteLine(string.Format("    Unable to load texture {0}", textureName));
+                return mDefaultTextureIndex;
+            }
         }
 
-        void CreateSurfaceTextures(Bsp bsp, ContentManager contentManager, ShaderDb shaderDb)
+        void CreateSurfaceTextures(Bsp bsp, ContentManager contentManager)
         {
             List<Effect> effects = new List<Effect>();
-
             Effect defaultShader = contentManager.Load<Effect>("bsp");
             effects.Add(defaultShader);
 
-            int[] shaderIdxToEffectIdx = new int[shaderDb.NumTextShaders()];
-
             int numSurfaces = bsp.Textures.Length;
-            mShaders = new BspShader[numSurfaces];
 
+            mShaders = new BspShader[numSurfaces];
             for (int i = 0; i < numSurfaces; ++i)
             {
                 Surface sfc = bsp.Textures[i];
 
-                GeneratedShader GS = shaderDb.Find(sfc.Name);
-                if (GS != null)
+                try
                 {
-                    int effectIdx = shaderIdxToEffectIdx[GS.mShaderTextIndex];
-//                    Debug.WriteLine(string.Format("{0} Using SWEET AWESOME CUSTOM shader for {1}", i, sfc.Name));
+                    string shaderName = "shaders/" + sfc.Name;
+                    CompiledShader shader = contentManager.Load<CompiledShader>(shaderName);
+                    Effect E = new Effect(mDevice, shader.mEffectCode);
 
-                    if (effectIdx == 0)
-                    {
-                        CompiledEffect CE = Effect.CompileEffectFromSource(
-                            shaderDb.mShaderText[GS.mShaderTextIndex],
-                            null,
-                            null,
-                            CompilerOptions.Debug,
-                            mTargetPlatform);
-                        Effect E = new Effect(mDevice, CE.GetEffectCode(), CompilerOptions.Debug, null);
-                        shaderIdxToEffectIdx[GS.mShaderTextIndex] = effects.Count;
-                        effectIdx = effects.Count;
-                        effects.Add(E);
-                    }
+                    int effectIndex = effects.Count;
+                    effects.Add(E);
+                    
+                    int numTextures = shader.mTextures.Length;
+                    int[] textureIndices = new int[numTextures];
+                    for (int ii = 0; ii < shader.mTextures.Length; ++ii)
+                        textureIndices[ii] = GetLoadedTextureIndex(shader.mTextures[ii], contentManager);
 
-                    BspShader B = new BspShader(effectIdx, GS.mNumTextures);
-                    B.mFlags = GS.mFlags;
-
-                    if ((sfc.Flags & Surface.SURF_NODRAW) != 0)
-                        B.mFlags |= (int)ShaderFlags.NODRAW;
-
-                    B.mName = GS.mName;
-
-                    foreach (int texIndex in GS.mTextureIndices)
-                        B.AddIndex(
-                            GetLoadedTextureIndex(texIndex, contentManager, shaderDb));
-
-                    mShaders[i] = B;
+                    mShaders[i] = new BspShader(effectIndex, numTextures, textureIndices);
+                    mShaders[i].mFlags = shader.mFlags;
                 }
-                else
+                catch (ContentLoadException)
                 {
-                    // Use a default shader.
-                    try
-                    {
-                        Texture2D tex = contentManager.Load<Texture2D>(sfc.Name);
-                        int idx = mTextures.Count;
-                        mTextures.Add(tex);
-                        mShaders[i] = new BspShader(0, 2, idx, BspShader.LIGHTMAP);
-                        mShaders[i].mName = sfc.Name;
-
-//                        Debug.WriteLine(string.Format("{0} Using default shader for {1} {2}", i, sfc.Name, idx));
-                    }
-                    catch
-                    {
-                        mTextures.Add(null);
-//                        Debug.WriteLine(string.Format("{0} Unable to load texture {1}!", i, sfc.Name));
-                    }
+                    Debug.WriteLine(string.Format("Unable to load shader {0}", sfc.Name));
+                    int idx = GetLoadedTextureIndex(sfc.Name, contentManager);
+                    mShaders[i] = new BspShader(0, 2, idx, BspShader.LIGHTMAP);
                 }
             }
 
@@ -454,15 +416,14 @@ namespace Split
             Texture2D[] lightMaps = new Texture2D[numLightMaps + 1];
             for (int i = 0; i < numLightMaps; ++i)
             {
-                Texture2D LM = new Texture2D(mDevice, 128, 128, 1, TextureUsage.Linear, SurfaceFormat.Color);
+                Texture2D LM = new Texture2D(mDevice, 128, 128, true, SurfaceFormat.Color);
                 LM.SetData<Color>(bsp.LightMaps[i].LightMap);
                 lightMaps[i] = LM;
-                LM.GenerateMipMaps(TextureFilter.Linear);
             }
             bsp.LightMaps = null;
             mLightMapTextures = lightMaps;
 
-            Texture2D defaultLightMap = new Texture2D(mDevice, 1, 1, 1, TextureUsage.Linear, SurfaceFormat.Color);
+            Texture2D defaultLightMap = new Texture2D(mDevice, 1, 1, false, SurfaceFormat.Color);
             Color[] defaultLightMapColor = new Color[1];
             defaultLightMapColor[0] = new Color(1.0f, 1.0f, 1.0f, 1.0f);
             defaultLightMap.SetData<Color>(defaultLightMapColor);
@@ -493,7 +454,7 @@ namespace Split
 
         void CreateMeshDrawData(Bsp bsp)
         {
-            VertexBuffer VB = new VertexBuffer(mDevice, BspVertexSize * bsp.Vertices.Length, BufferUsage.WriteOnly);
+            VertexBuffer VB = new VertexBuffer(mDevice, mVertexDeclaration, bsp.Vertices.Length, BufferUsage.WriteOnly);
             VB.SetData<Vertex>(bsp.Vertices);
             bsp.Vertices = null;
 
@@ -510,7 +471,7 @@ namespace Split
         {
             /// TODO: Calculate the number of verts we create during tesselation
             /// and create an array of that size.
-            PatchTesselator PT = new PatchTesselator(bsp, mDevice);
+            PatchTesselator PT = new PatchTesselator(bsp, mDevice, mVertexDeclaration);
             mDrawData[(int)SurfaceType.PATCH] = new DrawData(PT.VertexBuffer, PT.IndexBuffer);
 
             int numPatches = PT.PatchDrawData.Count;
@@ -540,30 +501,45 @@ namespace Split
 
         void InitializeDevice()
         {
+            /*
             mDevice.RenderState.AlphaBlendEnable = true;
-            mDevice.RenderState.SourceBlend = Blend.SourceAlpha;
-            mDevice.RenderState.DestinationBlend = Blend.InverseSourceAlpha;
+            mDevice.BlendState.AlphaSourceBlend = Blend.SourceAlpha;
+            mDevice.BlendState.AlphaDestinationBlend = Blend.InverseSourceAlpha;
+             */
+
         }
 
-        void UpdateRenderStateFlags(int flags)
+        uint mLastRenderStateFlags = 0;
+
+        void UpdateRenderStateFlags(uint flags)
         {
-            if ((flags & (int)ShaderFlags.DEPTH_EQUAL) != 0)
-                mDevice.RenderState.DepthBufferFunction = CompareFunction.Equal;
+            if (flags == mLastRenderStateFlags)
+                return;
+
+            DepthStencilState depthState = new DepthStencilState();
+            RasterizerState rasterizerState = new RasterizerState();
+
+            if ((flags & (uint)ShaderFlags.DEPTH_EQUAL) != 0)
+                depthState.DepthBufferFunction = CompareFunction.Equal;
             else
-                mDevice.RenderState.DepthBufferFunction = CompareFunction.LessEqual;
+                depthState.DepthBufferFunction = CompareFunction.LessEqual;
 
             // Depth buffer writes are enabled if the surface is not transparent OR
             // the depth write flag is set.
-            mDevice.RenderState.DepthBufferWriteEnable = 
-                (flags & (int)ShaderFlags.TRANSPARENT) == 0
-                || (flags & (int)ShaderFlags.DEPTH_WRITE) != 0;
+            depthState.DepthBufferWriteEnable = 
+                (flags & (uint)ShaderFlags.TRANSPARENT) == 0
+                || (flags & (uint)ShaderFlags.DEPTH_WRITE) != 0;
 
-            if ((flags & (int)ShaderFlags.CULL_BACK) != 0)
-                mDevice.RenderState.CullMode = CullMode.CullClockwiseFace;
-            else if ((flags & (int)ShaderFlags.CULL_BACK) != 0)
-                mDevice.RenderState.CullMode = CullMode.None;
+            if ((flags & (uint)ShaderFlags.CULL_BACK) != 0)
+                rasterizerState.CullMode = CullMode.CullClockwiseFace;
+            else if ((flags & (uint)ShaderFlags.CULL_BACK) != 0)
+                rasterizerState.CullMode = CullMode.None;
             else
-                mDevice.RenderState.CullMode = CullMode.CullCounterClockwiseFace;
+                rasterizerState.CullMode = CullMode.CullCounterClockwiseFace;
+
+            mDevice.DepthStencilState = depthState;
+            mDevice.RasterizerState = rasterizerState;
+            mLastRenderStateFlags = flags;
         }
 
         int shaderIdx = -1;
@@ -577,7 +553,7 @@ namespace Split
 
             if (drawIdx != mLastDrawIdx)
             {
-                mDevice.Vertices[0].SetSource(mDrawData[drawIdx].VB, 0, BspVertexSize);
+                mDevice.SetVertexBuffer(mDrawData[drawIdx].VB);
                 mDevice.Indices = mDrawData[drawIdx].IB;
                 mLastDrawIdx = drawIdx;
             }
@@ -586,12 +562,6 @@ namespace Split
             if (mDrawCalls[callIdx].ShaderIndex == shaderIdx)
                 return true;
             shaderIdx = mDrawCalls[callIdx].ShaderIndex;
-
-            if (mCurrentEffect != null)
-            {
-                mCurrentEffect.CurrentTechnique.Passes[0].End();
-                mCurrentEffect.End();
-            }
 
             UpdateRenderStateFlags(shader.mFlags);
 
@@ -603,26 +573,20 @@ namespace Split
             {
                 int textureIndex = shader.mTextureIndices[i];
                 mDevice.Textures[i] = (textureIndex != BspShader.LIGHTMAP) ? mTextures[textureIndex] : mLightMapTextures[lightmapIndex];
-
-                mDevice.SamplerStates[i].MagFilter = TextureFilter.Anisotropic;
-                mDevice.SamplerStates[i].MinFilter = TextureFilter.Anisotropic;
-                mDevice.SamplerStates[i].MipFilter = TextureFilter.Linear;
+//                mDevice.SamplerStates[i].Filter = TextureFilter.Anisotropic;
             }
 
             mCurrentEffect.Parameters["gTime"].SetValue(mTime);
             mCurrentEffect.Parameters["gWorld"].SetValue(Matrix.Identity);
             mCurrentEffect.Parameters["gViewProjection"].SetValue(mViewProjection);
 
-            mCurrentEffect.Begin();
-            mCurrentEffect.CurrentTechnique.Passes[0].Begin();
+            mCurrentEffect.CurrentTechnique.Passes[0].Apply();
             
             return true;
         }
 
         void DrawFaces()
         {
-            mDevice.VertexDeclaration = mVertexDeclaration;
-
             System.Diagnostics.Stopwatch SW = new Stopwatch();
             SW.Start();
 
@@ -651,12 +615,6 @@ namespace Split
             if (Split.Special)
                 Debugger.Break();
 
-            if (mCurrentEffect != null)
-            {
-                mCurrentEffect.CurrentTechnique.Passes[0].End();
-                mCurrentEffect.End();
-                mCurrentEffect = null;
-            }
             mLastDrawIdx = -1;
         }
 

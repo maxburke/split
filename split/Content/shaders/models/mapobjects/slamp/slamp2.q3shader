@@ -1,0 +1,20 @@
+models/mapobjects/slamp/slamp2
+{
+    cull disable
+    surfaceparm	trans
+	surfaceparm nomarks
+	surfaceparm nolightmap
+    
+        {
+                map models/mapobjects/slamp/slamp2.tga
+                blendFunc GL_ONE GL_ONE
+        }
+        {
+		map textures/effects/envmapdimb.tga
+		tcGen environment
+		blendfunc GL_ONE GL_ONE
+	                                
+	}
+
+
+}

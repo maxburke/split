@@ -1,0 +1,22 @@
+textures/base_light/baslt4_1_4k
+{
+	qer_editorimage textures/base_light/baslt4_1.tga
+	surfaceparm nomarks
+	q3map_surfacelight 4000
+	         
+
+	                        
+	{
+		map $lightmap
+		rgbGen identity
+	}
+	{
+		map textures/base_light/baslt4_1.tga
+		blendFunc GL_DST_COLOR GL_ZERO
+		rgbGen identity
+	}
+	{
+		map textures/base_light/baslt4_1.blend.tga
+		blendfunc GL_ONE GL_ONE
+	}
+}

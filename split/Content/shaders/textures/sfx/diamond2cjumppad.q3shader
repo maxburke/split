@@ -1,0 +1,35 @@
+textures/sfx/diamond2cjumppad
+{
+	qer_editorimage textures/sfx/bouncepad01_diamond2cTGA.tga
+	                         
+	surfaceparm nodamage
+	q3map_lightimage textures/sfx/jumppadsmall.tga	
+	q3map_surfacelight 500
+
+	
+	{
+		map textures/sfx/bouncepad01_diamond2cTGA.tga
+		rgbGen identity
+	}
+	
+	{
+		map $lightmap
+		rgbGen identity
+		blendfunc gl_dst_color gl_zero
+	}
+	
+	{
+		map textures/sfx/bouncepad01b_layer1.tga
+		blendfunc gl_one gl_one
+		rgbGen wave sin .5 .5 0 1.5	
+	}
+
+	{
+		clampmap textures/sfx/jumppadsmall.tga
+		blendfunc gl_one gl_one
+		tcMod stretch sin 1.2 .8 0 1.5
+		rgbGen wave square .5 .5 .25 1.5
+	}
+
+	      
+}

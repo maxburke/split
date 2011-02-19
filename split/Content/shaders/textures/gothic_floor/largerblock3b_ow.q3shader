@@ -1,0 +1,22 @@
+textures/gothic_floor/largerblock3b_ow
+{
+
+        {
+		map textures/sfx/firegorre.tga
+                tcmod scroll 0 1
+                tcMod turb 0 .25 0 1.6
+                tcmod scale 4 4
+                blendFunc GL_ONE GL_ZERO
+                rgbGen identity
+	}
+	{
+	        map textures/gothic_floor/largerblock3b_ow.tga
+		blendFunc GL_SRC_ALPHA GL_ONE_MINUS_SRC_ALPHA
+	        rgbGen identity
+	}
+        {
+		map $lightmap
+                blendFunc GL_DST_COLOR GL_ONE_MINUS_DST_ALPHA
+		rgbGen identity
+	}
+}

@@ -1,0 +1,27 @@
+textures/base_trim/panelbrn010w
+{
+	q3map_lightimage textures/base_trim/panelbrn010wfx.tga
+	
+        {
+		map textures/base_trim/panelbrn010w.tga
+        }
+	
+        {
+		map textures/sfx/hologirl2.tga
+                tcmod scale .4 .4
+                tcmod scroll 6 2
+                blendFunc GL_ONE GL_ONE
+                rgbGen identity
+	}
+	{
+		map textures/base_trim/panelbrn010w.tga
+                blendfunc blend
+		
+	}
+        {
+		map $lightmap
+		rgbGen identity
+		blendFunc filter
+	}
+       
+}
