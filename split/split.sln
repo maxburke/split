@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShaderProcessor", "..\Shade
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "splitContent", "Content\splitContent.contentproj", "{8601277E-EA4E-4FF9-A9A2-1523A2A2C3CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HlslDom", "..\..\HlslDom\HlslDom\HlslDom.csproj", "{3F8E935A-6A95-4438-8F15-ED4D7F0FBD38}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HlslDom", "..\..\HlslDom\HlslDom\HlslDom\HlslDom_VS2010.csproj", "{3F8E935A-6A95-4438-8F15-ED4D7F0FBD38}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
