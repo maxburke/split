@@ -585,6 +585,8 @@ namespace Split
             return true;
         }
 
+        StringBuilder DebugText = new StringBuilder();
+
         void DrawFaces()
         {
             System.Diagnostics.Stopwatch SW = new Stopwatch();
@@ -614,6 +616,9 @@ namespace Split
 
             if (Split.Special)
                 Debugger.Break();
+
+            DebugText.Clear();
+            Split.DebugText.Draw(DebugText.AppendFormat("BSP draw calls: {0} Time: {1} ms", numDrawn, SW.Elapsed.TotalMilliseconds));
 
             mLastDrawIdx = -1;
         }

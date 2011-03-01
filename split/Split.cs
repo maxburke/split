@@ -36,6 +36,10 @@ namespace Split
         TimeSpan mLastTime;
         BspTree mBspTree;
 
+        static DebugText DebugDrawInstance;
+
+        public static DebugText DebugText { get { return DebugDrawInstance; } }
+
         public Split()
         {
             Graphics = new GraphicsDeviceManager(this);
@@ -73,6 +77,9 @@ namespace Split
         protected override void LoadContent()
         {
             Renderer = new Renderer(GraphicsDevice);
+            DebugDrawInstance = new DebugText(Content, GraphicsDevice);
+            Renderer.Register(DebugDrawInstance);
+
             Bsp B = Content.Load<Bsp>("q3dm11");
             mBspTree = new BspTree(B);
             Renderer.Register(new BspRenderer(B, mBspTree, GraphicsDevice, Content));

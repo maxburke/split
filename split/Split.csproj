@@ -123,6 +123,7 @@
     <Compile Include="BspShader.cs" />
     <Compile Include="BspTree.cs" />
     <Compile Include="Camera.cs" />
+    <Compile Include="DebugText.cs" />
     <Compile Include="Pix.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
