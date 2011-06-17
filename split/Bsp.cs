@@ -322,6 +322,38 @@ namespace Split.Pipeline
     {
         public readonly int NumVectors;
         public readonly int VectorSize;
+        public readonly List<byte[]> Vectors;
+
+        public VisData(EndianReader ER)
+        {
+            NumVectors = ER.ReadI4();
+            VectorSize = ER.ReadI4();
+
+            Vectors = new List<byte[]>(NumVectors);
+            for (int i = 0; i < NumVectors; ++i)
+            {
+                byte[] vector = new byte[VectorSize];
+                for (int ii = 0; ii < VectorSize; ++ii)
+                    vector[ii] = ER.ReadI1();
+
+                Vectors.Add(vector);
+            }
+        }
+
+        public bool IsVisible(int fromCluster, int toCluster)
+        {
+            byte[] vector;
+            if (fromCluster < 0 || fromCluster >= Vectors.Count)
+                vector = Vectors[0];
+            else
+                vector = Vectors[fromCluster];
+
+            if (((vector[toCluster & 3]) & (1 << (toCluster & 7))) == 0)
+                return false;
+
+            return true;
+        }
+        /*
         public readonly byte[] Vectors;
 
         public VisData(EndianReader ER)
@@ -341,6 +373,7 @@ namespace Split.Pipeline
             int b = Vectors[idx];
             return (b & (1 << (fromCluster % 8))) != 0;
         }
+        */
     }
 
     public class Bsp
@@ -608,7 +641,7 @@ namespace Split.Pipeline
             FetchNumEntriesAndSeek(LumpType.VisData);
             BspVisData = new VisData(Reader);
         }
-        
+
         public void Parse(BinaryReader BR)
         {
             ByteOffset = BR.BaseStream.Position;
