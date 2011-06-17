@@ -16,6 +16,7 @@ namespace Split
         CULL_FRONT = 1 << 6,
         CULL_FLAGS = (CULL_BACK | CULL_FRONT),
         NODRAW = 1 << 7,
+        ADDITIVE_BLEND = 1 << 8
     }
 
     class BspShader

@@ -23,6 +23,7 @@ namespace Split.Pipeline
         DEPTH_EQUAL = 1 << 4,
         CULL_BACK = 1 << 5,
         CULL_FRONT = 1 << 6,
+        ADDITIVE_BLEND = 1 << 8
     }
 
     public enum BlendMode
@@ -306,6 +307,7 @@ namespace Split.Pipeline
 
         #region Shader stage data
 
+        int mCurrentTextureStage;
         BlendMode mSrcBlend = BlendMode.GL_ONE;
         BlendMode mDestBlend = BlendMode.GL_ONE;
         Value mSampler;
@@ -1001,6 +1003,11 @@ namespace Split.Pipeline
                 default:
                     throw new Exception("Whachu talkin about, Willis?");
             }
+
+            // If the first texture stage has GL_ONE/GL_ONE set for source/dest blends then
+            // ensure that additive blending is enabled in the back end renderer.
+            if (++mCurrentTextureStage == 1 && mSrcBlend == BlendMode.GL_ONE && mDestBlend == BlendMode.GL_ONE)
+                mShader.SetFlag(Flag.ADDITIVE_BLEND);
 
             if (!skipCombine)
                 mShader.mPsAccumulatedColor = new BinaryExpr(source.Value, dest.Value, OpCode.ADD);
