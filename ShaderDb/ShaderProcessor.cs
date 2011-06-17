@@ -16,6 +16,7 @@ namespace Split.Pipeline
 {
     public class ShaderText
     {
+        public string ShaderName;
         public string ShaderContent;
     }
 
@@ -39,7 +40,6 @@ namespace Split.Pipeline
         public override CompiledShaderOutput Process(ShaderText input, ContentProcessorContext context)
         {
             ShaderParser SP = new ShaderParser(input.ShaderContent);
-            byte[] textureBytes = new byte[1];
 
             EffectProcessor compiler = new EffectProcessor();
             EffectContent content = new EffectContent();
@@ -56,6 +56,7 @@ namespace Split.Pipeline
         public override ShaderText Import(string filename, ContentImporterContext context)
         {
             ShaderText shaderText = new ShaderText();
+            shaderText.ShaderName = filename;
             shaderText.ShaderContent = File.ReadAllText(filename);
             return shaderText;
         }

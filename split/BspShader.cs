@@ -13,7 +13,8 @@ namespace Split
         DEPTH_WRITE = 1 << 3,
         DEPTH_EQUAL = 1 << 4,
         CULL_BACK = 1 << 5,
-        CULL_NONE = 1 << 6,
+        CULL_FRONT = 1 << 6,
+        CULL_FLAGS = (CULL_BACK | CULL_FRONT),
         NODRAW = 1 << 7,
     }
 

@@ -22,7 +22,7 @@ namespace Split.Pipeline
         DEPTH_WRITE = 1 << 3,
         DEPTH_EQUAL = 1 << 4,
         CULL_BACK = 1 << 5,
-        CULL_NONE = 1 << 6,
+        CULL_FRONT = 1 << 6,
     }
 
     public enum BlendMode
@@ -407,6 +407,7 @@ namespace Split.Pipeline
             switch (cullMode)
             {
                 case "front":
+                    mShader.SetFlag(Flag.CULL_FRONT);
                     break;
                 case "back":
                     mShader.SetFlag(Flag.CULL_BACK);
@@ -414,7 +415,6 @@ namespace Split.Pipeline
                 case "disable":
                 case "none":
                 case "twosided":
-                    mShader.SetFlag(Flag.CULL_NONE);
                     break;
             }
         }
@@ -751,10 +751,11 @@ namespace Split.Pipeline
                 case "oneminusvertex":
                     {
                         Expr one = new LiteralExpr(TypeRegistry.GetVectorType(TypeRegistry.GetFloatType(), 4),
-                            1.0f, 1.0f, 1.0f, 1.0f);
-                        mRgbGenMultiplicationExpr = new BinaryExpr(one.Value,
-                            new StructMemberExpr(mShader.mPsInput, "color").Value,
-                            OpCode.SUB);
+                            1.0f, 1.0f, 1.0f, 0.0f);
+                        mRgbGenMultiplicationExpr = new LiteralExpr(TypeRegistry.GetVectorType(TypeRegistry.GetFloatType(), 4), 
+                            new SwizzleExpr(new BinaryExpr(one.Value,
+                                new StructMemberExpr(mShader.mPsInput, "color").Value,
+                                OpCode.SUB).Value, "xyz").Value, 1.0f);
                     }
                     break;
 
@@ -791,7 +792,7 @@ namespace Split.Pipeline
                         }));
                         mShader.mPixelShader.AddExpr(waveCall);
                         Value v = waveCall.Value;
-                        mRgbGenMultiplicationExpr = new LiteralExpr(TypeRegistry.GetVectorType(floatType, 4), v, v, v, v);
+                        mRgbGenMultiplicationExpr = new LiteralExpr(TypeRegistry.GetVectorType(floatType, 4), v, v, v, 1.0f);
                     }
                     break;
             }

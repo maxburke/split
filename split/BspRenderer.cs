@@ -504,9 +504,7 @@ namespace Split
             /*
             mDevice.RenderState.AlphaBlendEnable = true;
             mDevice.BlendState.AlphaSourceBlend = Blend.SourceAlpha;
-            mDevice.BlendState.AlphaDestinationBlend = Blend.InverseSourceAlpha;
-             */
-
+            mDevice.BlendState.AlphaDestinationBlend = Blend.InverseSourceAlpha;*/
         }
 
         uint mLastRenderStateFlags = 0;
@@ -530,13 +528,19 @@ namespace Split
                 (flags & (uint)ShaderFlags.TRANSPARENT) == 0
                 || (flags & (uint)ShaderFlags.DEPTH_WRITE) != 0;
 
-            if ((flags & (uint)ShaderFlags.CULL_BACK) != 0)
-                rasterizerState.CullMode = CullMode.CullClockwiseFace;
-            else if ((flags & (uint)ShaderFlags.CULL_BACK) != 0)
-                rasterizerState.CullMode = CullMode.None;
-            else
-                rasterizerState.CullMode = CullMode.CullCounterClockwiseFace;
+            uint cullFlags = flags & (uint)ShaderFlags.CULL_FLAGS;
 
+            if (cullFlags == (uint)ShaderFlags.CULL_BACK)
+                rasterizerState.CullMode = CullMode.CullClockwiseFace;
+            else if (flags == (uint)ShaderFlags.CULL_FRONT)
+                rasterizerState.CullMode = CullMode.CullCounterClockwiseFace;
+            else
+                rasterizerState.CullMode = CullMode.None;
+
+//BlendState blendState = new BlendState();
+//blendState.AlphaSourceBlend = Blend.SourceAlpha;
+//blendState.AlphaDestinationBlend = Blend.InverseSourceAlpha;
+            mDevice.BlendState = BlendState.NonPremultiplied;
             mDevice.DepthStencilState = depthState;
             mDevice.RasterizerState = rasterizerState;
             mLastRenderStateFlags = flags;
@@ -651,6 +655,8 @@ namespace Split
             int leaf = mBspTree.FindLeafForPoint(cameraPosition);
             int cluster = leafs[leaf].Cluster;
 
+            Split.DebugText.Draw("Leaf: {0}", leaf);
+            /*
             for (int i = 0; i < leafs.Length; ++i)
             {
                 if (leafs[i].Cluster >= 0 
@@ -665,10 +671,13 @@ namespace Split
                         mDrawCalls[drawCallIdx].Visible = true;
                     }
                 }
-            }
+            }*/
 
             for (int i = 0; i < mDrawCalls.Length; ++i)
+            {
+                mDrawCalls[i].Visible = true;
                 mDrawCalls[i].UpdateSortKey();
+            }
         }
 
         #endregion
