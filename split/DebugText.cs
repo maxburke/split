@@ -32,6 +32,13 @@ namespace Split
             Text.Add(str);
         }
 
+        public void Draw(string format, params object[] args)
+        {
+            StringBuilder SB = new StringBuilder();
+            SB.AppendFormat(format, args);
+            Draw(SB);
+        }
+
         public void Render(Matrix worldViewProjection, float gameTime)
         {
             if (Text.Count == 0)
