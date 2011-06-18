@@ -6,7 +6,7 @@ textures/sfx/flame2
 	                              
 	                               
 	                                                    
-	
+	    surfaceparm trans
 		surfaceparm nomarks
 		surfaceparm nolightmap
 		cull none

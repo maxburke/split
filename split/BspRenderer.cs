@@ -195,7 +195,12 @@ namespace Split
             public const int UNUSED_DRAW_CALL = int.MaxValue;
 
             const int INVISIBLE_SHIFT = 63;
-            const int TRANSPARENT_SHIFT = 62;
+            const int TRANSPARENCY_SHIFT = 61;
+
+            const ulong OPAQUE = 0;
+            const ulong HAS_ALPHA = 1;
+            const ulong TRANSPARENT = 2;
+
             const int DRAWDATA_SHIFT = 54;
             const int LIGHTMAP_SHIFT = 27;
             const int SURFACE_SHIFT = 0;
@@ -235,10 +240,14 @@ namespace Split
                 // [invisible][transparent][draw data][lightmap][surface]
                 SortKey = 0;
 
-                // Commenting out this bit of transparency sorting for now as this
-                // should be handled correctly once we sort geometry.
+                // Opaque geometry should be drawn before geometry with alpha which
+                // should be drawn before transparent geometry.
+                ulong transparency = 0;
                 if ((Instance.mShaders[ShaderIndex].mFlags & (int)ShaderFlags.TRANSPARENT) != 0)
-                    SortKey |= 1ul << TRANSPARENT_SHIFT;
+                    transparency = (TRANSPARENT << TRANSPARENCY_SHIFT);
+                else if (!Instance.mShaders[ShaderIndex].IsOpaque())
+                    transparency = (HAS_ALPHA << TRANSPARENCY_SHIFT);
+                SortKey |= transparency;
 
                 SortKey |= (ulong)((uint)DrawDataIndex & DRAWDATA_MASK) << DRAWDATA_SHIFT;
                 SortKey |= (ulong)((uint)LightMap & TEX_MASK) << LIGHTMAP_SHIFT;
@@ -249,9 +258,6 @@ namespace Split
             {
                 if (!Valid)
                     return;
-
-                if ((Instance.mShaders[ShaderIndex].mFlags & (int)ShaderFlags.NODRAW) != 0)
-                    Visible = false;
 
                 const ulong INVISIBLE_BIT = 1ul << INVISIBLE_SHIFT;
                 SortKey = Visible ? SortKey & (~INVISIBLE_BIT) : SortKey | INVISIBLE_BIT;
@@ -387,7 +393,6 @@ namespace Split
                     string shaderName = "shaders/" + sfc.Name;
                     CompiledShader shader = contentManager.Load<CompiledShader>(shaderName);
                     Effect E = new Effect(mDevice, shader.mEffectCode);
-
                     int effectIndex = effects.Count;
                     effects.Add(E);
                     
@@ -499,23 +504,54 @@ namespace Split
                 mDrawCalls[i].Visible = false;
         }
 
-        void InitializeDevice()
-        {
-            /*
-            mDevice.RenderState.AlphaBlendEnable = true;
-            mDevice.BlendState.AlphaSourceBlend = Blend.SourceAlpha;
-            mDevice.BlendState.AlphaDestinationBlend = Blend.InverseSourceAlpha;*/
-        }
-
         uint mLastRenderStateFlags = 0;
+
+        // This array needs to be kept in sync with the BlendMode enumeration.
+        static Blend[] gBlendTranslationTable =
+        {
+            Blend.One,
+            Blend.Zero,
+            Blend.DestinationColor,
+            Blend.InverseDestinationColor,
+            Blend.SourceColor,
+            Blend.InverseSourceColor,
+            Blend.DestinationAlpha,
+            Blend.InverseDestinationAlpha,
+            Blend.SourceAlpha,
+            Blend.InverseSourceAlpha,
+        };
+
+        BlendState GenerateBlendState(BlendMode sourceBlend, BlendMode destBlend)
+        {
+            if (sourceBlend == BlendMode.GL_DST_COLOR && destBlend == BlendMode.GL_ZERO)
+                return BlendState.Opaque;
+            if (sourceBlend == BlendMode.GL_ONE && destBlend == BlendMode.GL_ONE)
+                return BlendState.Additive;
+            if (sourceBlend == BlendMode.GL_SRC_ALPHA && destBlend == BlendMode.GL_ONE_MINUS_SRC_ALPHA)
+                return BlendState.NonPremultiplied;
+
+            BlendState BS = new BlendState();
+            BS.ColorSourceBlend = gBlendTranslationTable[(int)sourceBlend];
+            BS.AlphaSourceBlend = gBlendTranslationTable[(int)sourceBlend];
+            BS.ColorDestinationBlend = gBlendTranslationTable[(int)destBlend];
+            BS.AlphaDestinationBlend = gBlendTranslationTable[(int)destBlend];
+
+            return BS;
+        }
 
         void UpdateRenderStateFlags(uint flags)
         {
             if (flags == mLastRenderStateFlags)
                 return;
 
+            BlendMode sourceBlend = (BlendMode)((flags & (uint)ShaderFlags.SOURCE_BLEND_MASK) >> (int)FlagFields.SOURCE_BLEND);
+            BlendMode destBlend = (BlendMode)((flags & (uint)ShaderFlags.DEST_BLEND_MASK) >> (int)FlagFields.DEST_BLEND);
+
+            mDevice.BlendState = ((flags & (uint)ShaderFlags.TRANSPARENT) == 0)
+                ? GenerateBlendState(sourceBlend, destBlend)
+                : BlendState.Additive;
+
             DepthStencilState depthState = new DepthStencilState();
-            RasterizerState rasterizerState = new RasterizerState();
 
             if ((flags & (uint)ShaderFlags.DEPTH_EQUAL) != 0)
                 depthState.DepthBufferFunction = CompareFunction.Equal;
@@ -524,25 +560,23 @@ namespace Split
 
             // Depth buffer writes are enabled if the surface is not transparent OR
             // the depth write flag is set.
-            depthState.DepthBufferWriteEnable = 
-                (flags & (uint)ShaderFlags.TRANSPARENT) == 0
-                || (flags & (uint)ShaderFlags.DEPTH_WRITE) != 0;
+            if ((flags & (uint)ShaderFlags.TRANSPARENT) == 0
+                || (flags & (uint)ShaderFlags.DEPTH_WRITE) != 0)
+                depthState.DepthBufferWriteEnable = true;
+            else
+                depthState.DepthBufferWriteEnable = false;
 
             uint cullFlags = flags & (uint)ShaderFlags.CULL_FLAGS;
 
             if (cullFlags == (uint)ShaderFlags.CULL_BACK)
-                rasterizerState.CullMode = CullMode.CullClockwiseFace;
+                mDevice.RasterizerState = RasterizerState.CullClockwise;
             else if (flags == (uint)ShaderFlags.CULL_FRONT)
-                rasterizerState.CullMode = CullMode.CullCounterClockwiseFace;
+                mDevice.RasterizerState = RasterizerState.CullClockwise;
             else
-                rasterizerState.CullMode = CullMode.None;
+                mDevice.RasterizerState = RasterizerState.CullNone;
 
-//BlendState blendState = new BlendState();
-//blendState.AlphaSourceBlend = Blend.SourceAlpha;
-//blendState.AlphaDestinationBlend = Blend.InverseSourceAlpha;
-            mDevice.BlendState = BlendState.NonPremultiplied;
             mDevice.DepthStencilState = depthState;
-            mDevice.RasterizerState = rasterizerState;
+
             mLastRenderStateFlags = flags;
         }
 
@@ -577,7 +611,12 @@ namespace Split
             {
                 int textureIndex = shader.mTextureIndices[i];
                 mDevice.Textures[i] = (textureIndex != BspShader.LIGHTMAP) ? mTextures[textureIndex] : mLightMapTextures[lightmapIndex];
-//                mDevice.SamplerStates[i].Filter = TextureFilter.Anisotropic;
+                SamplerState SS = new SamplerState();
+                SS.AddressU = TextureAddressMode.Wrap;
+                SS.AddressV = TextureAddressMode.Wrap;
+                SS.AddressW = TextureAddressMode.Wrap;
+                SS.Filter = TextureFilter.Anisotropic;
+                mDevice.SamplerStates[i] = SS;
             }
 
             mCurrentEffect.Parameters["gTime"].SetValue(mTime);
@@ -629,7 +668,6 @@ namespace Split
 
         public void Render(Matrix viewProjection, float time)
         {
-            InitializeDevice();
             mTime = time;
 
             mViewProjection = viewProjection;

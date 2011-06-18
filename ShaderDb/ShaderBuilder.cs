@@ -14,7 +14,13 @@ using Hlsl.Expressions;
 
 namespace Split.Pipeline
 {
-    public enum Flag
+    enum FlagShift
+    {
+        SOURCE_BLEND = 8,
+        DEST_BLEND = SOURCE_BLEND + 4
+    }
+
+    public enum ShaderFlags
     {
         NOPICMIP    = 1,
         NOMIPMAP    = 1 << 1,
@@ -23,12 +29,14 @@ namespace Split.Pipeline
         DEPTH_EQUAL = 1 << 4,
         CULL_BACK = 1 << 5,
         CULL_FRONT = 1 << 6,
-        ADDITIVE_BLEND = 1 << 8
+        CULL_FLAGS = (CULL_BACK | CULL_FRONT),
+        SOURCE_BLEND_MASK = 15 << FlagShift.SOURCE_BLEND,
+        DEST_BLEND_MASK = 15 << FlagShift.DEST_BLEND,
     }
 
     public enum BlendMode
     {
-        INVALID,
+        INVALID = -1,
         GL_ONE,
         GL_ZERO,
         GL_DST_COLOR,
@@ -63,9 +71,14 @@ namespace Split.Pipeline
 
         public uint mFlags;
 
-        public void SetFlag(Flag f)
+        public void SetFlag(ShaderFlags f)
         {
-            mFlags = mFlags | (uint)f;
+            mFlags |= (uint)f;
+        }
+
+        public void SetFlagBits(uint bits)
+        {
+            mFlags |= bits;
         }
 
         public Shader(string name)
@@ -309,7 +322,7 @@ namespace Split.Pipeline
 
         int mCurrentTextureStage;
         BlendMode mSrcBlend = BlendMode.GL_ONE;
-        BlendMode mDestBlend = BlendMode.GL_ONE;
+        BlendMode mDestBlend = BlendMode.GL_ZERO;
         Value mSampler;
         Expr mTexCoords;
         bool mIsClamped;
@@ -397,7 +410,7 @@ namespace Split.Pipeline
             switch (token)
             {
                 case "trans":
-                    mShader.mFlags |= (uint)(Flag.TRANSPARENT);
+                    mShader.mFlags |= (uint)(ShaderFlags.TRANSPARENT);
                     break;
             }
         }
@@ -409,10 +422,10 @@ namespace Split.Pipeline
             switch (cullMode)
             {
                 case "front":
-                    mShader.SetFlag(Flag.CULL_FRONT);
+                    mShader.SetFlag(ShaderFlags.CULL_FRONT);
                     break;
                 case "back":
-                    mShader.SetFlag(Flag.CULL_BACK);
+                    mShader.SetFlag(ShaderFlags.CULL_BACK);
                     break;
                 case "disable":
                 case "none":
@@ -579,12 +592,12 @@ namespace Split.Pipeline
 
         void Nopicmip() 
         {
-            mShader.SetFlag(Flag.NOPICMIP);
+            mShader.SetFlag(ShaderFlags.NOPICMIP);
         }
 
         void Nomipmap() 
         {
-            mShader.SetFlag(Flag.NOMIPMAP);
+            mShader.SetFlag(ShaderFlags.NOMIPMAP);
         }
 
         void PolygonOffset()
@@ -896,124 +909,132 @@ namespace Split.Pipeline
                 mStageColor = new CallExpr(tex2D, new Value[] { mSampler, mTexCoords.Value });
             }                 
 
-            if (mShader.mPsAccumulatedColor == null)
+//            if (mShader.mPsAccumulatedColor == null)
+//            {
+//                mShader.mPsAccumulatedColor = mStageColor;
+//                return;
+//            }
+
+            // Pass initial blend settings through to the renderer so it can set up the
+            // appropriate blend stage settings.
+            if (++mCurrentTextureStage == 1)
             {
+                uint sourceBlendBits = (uint)mSrcBlend << (int)FlagShift.SOURCE_BLEND;
+                uint destBlendBits = (uint)mDestBlend << (int)FlagShift.DEST_BLEND;
+                mShader.SetFlagBits(sourceBlendBits);
+                mShader.SetFlagBits(destBlendBits);
                 mShader.mPsAccumulatedColor = mStageColor;
-                return;
             }
-
-            Expr source = mStageColor;
-            Expr dest = mShader.mPsAccumulatedColor;
-            Hlsl.Type f4 = TypeRegistry.GetVectorType(TypeRegistry.GetFloatType(), 4);
-            bool skipCombine = false;
-
-            switch (mSrcBlend)
+            else
             {
-                case BlendMode.GL_ONE:
-                    break;
-                case BlendMode.GL_ZERO:
-                    skipCombine = true;
-                    mShader.mPsAccumulatedColor = dest;
-                    break;
-                case BlendMode.GL_DST_COLOR:
-                    source = new BinaryExpr(mShader.mPsAccumulatedColor.Value, source.Value, OpCode.MUL);
-                    break;
-                case BlendMode.GL_ONE_MINUS_DST_COLOR:
-                    source = new DeclExpr(
-                        new BinaryExpr(
+                Expr source = mStageColor;
+                Expr dest = mShader.mPsAccumulatedColor;
+                Hlsl.Type f4 = TypeRegistry.GetVectorType(TypeRegistry.GetFloatType(), 4);
+                bool skipCombine = false;
+
+                switch (mSrcBlend)
+                {
+                    case BlendMode.GL_ONE:
+                        break;
+                    case BlendMode.GL_ZERO:
+                        skipCombine = true;
+                        mShader.mPsAccumulatedColor = dest;
+                        break;
+                    case BlendMode.GL_DST_COLOR:
+                        source = new BinaryExpr(mShader.mPsAccumulatedColor.Value, source.Value, OpCode.MUL);
+                        break;
+                    case BlendMode.GL_ONE_MINUS_DST_COLOR:
+                        source = new DeclExpr(
                             new BinaryExpr(
-                                new LiteralExpr(f4, 1.0f, 1.0f, 1.0f, 1.0f).Value,
-                                mShader.mPsAccumulatedColor.Value,
-                                OpCode.SUB).Value,
-                            source.Value,
-                            OpCode.MUL));
-                    mShader.mPixelShader.AddExpr(source);
-                    break;
-                case BlendMode.GL_SRC_ALPHA:
-                    source = new DeclExpr(
-                        new BinaryExpr(new SwizzleExpr(source.Value, "wwww").Value, source.Value, OpCode.MUL));
-                    mShader.mPixelShader.AddExpr(source);
-                    break;
-                case BlendMode.GL_ONE_MINUS_SRC_ALPHA:                    
-                    source = new DeclExpr(
-                        new BinaryExpr(
+                                new BinaryExpr(
+                                    new LiteralExpr(f4, 1.0f, 1.0f, 1.0f, 1.0f).Value,
+                                    mShader.mPsAccumulatedColor.Value,
+                                    OpCode.SUB).Value,
+                                source.Value,
+                                OpCode.MUL));
+                        mShader.mPixelShader.AddExpr(source);
+                        break;
+                    case BlendMode.GL_SRC_ALPHA:
+                        source = new DeclExpr(
+                            new BinaryExpr(new SwizzleExpr(source.Value, "wwww").Value, source.Value, OpCode.MUL));
+                        mShader.mPixelShader.AddExpr(source);
+                        break;
+                    case BlendMode.GL_ONE_MINUS_SRC_ALPHA:
+                        source = new DeclExpr(
                             new BinaryExpr(
-                                new LiteralExpr(f4, 1.0f, 1.0f, 1.0f, 1.0f).Value, 
-                                new SwizzleExpr(source.Value, "wwww").Value, 
-                                OpCode.SUB).Value,
-                            source.Value, OpCode.MUL));
-                    mShader.mPixelShader.AddExpr(source);
-                    break;
-                default:
-                    throw new Exception("Whachu talkin about, Willis?");
+                                new BinaryExpr(
+                                    new LiteralExpr(f4, 1.0f, 1.0f, 1.0f, 1.0f).Value,
+                                    new SwizzleExpr(source.Value, "wwww").Value,
+                                    OpCode.SUB).Value,
+                                source.Value, OpCode.MUL));
+                        mShader.mPixelShader.AddExpr(source);
+                        break;
+                    default:
+                        throw new Exception("Whachu talkin about, Willis?");
+                }
+
+                switch (mDestBlend)
+                {
+                    case BlendMode.GL_ONE:
+                        break;
+                    case BlendMode.GL_ZERO:
+                        skipCombine = true;
+                        mShader.mPsAccumulatedColor = source;
+                        break;
+                    case BlendMode.GL_SRC_COLOR:
+                        dest = new BinaryExpr(mStageColor.Value, dest.Value, OpCode.MUL);
+                        break;
+                    case BlendMode.GL_ONE_MINUS_SRC_COLOR:
+                        dest = new DeclExpr(
+                            new BinaryExpr(
+                                new BinaryExpr(
+                                    new LiteralExpr(f4, 1.0f, 1.0f, 1.0f, 1.0f).Value,
+                                    mStageColor.Value,
+                                    OpCode.SUB).Value,
+                                dest.Value,
+                                OpCode.MUL));
+                        mShader.mPixelShader.AddExpr(dest);
+                        break;
+                    case BlendMode.GL_DST_ALPHA:
+                        dest = new DeclExpr(
+                            new BinaryExpr(new SwizzleExpr(dest.Value, "wwww").Value, dest.Value, OpCode.MUL));
+                        mShader.mPixelShader.AddExpr(dest);
+                        break;
+                    case BlendMode.GL_SRC_ALPHA:
+                        dest = new DeclExpr(
+                            new BinaryExpr(new SwizzleExpr(mStageColor.Value, "wwww").Value, dest.Value, OpCode.MUL));
+                        mShader.mPixelShader.AddExpr(dest);
+                        break;
+                    case BlendMode.GL_ONE_MINUS_DST_ALPHA:
+                        dest = new DeclExpr(
+                            new BinaryExpr(
+                                new BinaryExpr(
+                                    new LiteralExpr(f4, 1.0f, 1.0f, 1.0f, 1.0f).Value,
+                                    new SwizzleExpr(dest.Value, "wwww").Value,
+                                    OpCode.SUB).Value,
+                                dest.Value, OpCode.MUL));
+                        mShader.mPixelShader.AddExpr(dest);
+                        break;
+                    case BlendMode.GL_ONE_MINUS_SRC_ALPHA:
+                        dest = new DeclExpr(
+                            new BinaryExpr(
+                                new BinaryExpr(
+                                    new LiteralExpr(f4, 1.0f, 1.0f, 1.0f, 1.0f).Value,
+                                    new SwizzleExpr(mStageColor.Value, "wwww").Value,
+                                    OpCode.SUB).Value,
+                                dest.Value, OpCode.MUL));
+                        mShader.mPixelShader.AddExpr(dest);
+                        break;
+                    default:
+                        throw new Exception("Whachu talkin about, Willis?");
+                }
+
+                if (!skipCombine)
+                    mShader.mPsAccumulatedColor = new BinaryExpr(source.Value, dest.Value, OpCode.ADD);
             }
 
-            switch (mDestBlend)
-            {
-                case BlendMode.GL_ONE:
-                    break;
-                case BlendMode.GL_ZERO:
-                    skipCombine = true;
-                    mShader.mPsAccumulatedColor = source;
-                    break;
-                case BlendMode.GL_SRC_COLOR:
-                    dest = new BinaryExpr(mStageColor.Value, dest.Value, OpCode.MUL);
-                    break;
-                case BlendMode.GL_ONE_MINUS_SRC_COLOR:
-                    dest = new DeclExpr(
-                        new BinaryExpr(
-                            new BinaryExpr(
-                                new LiteralExpr(f4, 1.0f, 1.0f, 1.0f, 1.0f).Value,
-                                mStageColor.Value,
-                                OpCode.SUB).Value,
-                            dest.Value,
-                            OpCode.MUL));
-                    mShader.mPixelShader.AddExpr(dest);
-                    break;
-                case BlendMode.GL_DST_ALPHA:
-                    dest = new DeclExpr(
-                        new BinaryExpr(new SwizzleExpr(dest.Value, "wwww").Value, dest.Value, OpCode.MUL));
-                    mShader.mPixelShader.AddExpr(dest);
-                    break;
-                case BlendMode.GL_SRC_ALPHA:
-                    dest = new DeclExpr(
-                        new BinaryExpr(new SwizzleExpr(mStageColor.Value, "wwww").Value, dest.Value, OpCode.MUL));
-                    mShader.mPixelShader.AddExpr(dest);
-                    break;
-                case BlendMode.GL_ONE_MINUS_DST_ALPHA:
-                    dest = new DeclExpr(
-                        new BinaryExpr(
-                            new BinaryExpr(
-                                new LiteralExpr(f4, 1.0f, 1.0f, 1.0f, 1.0f).Value,
-                                new SwizzleExpr(dest.Value, "wwww").Value,
-                                OpCode.SUB).Value,
-                            dest.Value, OpCode.MUL));
-                    mShader.mPixelShader.AddExpr(dest);
-                    break;
-                case BlendMode.GL_ONE_MINUS_SRC_ALPHA:
-                    dest = new DeclExpr(
-                        new BinaryExpr(
-                            new BinaryExpr(
-                                new LiteralExpr(f4, 1.0f, 1.0f, 1.0f, 1.0f).Value,
-                                new SwizzleExpr(mStageColor.Value, "wwww").Value,
-                                OpCode.SUB).Value,
-                            dest.Value, OpCode.MUL));
-                    mShader.mPixelShader.AddExpr(dest);
-                    break;
-                default:
-                    throw new Exception("Whachu talkin about, Willis?");
-            }
-
-            // If the first texture stage has GL_ONE/GL_ONE set for source/dest blends then
-            // ensure that additive blending is enabled in the back end renderer.
-            if (++mCurrentTextureStage == 1 && mSrcBlend == BlendMode.GL_ONE && mDestBlend == BlendMode.GL_ONE)
-                mShader.SetFlag(Flag.ADDITIVE_BLEND);
-
-            if (!skipCombine)
-                mShader.mPsAccumulatedColor = new BinaryExpr(source.Value, dest.Value, OpCode.ADD);
-
-            mSrcBlend = BlendMode.GL_ONE;
-            mDestBlend = BlendMode.GL_ONE;
+//            mSrcBlend = BlendMode.GL_ONE;
+//            mDestBlend = BlendMode.GL_ONE;
             mSampler = null;
             mTexCoords = null;
             mIsClamped = false;
@@ -1227,7 +1248,7 @@ namespace Split.Pipeline
             switch (function)
             {
                 case "equal":
-                    mShader.SetFlag(Flag.DEPTH_EQUAL);
+                    mShader.SetFlag(ShaderFlags.DEPTH_EQUAL);
                     break;
                 default:
                     throw new Exception("Expected depthfunc values of equal or lessequal only!");
@@ -1236,7 +1257,7 @@ namespace Split.Pipeline
 
         void DepthWrite() 
         {
-            mShader.mFlags |= (uint)(Flag.DEPTH_WRITE);
+            mShader.mFlags |= (uint)(ShaderFlags.DEPTH_WRITE);
         }
 
         void AlphaFunc() 
