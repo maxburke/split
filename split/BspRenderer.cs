@@ -201,12 +201,12 @@ namespace Split
             const ulong HAS_ALPHA = 1;
             const ulong TRANSPARENT = 2;
 
-            const int DRAWDATA_SHIFT = 54;
-            const int LIGHTMAP_SHIFT = 27;
+            const int DRAWDATA_SHIFT = 52;
+            const int LIGHTMAP_SHIFT = 26;
             const int SURFACE_SHIFT = 0;
 
             const uint DRAWDATA_MASK = 0xFF;
-            const uint TEX_MASK = 0x07FFFFFF;
+            const uint TEX_MASK = 0x03FFFFFF;
 
             public DrawCall(int firstVertex, 
                 int startIndex,
@@ -546,22 +546,17 @@ namespace Split
 
             BlendMode sourceBlend = (BlendMode)((flags & (uint)ShaderFlags.SOURCE_BLEND_MASK) >> (int)FlagFields.SOURCE_BLEND);
             BlendMode destBlend = (BlendMode)((flags & (uint)ShaderFlags.DEST_BLEND_MASK) >> (int)FlagFields.DEST_BLEND);
+            bool isTransparent = (flags & (uint)ShaderFlags.TRANSPARENT) != 0;
+            bool hasDepthWrite = (flags & (uint)ShaderFlags.DEPTH_WRITE) != 0;
+            bool depthEqual = (flags & (uint)ShaderFlags.DEPTH_EQUAL) != 0;
 
-            mDevice.BlendState = ((flags & (uint)ShaderFlags.TRANSPARENT) == 0)
-                ? GenerateBlendState(sourceBlend, destBlend)
-                : BlendState.Additive;
+            mDevice.BlendState = GenerateBlendState(sourceBlend, destBlend);
 
             DepthStencilState depthState = new DepthStencilState();
 
-            if ((flags & (uint)ShaderFlags.DEPTH_EQUAL) != 0)
-                depthState.DepthBufferFunction = CompareFunction.Equal;
-            else
-                depthState.DepthBufferFunction = CompareFunction.LessEqual;
-
             // Depth buffer writes are enabled if the surface is not transparent OR
             // the depth write flag is set.
-            if ((flags & (uint)ShaderFlags.TRANSPARENT) == 0
-                || (flags & (uint)ShaderFlags.DEPTH_WRITE) != 0)
+            if (!isTransparent || hasDepthWrite)
                 depthState.DepthBufferWriteEnable = true;
             else
                 depthState.DepthBufferWriteEnable = false;
@@ -587,6 +582,7 @@ namespace Split
                 || !mDrawCalls[callIdx].Visible)
                 return false;
 
+            BspShader shader = mShaders[mDrawCalls[callIdx].ShaderIndex];
             int drawIdx = mDrawCalls[callIdx].DrawDataIndex;
 
             if (drawIdx != mLastDrawIdx)
@@ -596,7 +592,6 @@ namespace Split
                 mLastDrawIdx = drawIdx;
             }
 
-            BspShader shader = mShaders[mDrawCalls[callIdx].ShaderIndex];
             if (mDrawCalls[callIdx].ShaderIndex == shaderIdx)
                 return true;
             shaderIdx = mDrawCalls[callIdx].ShaderIndex;
@@ -637,6 +632,7 @@ namespace Split
 
             int numDrawCalls = mDrawCalls.Length;
             int numDrawn = 0;
+            int trisDrawn = 0;
 
             for (int i = 0; i < numDrawCalls; ++i)
             {
@@ -653,6 +649,7 @@ namespace Split
                     mDrawCalls[callIdx].StartIndex,
                     mDrawCalls[callIdx].PrimitiveCount);
                 ++numDrawn;
+                trisDrawn += mDrawCalls[callIdx].PrimitiveCount;
             }
 
             SW.Stop();
@@ -661,7 +658,10 @@ namespace Split
                 Debugger.Break();
 
             DebugText.Clear();
-            Split.DebugText.Draw(DebugText.AppendFormat("BSP draw calls: {0} Time: {1} ms", numDrawn, SW.Elapsed.TotalMilliseconds));
+            Split.DebugText.Draw(DebugText.AppendFormat("BSP draw calls: {0} Time: {1} ms {2} tris", 
+                numDrawn, 
+                SW.Elapsed.TotalMilliseconds,
+                trisDrawn));
 
             mLastDrawIdx = -1;
         }
@@ -693,11 +693,14 @@ namespace Split
             int leaf = mBspTree.FindLeafForPoint(cameraPosition);
             int cluster = leafs[leaf].Cluster;
 
-            Split.DebugText.Draw("Leaf: {0}", leaf);
+            Split.DebugText.Draw("Leaf: {0} Cluster {1}", leaf, cluster);
+
             /*
+            Debug.Assert(leafs[leaf].Cluster >= 0);
+            
             for (int i = 0; i < leafs.Length; ++i)
             {
-                if (leafs[i].Cluster >= 0 
+                if (leafs[i].Cluster >= 0
                     && mVisData.IsVisible(cluster, leafs[i].Cluster))
                 {
                     int[] leafFaces = mBspTree.mLeafFaces;
@@ -709,7 +712,7 @@ namespace Split
                         mDrawCalls[drawCallIdx].Visible = true;
                     }
                 }
-            }*/
+            */
 
             for (int i = 0; i < mDrawCalls.Length; ++i)
             {

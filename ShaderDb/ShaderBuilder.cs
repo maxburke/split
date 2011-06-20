@@ -320,6 +320,14 @@ namespace Split.Pipeline
 
         #region Shader stage data
 
+        enum AlphaTestFunction
+        {
+            NONE,
+            GT0,
+            LT128,
+            GE128
+        }
+
         int mCurrentTextureStage;
         BlendMode mSrcBlend = BlendMode.GL_ONE;
         BlendMode mDestBlend = BlendMode.GL_ZERO;
@@ -332,6 +340,7 @@ namespace Split.Pipeline
         string mRgbGenFunction;
         Expr mRgbGenMultiplicationExpr;
         float mAnimFrequency;
+        AlphaTestFunction mAlphaTestFunction = AlphaTestFunction.NONE;
 
         #endregion
 
@@ -907,13 +916,40 @@ namespace Split.Pipeline
             {
                 Function tex2D = mShader.mProgram.GetFunctionByName("tex2D");
                 mStageColor = new CallExpr(tex2D, new Value[] { mSampler, mTexCoords.Value });
-            }                 
+            }
 
-//            if (mShader.mPsAccumulatedColor == null)
-//            {
-//                mShader.mPsAccumulatedColor = mStageColor;
-//                return;
-//            }
+            if (mAlphaTestFunction != AlphaTestFunction.NONE)
+            {
+                Function clip = mShader.mProgram.GetFunctionByName("clip");
+                Comparison comparisonOperator = Comparison.EQUAL;
+                float threshold = 0.0f;
+
+                switch(mAlphaTestFunction)
+                {
+                    case AlphaTestFunction.GT0:
+                        comparisonOperator = Comparison.EQUAL;
+                        threshold = 0;
+                        break;
+                    case AlphaTestFunction.GE128:
+                        comparisonOperator = Comparison.LESS;
+                        threshold = 0.5f;
+                        break;
+                    case AlphaTestFunction.LT128:
+                        comparisonOperator = Comparison.GREATER_EQUAL;
+                        threshold = 0.5f;
+                        break;
+                }
+                
+                Expr callExpr = new CallExpr(clip, new Expr[] { new LiteralExpr(TypeRegistry.GetFloatType(), -1.0f) });
+                IfExpr expr = new IfExpr(new ComparisonExpr(
+                        new SwizzleExpr(mStageColor.Value, "a").Value,
+                        new LiteralExpr(TypeRegistry.GetFloatType(), threshold).Value,
+                        comparisonOperator));
+                expr.Add(callExpr);
+
+                mShader.mPixelShader.AddExpr(expr);
+                mAlphaTestFunction = AlphaTestFunction.NONE;
+            }
 
             // Pass initial blend settings through to the renderer so it can set up the
             // appropriate blend stage settings.
@@ -1033,8 +1069,6 @@ namespace Split.Pipeline
                     mShader.mPsAccumulatedColor = new BinaryExpr(source.Value, dest.Value, OpCode.ADD);
             }
 
-//            mSrcBlend = BlendMode.GL_ONE;
-//            mDestBlend = BlendMode.GL_ONE;
             mSampler = null;
             mTexCoords = null;
             mIsClamped = false;
@@ -1264,7 +1298,20 @@ namespace Split.Pipeline
         {
             string function = NextTokenLowerCase();
 
-            Debug.Assert(function == "gt0" || function == "lt128" || function == "ge128");
+            switch (function)
+            {
+                case "gt0":
+                    mAlphaTestFunction = AlphaTestFunction.GT0;
+                    break;
+                case "lt128":
+                    mAlphaTestFunction = AlphaTestFunction.LT128;
+                    break;
+                case "ge128":
+                    mAlphaTestFunction = AlphaTestFunction.GE128;
+                    break;
+                default:
+                    throw new Exception(string.Format("Unknown alpha func value {0}", function));
+            }
 
             // TODO: add alpha function handling code here.
         }
